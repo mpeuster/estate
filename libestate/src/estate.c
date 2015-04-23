@@ -7,9 +7,14 @@
 
 
 #include <stdio.h>
+#include "backend.h"
+#include "util.h"
 
 
 void test(void)
 {
-    puts("Hello, I'm a shared library!");
+    print_call();
+    backend_init();
+
+    backend_close();
 }

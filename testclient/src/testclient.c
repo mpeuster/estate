@@ -12,7 +12,7 @@
 #include <estate.h>
 
 int main(void) {
-	puts("Hallo Welt local!");
+	//puts("running testclient");
 	test();
 	return EXIT_SUCCESS;
 }
