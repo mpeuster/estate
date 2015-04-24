@@ -13,6 +13,8 @@
 
 int main(void) {
 	//puts("running testclient");
+	estate_init();
 	test();
+	estate_close();
 	return EXIT_SUCCESS;
 }
