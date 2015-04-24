@@ -47,7 +47,7 @@
 								<option id="gnu.c.link.option.libs.1152218468" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="hiredis"/>
 								</option>
-								<option id="gnu.c.link.option.paths.267024704" superClass="gnu.c.link.option.paths" valueType="libPaths">
+								<option id="gnu.c.link.option.paths.267024704" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/local/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.29198618" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
