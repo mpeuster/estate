@@ -13,7 +13,12 @@
 
 int main(void) {
 	estatepp_init();
-	testpp();
+	//testpp();
+
+	set("k1", "value1");
+	get("k1");
+	del("k1");
+
 	estatepp_close();
 	return EXIT_SUCCESS;
 }

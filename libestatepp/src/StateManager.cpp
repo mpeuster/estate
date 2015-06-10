@@ -11,8 +11,8 @@
 
 StateManager::StateManager()
 {
-	// TODO Auto-generated constructor stub
-
+	std::cout << "Created eState StateManager" << std::endl;
+	this->local_state = new LocalState();
 }
 
 StateManager::~StateManager()
@@ -23,6 +23,23 @@ StateManager::~StateManager()
 void StateManager::test()
 {
 	print_call();
-	std::cout << "C++ LIB!!!! " << std::endl;
+}
+
+void StateManager::set(std::string k, std::string v)
+{
+	print_call();
+	this->local_state->set(k, v);
+}
+
+std::string StateManager::get(std::string k)
+{
+	print_call();
+	return this->local_state->get(k);
+}
+
+void StateManager::del(std::string k)
+{
+	print_call();
+	this->local_state->del(k);
 }
 

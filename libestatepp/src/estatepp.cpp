@@ -27,3 +27,25 @@ void testpp()
 	sm->test();
 }
 
+void set(const char* k, const char* v)
+{
+	print_call();
+	std::string str_k(k);
+	std::string str_v(v);
+	sm->set(str_k, str_v);
+}
+
+const char* get(const char* k)
+{
+	print_call();
+	std::string str_k(k);
+	return sm->get(str_k).c_str();
+}
+
+void del(const char* k)
+{
+	print_call();
+	std::string str_k(k);
+	sm->del(str_k);
+}
+
