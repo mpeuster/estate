@@ -7,6 +7,7 @@
 
 #include "estatepp.h"
 #include "StateManager.h"
+#include "util.h"
 
 StateManager* sm;
 
@@ -22,6 +23,7 @@ void estatepp_close()
 
 void testpp()
 {
+	print_call();
 	sm->test();
 }
 

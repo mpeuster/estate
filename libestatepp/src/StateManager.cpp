@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include "StateManager.h"
-#include "Backend.h"
+#include "util.h"
 
 StateManager::StateManager()
 {
@@ -22,6 +22,7 @@ StateManager::~StateManager()
 
 void StateManager::test()
 {
+	print_call();
 	std::cout << "C++ LIB!!!! " << std::endl;
 }
 

@@ -5,6 +5,8 @@
  *      Author: Manuel Peuster (manuel.peuster@uni-paderborn.de)
  */
 
+#include <stdio.h>
+
 #ifndef UTIL_H_
 #define UTIL_H_
 

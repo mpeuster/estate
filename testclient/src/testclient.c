@@ -9,17 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <estate.h>
 #include <estatepp.h>
 
 int main(void) {
-	//puts("running testclient");
-	estate_init();
-	test();
-	estate_close();
-
-	puts("----------------------------------------------------");
-
 	estatepp_init();
 	testpp();
 	estatepp_close();
