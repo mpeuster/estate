@@ -4,6 +4,10 @@
 *.o
 *.obj
 
+# Python
+*.pyc
+
+
 # Precompiled Headers
 *.gch
 *.pch

@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <iostream>
 
 #ifndef UTIL_H_
 #define UTIL_H_
@@ -21,5 +22,7 @@
 
 #define PRINT_ERROR 1
 #define error(fmt, args...) do { if (PRINT_ERROR) fprintf(stderr, "ERROR: %s:%d:%s(): " fmt, __FILE__, __LINE__, __func__, ##args); } while (0)
+
+std::string to_string(int);
 
 #endif /* UTIL_H_ */

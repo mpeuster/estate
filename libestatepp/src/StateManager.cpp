@@ -9,16 +9,17 @@
 #include "StateManager.h"
 #include "util.h"
 
-StateManager::StateManager()
+StateManager::StateManager(int local_instance)
 {
-	std::cout << "Created eState StateManager" << std::endl;
 	this->local_state = new LocalState();
-	this->comm = new CommunicationManager();
+	this->comm = new CommunicationManager(local_instance);
+
+	std::cout << "Created eState StateManager for instance " << local_instance << std::endl;
 }
 
 StateManager::~StateManager()
 {
-	// TODO Auto-generated destructor stub
+	std::cout << "Destroyed eState StateManager." << std::endl;
 }
 
 void StateManager::test()

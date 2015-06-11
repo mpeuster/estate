@@ -14,9 +14,9 @@
 
 StateManager* sm;
 
-void es_init()
+void es_init(int instance)
 {
-	sm = new StateManager();
+	sm = new StateManager(instance);
 }
 
 void es_close()

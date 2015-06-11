@@ -10,8 +10,13 @@
 
 class CommunicationManager
 {
+private:
+	/* used to specify different communication ports when multiple nodes are executed on one machine */
+	/* default is 0 */
+	int local_instance;
+
 public:
-	CommunicationManager();
+	CommunicationManager(int);
 	virtual ~CommunicationManager();
 };
 
