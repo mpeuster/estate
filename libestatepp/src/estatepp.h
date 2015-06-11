@@ -13,8 +13,8 @@ extern "C"
 {
 #endif
 
-	extern void estatepp_init(void);
-	extern void estatepp_close(void);
+	extern void es_init(void);
+	extern void es_close(void);
 	extern void testpp(void);
 
 	/* our main state management API */

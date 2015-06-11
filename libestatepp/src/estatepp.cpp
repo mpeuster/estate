@@ -12,12 +12,12 @@
 
 StateManager* sm;
 
-void estatepp_init()
+void es_init()
 {
 	sm = new StateManager();
 }
 
-void estatepp_close()
+void es_close()
 {
 	delete sm;
 }
@@ -25,7 +25,7 @@ void estatepp_close()
 void testpp()
 {
 	print_call();
-	sm->test();
+	//sm->test();
 }
 
 void es_set(const char* k, const char* v)

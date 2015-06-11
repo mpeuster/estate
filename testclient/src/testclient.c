@@ -12,7 +12,7 @@
 #include <estatepp.h>
 
 int main(void) {
-	estatepp_init();
+	es_init();
 	//testpp();
 
 	es_set("k1", "value1");
@@ -20,6 +20,6 @@ int main(void) {
 	printf("received: %s\n", result);
 	es_del("k1");
 
-	estatepp_close();
+	es_close();
 	return EXIT_SUCCESS;
 }
