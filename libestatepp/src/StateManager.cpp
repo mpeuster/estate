@@ -13,6 +13,7 @@ StateManager::StateManager()
 {
 	std::cout << "Created eState StateManager" << std::endl;
 	this->local_state = new LocalState();
+	this->comm = new CommunicationManager();
 }
 
 StateManager::~StateManager()

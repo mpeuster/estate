@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <assert.h>
 #include "estatepp.h"
 #include "StateManager.h"
 #include "util.h"
@@ -32,16 +33,10 @@ void testpp()
 void es_set(const char* k, const char* v)
 {
 	//print_call();
-	if(sm == NULL)
-	{
-		error("es_init() never called!\n");
-		exit(1);
-	}
-	if(k == NULL || v == NULL)
-	{
-		error("NULL is not a valid key nor a valid value!\n");
-		return;
-	}
+	assert(sm != NULL);
+	assert(k != NULL);
+	assert(v != NULL);
+
 	std::string str_k(k);
 	std::string str_v(v);
 	sm->set(str_k, str_v);
@@ -50,16 +45,9 @@ void es_set(const char* k, const char* v)
 const char* es_get(const char* k)
 {
 	//print_call();
-	if(sm == NULL)
-	{
-		error("es_init() never called!\n");
-		exit(1);
-	}
-	if(k == NULL)
-	{
-		error("NULL is not a valid key!\n");
-		return "ES_NONE";
-	}
+	assert(sm != NULL);
+	assert(k != NULL);
+
 	std::string str_k(k);
 	return sm->get(str_k).c_str();
 }
@@ -67,16 +55,9 @@ const char* es_get(const char* k)
 void es_del(const char* k)
 {
 	//print_call();
-	if(sm == NULL)
-	{
-		error("es_init() never called!\n");
-		exit(1);
-	}
-	if(k == NULL)
-	{
-		error("NULL is not a valid key!\n");
-		return;
-	}
+	assert(sm != NULL);
+	assert(k != NULL);
+
 	std::string str_k(k);
 	sm->del(str_k);
 }

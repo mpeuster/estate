@@ -30,17 +30,17 @@
 								<option id="gnu.c.compiler.option.dialect.std.1355244751" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1084596352" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/estate/src}&quot;"/>
+									<listOptionValue builtIn="false" value="/home/manuel/zmqpp/src/zmqpp"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/estatepp/src}&quot;"/>
 								</option>
+								<option id="gnu.c.compiler.option.misc.other.738254661" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=c++11" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1803947104" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.2013184259" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
 								<option id="gnu.c.link.option.paths.1288960813" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/estate/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/estatepp/Debug}&quot;"/>
 								</option>
 								<option id="gnu.c.link.option.libs.1793448517" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="estate"/>
 									<listOptionValue builtIn="false" value="estatepp"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1045235152" superClass="cdt.managedbuild.tool.gnu.c.linker.input">

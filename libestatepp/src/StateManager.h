@@ -10,11 +10,13 @@
 
 #include <iostream>
 #include "LocalState.h"
+#include "CommunicationManager.h"
 
 class StateManager
 {
 private:
 	LocalState* local_state;
+	CommunicationManager* comm;
 
 public:
 	StateManager();
