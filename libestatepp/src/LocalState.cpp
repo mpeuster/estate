@@ -19,16 +19,26 @@ LocalState::~LocalState()
 void LocalState::set(std::string k, std::string v)
 {
 	this->data[k] = v;
-	std::cout << "k:" << k << " v:" << v << std::endl;
+	debug("SET %s to %s\n", k.c_str(), v.c_str());
 }
 
 std::string LocalState::get(std::string k)
 {
-	std::cout << this->data[k] << std::endl;
-	return this->data[k];
+	debug("GET %s\n", k.c_str());
+	if (this->exists(k))
+		return this->data[k];
+	return "ES_NONE"; // our reserves symbol if a key not exists
 }
 
 void LocalState::del(std::string k)
 {
+	this->data.erase(k);
+	debug("DEL %s\n", k.c_str());
+}
 
+
+bool LocalState::exists(std::string k)
+{
+	std::tr1::unordered_map<std::string, std::string>::const_iterator search = this->data.find(k);
+	return (search != this->data.end());
 }

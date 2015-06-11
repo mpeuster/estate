@@ -22,6 +22,7 @@ public:
 	virtual void set(std::string, std::string);
 	virtual std::string get(std::string);
 	virtual void del(std::string);
+	virtual bool exists(std::string);
 };
 
 #endif /* LOCALSTATE_H_ */

@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <stdlib.h>
 #include "estatepp.h"
 #include "StateManager.h"
 #include "util.h"
@@ -30,7 +31,17 @@ void testpp()
 
 void es_set(const char* k, const char* v)
 {
-	print_call();
+	//print_call();
+	if(sm == NULL)
+	{
+		error("es_init() never called!\n");
+		exit(1);
+	}
+	if(k == NULL || v == NULL)
+	{
+		error("NULL is not a valid key nor a valid value!\n");
+		return;
+	}
 	std::string str_k(k);
 	std::string str_v(v);
 	sm->set(str_k, str_v);
@@ -38,16 +49,34 @@ void es_set(const char* k, const char* v)
 
 const char* es_get(const char* k)
 {
-	print_call();
+	//print_call();
+	if(sm == NULL)
+	{
+		error("es_init() never called!\n");
+		exit(1);
+	}
+	if(k == NULL)
+	{
+		error("NULL is not a valid key!\n");
+		return "ES_NONE";
+	}
 	std::string str_k(k);
-	std::string result = sm->get(str_k);
-	std::cout << "lib: " << result.c_str() << std::endl;
-	return result.c_str();
+	return sm->get(str_k).c_str();
 }
 
 void es_del(const char* k)
 {
-	print_call();
+	//print_call();
+	if(sm == NULL)
+	{
+		error("es_init() never called!\n");
+		exit(1);
+	}
+	if(k == NULL)
+	{
+		error("NULL is not a valid key!\n");
+		return;
+	}
 	std::string str_k(k);
 	sm->del(str_k);
 }
