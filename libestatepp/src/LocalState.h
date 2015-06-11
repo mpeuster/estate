@@ -9,9 +9,13 @@
 #define LOCALSTATE_H_
 
 #include <iostream>
+#include <unordered_map>
 
 class LocalState
 {
+private:
+	std::unordered_map<std::string, std::string> data;
+
 public:
 	LocalState();
 	virtual ~LocalState();

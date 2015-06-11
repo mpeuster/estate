@@ -5,6 +5,7 @@
  *      Author: Manuel Peuster (manuel.peuster@uni-paderborn.de)
  */
 
+#include <iostream>
 #include "estatepp.h"
 #include "StateManager.h"
 #include "util.h"
@@ -27,7 +28,7 @@ void testpp()
 	sm->test();
 }
 
-void set(const char* k, const char* v)
+void es_set(const char* k, const char* v)
 {
 	print_call();
 	std::string str_k(k);
@@ -35,14 +36,16 @@ void set(const char* k, const char* v)
 	sm->set(str_k, str_v);
 }
 
-const char* get(const char* k)
+const char* es_get(const char* k)
 {
 	print_call();
 	std::string str_k(k);
-	return sm->get(str_k).c_str();
+	std::string result = sm->get(str_k);
+	std::cout << "lib: " << result.c_str() << std::endl;
+	return result.c_str();
 }
 
-void del(const char* k)
+void es_del(const char* k)
 {
 	print_call();
 	std::string str_k(k);

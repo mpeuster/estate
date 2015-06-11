@@ -15,9 +15,10 @@ int main(void) {
 	estatepp_init();
 	//testpp();
 
-	set("k1", "value1");
-	get("k1");
-	del("k1");
+	es_set("k1", "value1");
+	const char* result = es_get("k1");
+	printf("received: %s\n", result);
+	es_del("k1");
 
 	estatepp_close();
 	return EXIT_SUCCESS;

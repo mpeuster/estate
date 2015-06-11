@@ -10,29 +10,25 @@
 
 LocalState::LocalState()
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 LocalState::~LocalState()
 {
-	// TODO Auto-generated destructor stub
 }
 
 void LocalState::set(std::string k, std::string v)
 {
-	print_call();
+	this->data[k] = v;
 	std::cout << "k:" << k << " v:" << v << std::endl;
 }
 
-std::string LocalState::get(std::string)
+std::string LocalState::get(std::string k)
 {
-	print_call();
-	return "none";
+	std::cout << this->data[k] << std::endl;
+	return this->data[k];
 }
 
-void LocalState::del(std::string)
+void LocalState::del(std::string k)
 {
-	print_call();
 
 }

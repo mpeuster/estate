@@ -27,19 +27,16 @@ void StateManager::test()
 
 void StateManager::set(std::string k, std::string v)
 {
-	print_call();
 	this->local_state->set(k, v);
 }
 
 std::string StateManager::get(std::string k)
 {
-	print_call();
 	return this->local_state->get(k);
 }
 
 void StateManager::del(std::string k)
 {
-	print_call();
 	this->local_state->del(k);
 }
 
