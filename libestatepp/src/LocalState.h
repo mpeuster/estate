@@ -9,12 +9,12 @@
 #define LOCALSTATE_H_
 
 #include <iostream>
-#include <unordered_map>
+#include <tr1/unordered_map>
 
 class LocalState
 {
 private:
-	std::unordered_map<std::string, std::string> data;
+	std::tr1::unordered_map<std::string, std::string> data;
 
 public:
 	LocalState();
