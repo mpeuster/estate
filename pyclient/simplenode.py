@@ -60,8 +60,11 @@ def sigterm_handler(_signo, _stack_frame):
 def main():
     global local_node
     signal.signal(signal.SIGTERM, sigterm_handler)
+    instance = 0
+    if len(sys.argv) > 1:
+        instance = int(sys.argv[1])
     # create node
-    local_node = Node(int(sys.argv[1]))
+    local_node = Node(instance)
     local_node.fill_with_dummy_data()
     local_node.start_endless_processing()
 

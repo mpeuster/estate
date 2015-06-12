@@ -30,7 +30,7 @@ CommunicationManager::~CommunicationManager()
 
 void CommunicationManager::request_global_state()
 {
-	//TODO replace this by real functionality
+	//TODO replace this by real functionality, esp.: call it only from one node in the network (see manual node in example.py)
 	/* test code to publish requests */
 	zmqpp::socket zpublisher (this->zmqctx, zmqpp::socket_type::pub);
 	zpublisher.bind("tcp://*:" + to_string(9000 + this->local_instance));
@@ -40,7 +40,7 @@ void CommunicationManager::request_global_state()
 		zmqpp::message request;
 		request << "global_state_request:test";
 		zpublisher.send(request);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	}
 
 }
@@ -62,6 +62,7 @@ void CommunicationManager::request_subscriber_start()
  */
 void CommunicationManager::request_subscriber_thread_func()
 {
+	//TODO Support n-1 subscriptions! One connect command for each, but only one zsubscriber!
 	zmqpp::socket zsubscriber (this->zmqctx, zmqpp::socket_type::sub);
 	zsubscriber.connect("tcp://127.0.0.1:" + to_string(9000 + this->local_instance));
 	zsubscriber.set(zmqpp::socket_option::subscribe, "global_state_request");
