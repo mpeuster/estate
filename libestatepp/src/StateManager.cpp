@@ -19,6 +19,8 @@ StateManager::StateManager(int local_instance)
 
 StateManager::~StateManager()
 {
+	delete this->local_state;
+	delete this->comm;
 	std::cout << "Destroyed eState StateManager." << std::endl;
 }
 
