@@ -24,6 +24,7 @@ public:
 	virtual void test();
 	virtual void set(std::string, std::string);
 	virtual std::string get(std::string);
+	virtual std::string get_global(std::string);
 	virtual void del(std::string);
 };
 

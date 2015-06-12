@@ -13,36 +13,34 @@ CommunicationManager::CommunicationManager(int instance)
 	// initialization
 	this->local_instance = instance;
 
+	// create publisher
+	this->zpublisher = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pub);
+	this->zpublisher->bind("tcp://*:" + to_string(9000 + this->local_instance));
+
 	// start subscriber thread
 	this->request_subscriber_start();
-
-	this->request_global_state();
-
 }
 
 CommunicationManager::~CommunicationManager()
 {
+	// delete objects
+	delete this->zpublisher;
 	// stop and delete subscriber thread
 	this->request_subscriber_active = false;
 	this->request_subscriber_thread->join();
 	delete this->request_subscriber_thread;
 }
 
+
+/**
+ * Request the global state by sending a state request to all peer nodes.
+ * This is done by publishing a request to the zpublisher.
+ */
 void CommunicationManager::request_global_state()
 {
-	//TODO replace this by real functionality, esp.: call it only from one node in the network (see manual node in example.py)
-	/* test code to publish requests */
-	zmqpp::socket zpublisher (this->zmqctx, zmqpp::socket_type::pub);
-	zpublisher.bind("tcp://*:" + to_string(9000 + this->local_instance));
-
-	for(int i = 0; i < 20; i++)
-	{
-		zmqpp::message request;
-		request << "global_state_request:test";
-		zpublisher.send(request);
-		std::this_thread::sleep_for(std::chrono::milliseconds(300));
-	}
-
+	zmqpp::message request;
+	request << "global_state_request:test from " + to_string(this->local_instance);
+	this->zpublisher->send(request);
 }
 
 /**
@@ -54,7 +52,6 @@ void CommunicationManager::request_subscriber_start()
 	// start thread
 	this->request_subscriber_active = true;
 	this->request_subscriber_thread = new std::thread(&CommunicationManager::request_subscriber_thread_func, this);
-	std::cout << "normal thread operation... " << std::endl;
 }
 
 /**
@@ -62,24 +59,47 @@ void CommunicationManager::request_subscriber_start()
  */
 void CommunicationManager::request_subscriber_thread_func()
 {
-	//TODO Support n-1 subscriptions! One connect command for each, but only one zsubscriber!
+	/* create one single ZMQ subscriber */
 	zmqpp::socket zsubscriber (this->zmqctx, zmqpp::socket_type::sub);
-	zsubscriber.connect("tcp://127.0.0.1:" + to_string(9000 + this->local_instance));
 	zsubscriber.set(zmqpp::socket_option::subscribe, "global_state_request");
 	zsubscriber.set(zmqpp::socket_option::receive_timeout, 1000); // ensure that we check for termination from time to time
 
+	/* subscribe to each peer node which is currently known to us */
+	std::list<std::string> peer_list = this->get_peer_nodes();
+	for(std::string s : peer_list)
+	{
+		zsubscriber.connect("tcp://" + s);
+		std::cout << "(" << this->local_instance << ")" << " Subscribed to: " << s << std::endl;
+	}
+
+	/* infinity subscriber loop */
 	while(this->request_subscriber_active)
 	{
-		std::cout << "I am the subscriber Thread!" << std::endl;
-
+		//std::cout << "(" << this->local_instance << ")" << " Subscriber thread wakeup." << std::endl;
 		zmqpp::message response;
 		zsubscriber.receive(response);
 		if(response.parts() > 0)
 		{
-			std::cout << "Received: " << response.get(0) << std::endl;
+			std::cout << "(" << this->local_instance << ")" << " Received: " << response.get(0) << std::endl;
+			//TODO respond to request. Queue it? Is queing not already presend thorugh ZMQ? -> just answer?
 		}
 	}
 }
+
+std::list<std::string> CommunicationManager::get_peer_nodes()
+{
+	//TODO fake discovery: replace this with a real discovery method
+	std::list<std::string> lst;
+	lst.push_front("127.0.0.1:9000");
+	lst.push_front("127.0.0.1:9001");
+	lst.push_front("127.0.0.1:9002");
+	lst.push_front("127.0.0.1:9003");
+	lst.push_front("127.0.0.1:9004");
+	lst.push_front("127.0.0.1:9005");
+	//TODO discovery list currently includes the local node! not sure if this may be helpful or a problem?
+	return lst;
+}
+
 
 
 

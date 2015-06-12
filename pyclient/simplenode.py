@@ -30,6 +30,10 @@ class Node(object):
         rptr = self.lib.es_get(k)
         return ctypes.c_char_p(rptr).value
 
+    def get_global(self, k):
+        rptr = self.lib.es_get_global(k)
+        return ctypes.c_char_p(rptr).value
+
     def delete(self, k):
         self.lib.es_del(k)
 

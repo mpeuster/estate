@@ -52,6 +52,16 @@ const char* es_get(const char* k)
 	return sm->get(str_k).c_str();
 }
 
+const char* es_get_global(const char* k)
+{
+	print_call();
+	assert(sm != NULL);
+	assert(k != NULL);
+
+	std::string str_k(k);
+	return sm->get_global(str_k).c_str();
+}
+
 void es_del(const char* k)
 {
 	//print_call();

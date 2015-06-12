@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <estatepp.h>
+#include <time.h>
 
 int main(void) {
 	es_init(0);
@@ -18,6 +19,11 @@ int main(void) {
 	es_set("k1", "value1");
 	const char* result = es_get("k1");
 	printf("received from get: %s\n", result);
+
+	usleep(1000 * 1000 * 2);
+	es_get_global("k1");
+	usleep(1000 * 1000 * 2);
+
 	es_del("k1");
 
 	es_close();

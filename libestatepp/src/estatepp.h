@@ -21,7 +21,7 @@ extern "C"
 	extern void es_set(const char*,const char*);
 	extern const char* es_get(const char*);
 	extern void es_del(const char*);
-	extern char* es_get_global(const char*, char*(*reduce)(char*)); // TODO: reduce function needs a list of strings (linked list of char*, create a corresponding strunct in the lib?)
+	extern const char* es_get_global(const char* k); // TODO: reduce function needs a list of strings (linked list of char*, create a corresponding strunct in the lib?)
 
 #ifdef __cplusplus
 }

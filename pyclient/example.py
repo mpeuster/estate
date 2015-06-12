@@ -31,8 +31,14 @@ def run_local_node(NID):
     print n.get("k1")
     n.delete("k1")
     print n.get("k1")
+
+    # do some tires with our get global method
+    for i in range(0, 5):
+        print n.get_global("k1")
+        time.sleep(2)
+
     # dummy wait
-    time.sleep(10)
+    time.sleep(2)
     n.close()
 
 

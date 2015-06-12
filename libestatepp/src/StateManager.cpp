@@ -39,6 +39,12 @@ std::string StateManager::get(std::string k)
 	return this->local_state->get(k);
 }
 
+std::string StateManager::get_global(std::string k)
+{
+	this->comm->request_global_state();
+	return "ES_NONE";
+}
+
 void StateManager::del(std::string k)
 {
 	this->local_state->del(k);

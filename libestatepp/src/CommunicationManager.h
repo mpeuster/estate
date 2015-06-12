@@ -20,11 +20,17 @@ private:
 	/* default is 0 */
 	int local_instance;
 
+	/* request publisher */
+	zmqpp::socket* zpublisher;
+
 	/* request subscriber thread management */
 	std::thread *request_subscriber_thread = NULL;
 	virtual void request_subscriber_start();
 	virtual void request_subscriber_thread_func();
 	bool request_subscriber_active = false;
+
+	/* peer discovery */
+	virtual std::list<std::string> get_peer_nodes();
 
 	/* zeromq management */
 	zmqpp::context zmqctx;
