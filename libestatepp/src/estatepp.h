@@ -13,7 +13,7 @@ extern "C"
 {
 #endif
 
-	extern void es_init(int instance);
+	extern void es_init(const char* ip, int port);
 	extern void es_close(void);
 	extern void testpp(void);
 

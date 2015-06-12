@@ -10,15 +10,17 @@
 
 #include <thread>
 #include <chrono>
+#include <sstream>
 #include <zmqpp/zmqpp.hpp>
 #include "util.h"
 
 class CommunicationManager
 {
 private:
-	/* used to specify different communication ports when multiple nodes are executed on one machine */
-	/* default is 0 */
-	int local_instance;
+	/* identification of this node */
+	std::string my_ip;
+	int my_port;
+	virtual std::string get_local_identity();
 
 	/* request publisher */
 	zmqpp::socket* zpublisher;
@@ -36,9 +38,9 @@ private:
 	zmqpp::context zmqctx;
 
 public:
-	CommunicationManager(int);
+	CommunicationManager(std::string, int);
 	virtual ~CommunicationManager();
-	virtual void request_global_state();
+	virtual void request_global_state(std::string);
 };
 
 #endif /* COMMUNICATIONMANAGER_H_ */

@@ -9,12 +9,12 @@
 #include "StateManager.h"
 #include "util.h"
 
-StateManager::StateManager(int local_instance)
+StateManager::StateManager(std::string ip, int port)
 {
 	this->local_state = new LocalState();
-	this->comm = new CommunicationManager(local_instance);
+	this->comm = new CommunicationManager(ip, port);
 
-	std::cout << "Created eState StateManager for instance " << local_instance << std::endl;
+	std::cout << "Created eState StateManager for instance: " << ip << ":" << port << std::endl;
 }
 
 StateManager::~StateManager()
@@ -41,7 +41,7 @@ std::string StateManager::get(std::string k)
 
 std::string StateManager::get_global(std::string k)
 {
-	this->comm->request_global_state();
+	this->comm->request_global_state(k);
 	return "ES_NONE";
 }
 

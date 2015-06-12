@@ -19,7 +19,7 @@ private:
 	CommunicationManager* comm;
 
 public:
-	StateManager(int local_instance);
+	StateManager(std::string ip, int port);
 	virtual ~StateManager();
 	virtual void test();
 	virtual void set(std::string, std::string);

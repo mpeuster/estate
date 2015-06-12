@@ -14,9 +14,10 @@
 
 StateManager* sm;
 
-void es_init(int instance)
+void es_init(const char* ip, int port)
 {
-	sm = new StateManager(instance);
+	std::string str_ip(ip);
+	sm = new StateManager(str_ip, port);
 }
 
 void es_close()

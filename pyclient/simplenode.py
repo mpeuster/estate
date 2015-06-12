@@ -9,19 +9,20 @@ local_node = None
 
 class Node(object):
 
-    def __init__(self, NID):
+    def __init__(self, ip, port):
         self.lib = ctypes.cdll.LoadLibrary('../libestatepp/Debug/libestatepp.so')
-        self.NID = NID
-        print "Node %d: created" % NID
+        self.ip = str(ip)
+        self.port = int(port)
+        print "Node %s:%d created" % (self.ip, self.port)
         self.init()
         
 
     def init(self):
-        self.lib.es_init(self.NID)
+        self.lib.es_init(self.ip, self.port)
 
     def close(self):
         self.lib.es_close()
-        print "Node %d: destroyed" % self.NID
+        print "Node %s:%d destroyed" % (self.ip, self.port)
 
     def set(self, k, v):
         self.lib.es_set(k, v)
@@ -39,7 +40,7 @@ class Node(object):
 
     def fill_with_dummy_data(self, n=100):
         for i in range(0, n):
-            self.set("key_n%d_%d" % (self.NID, i), "value_n%d_%d" % (self.NID, i))
+            self.set("key_n%d_%d" % (self.port, i), "value_n%d_%d" % (self.port, i))
 
     def start_endless_processing(self):
         """
@@ -48,7 +49,7 @@ class Node(object):
         try:
             while(True):
                 time.sleep(2)
-                print "Node %d: wakeup" % self.NID
+                print "Node %s:%d wakeup" % (self.ip, self.port)
         except:
             pass
         finally:
@@ -64,11 +65,13 @@ def sigterm_handler(_signo, _stack_frame):
 def main():
     global local_node
     signal.signal(signal.SIGTERM, sigterm_handler)
-    instance = 0
-    if len(sys.argv) > 1:
-        instance = int(sys.argv[1])
+    ip = "127.0.0.1"
+    port = 9000
+    if len(sys.argv) > 2:
+        ip = str(sys.argv[1])
+        port = int(sys.argv[2])
     # create node
-    local_node = Node(instance)
+    local_node = Node(ip, port)
     local_node.fill_with_dummy_data()
     local_node.start_endless_processing()
 

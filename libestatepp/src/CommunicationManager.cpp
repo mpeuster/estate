@@ -8,14 +8,15 @@
 #include "CommunicationManager.h"
 
 
-CommunicationManager::CommunicationManager(int instance)
+CommunicationManager::CommunicationManager(std::string ip, int port)
 {
 	// initialization
-	this->local_instance = instance;
+	this->my_ip = ip;
+	this->my_port = port;
 
 	// create publisher
 	this->zpublisher = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pub);
-	this->zpublisher->bind("tcp://*:" + to_string(9000 + this->local_instance));
+	this->zpublisher->bind("tcp://*:" + to_string(this->my_port));
 
 	// start subscriber thread
 	this->request_subscriber_start();
@@ -36,10 +37,14 @@ CommunicationManager::~CommunicationManager()
  * Request the global state by sending a state request to all peer nodes.
  * This is done by publishing a request to the zpublisher.
  */
-void CommunicationManager::request_global_state()
+void CommunicationManager::request_global_state(std::string k)
 {
+
+	//FIXME ugly string conversation (use json as message format)
 	zmqpp::message request;
-	request << "global_state_request:test from " + to_string(this->local_instance);
+	std::stringstream msg;
+	msg << "global_state_request##sender#" << this->get_local_identity() << "##key#" << k;
+	request << msg.str();
 	this->zpublisher->send(request);
 }
 
@@ -69,7 +74,7 @@ void CommunicationManager::request_subscriber_thread_func()
 	for(std::string s : peer_list)
 	{
 		zsubscriber.connect("tcp://" + s);
-		std::cout << "(" << this->local_instance << ")" << " Subscribed to: " << s << std::endl;
+		std::cout << "(" << this->get_local_identity() << ")" << " Subscribed to: " << s << std::endl;
 	}
 
 	/* infinity subscriber loop */
@@ -80,7 +85,7 @@ void CommunicationManager::request_subscriber_thread_func()
 		zsubscriber.receive(response);
 		if(response.parts() > 0)
 		{
-			std::cout << "(" << this->local_instance << ")" << " Received: " << response.get(0) << std::endl;
+			std::cout << "(" << this->get_local_identity() << ")" << " Received: " << response.get(0) << std::endl;
 			//TODO respond to request. Queue it? Is queing not already presend thorugh ZMQ? -> just answer?
 		}
 	}
@@ -98,6 +103,12 @@ std::list<std::string> CommunicationManager::get_peer_nodes()
 	lst.push_front("127.0.0.1:9005");
 	//TODO discovery list currently includes the local node! not sure if this may be helpful or a problem?
 	return lst;
+}
+
+std::string CommunicationManager::get_local_identity()
+{
+
+	return this->my_ip + std::string(":") + to_string(this->my_port);
 }
 
 

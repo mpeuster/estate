@@ -13,7 +13,7 @@
 #include <time.h>
 
 int main(void) {
-	es_init(0);
+	es_init("127.0.0.1", 9000);
 	//testpp();
 
 	es_set("k1", "value1");
