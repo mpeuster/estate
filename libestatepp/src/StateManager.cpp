@@ -13,15 +13,12 @@ StateManager::StateManager(std::string ip, int port)
 {
 	this->local_state = new LocalState();
 	this->comm = new CommunicationManager(this, ip, port);
-
-	std::cout << "Created eState StateManager for instance: " << ip << ":" << port << std::endl;
 }
 
 StateManager::~StateManager()
 {
 	delete this->local_state;
 	delete this->comm;
-	std::cout << "Destroyed eState StateManager." << std::endl;
 }
 
 void StateManager::test()

@@ -32,7 +32,7 @@ def run_local_node(port):
     time.sleep(1) # wait a bit to stabilize all peers
 
     # do some tires with our get global method
-    for i in range(0, 5):
+    for i in range(0, 2):
         print n.get_global("k1")
         time.sleep(2)
 

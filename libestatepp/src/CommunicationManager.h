@@ -35,7 +35,7 @@ private:
 	/* response puller */
 	zmqpp::socket* zresponsepull;
 
-	/* response pusher */
+	/* response pusher (we have one socket open to each of our peers!) */
 	std::tr1::unordered_map<std::string, zmqpp::socket*> zresponsepush_map;
 
 	/* request subscriber thread management */

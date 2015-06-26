@@ -79,7 +79,7 @@ std::list<std::string> CommunicationManager::request_global_state(std::string k)
 			int sender_port;
 			response.get(sender_port, 2);
 			std::string data = response.get(3);
-			std::cout << "(" << this->get_local_identity() << ")" << " Received response: " << response.get(0) << " from " << sender_ip << ":" << to_string(sender_port) << " containing: " << data << std::endl;
+			debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
 			// add response to results
 			results.push_back(data);
 		}
@@ -120,7 +120,7 @@ void CommunicationManager::request_subscriber_thread_func()
 	for(std::string s : peer_list)
 	{
 		zsubscriber.connect("tcp://" + s);
-		std::cout << "(" << this->get_local_identity() << ")" << " Subscribed to: " << s << std::endl;
+		info("(%s) subscribed to %s\n", this->get_local_identity().c_str(), s.c_str());
 	}
 
 	// infinity subscriber loop
@@ -135,7 +135,7 @@ void CommunicationManager::request_subscriber_thread_func()
 			int sender_port;
 			request.get(sender_port, 2);
 			std::string key = request.get(3);
-			std::cout << "(" << this->get_local_identity() << ")" << " Received: " << request.get(0) << " from " << sender_ip << ":" << to_string(sender_port) << std::endl;
+			debug("(%s) received request from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
 
 			// create ZMQ push socket for the response if it is not already present
 			std::string conn_string = sender_ip + ":" + to_string(sender_port + 1000);
@@ -147,7 +147,7 @@ void CommunicationManager::request_subscriber_thread_func()
 				zresponsepush = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::push);
 				zresponsepush->connect("tcp://" + conn_string);
 				this->zresponsepush_map[conn_string] = zresponsepush;
-				debug("Created push socket for: %s\n", conn_string.c_str());
+				info("(%s) created push socket for: %s\n", this->get_local_identity().c_str(), conn_string.c_str());
 			}
 			zresponsepush = this->zresponsepush_map[conn_string];
 
@@ -158,9 +158,6 @@ void CommunicationManager::request_subscriber_thread_func()
 			response.push_back(this->my_port);
 			response.push_back(this->sm->get(key)); // actual data for key
 			zresponsepush->send(response);
-
-			// TODO close at end
-			//zresponsepush.close();
 		}
 	}
 }
@@ -181,8 +178,8 @@ std::list<std::string> CommunicationManager::get_peer_nodes()
 
 std::string CommunicationManager::get_local_identity()
 {
-
-	return this->my_ip + std::string(":") + to_string(this->my_port);
+	//return this->my_ip + std::string(":") + to_string(this->my_port);
+	return to_string(this->my_port);
 }
 
 
