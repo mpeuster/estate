@@ -20,9 +20,9 @@ int main(void) {
 	const char* result = es_get("k1");
 	printf("received from get: %s\n", result);
 
-	usleep(1000 * 1000 * 2);
+	usleep(1000 * 1000 * 1);
 	es_get_global("k1");
-	usleep(1000 * 1000 * 2);
+	usleep(1000 * 1000 * 1);
 
 	es_del("k1");
 

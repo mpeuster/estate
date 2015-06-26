@@ -25,6 +25,9 @@ private:
 	/* request publisher */
 	zmqpp::socket* zpublisher;
 
+	/* response puller */
+	zmqpp::socket* zresponsepull;
+
 	/* request subscriber thread management */
 	std::thread *request_subscriber_thread = NULL;
 	virtual void request_subscriber_start();
