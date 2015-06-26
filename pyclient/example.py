@@ -27,10 +27,9 @@ def run_local_node(port):
     We have a node which interacts with the additionally created peer nodes.
     """
     n = Node("127.0.0.1", port)
-    n.set("k1", "value1")
-    print n.get("k1")
-    n.delete("k1")
-    print n.get("k1")
+    n.set("k1", "value_of_node_%s:%d" % (n.ip, n.port))
+
+    time.sleep(1) # wait a bit to stabilize all peers
 
     # do some tires with our get global method
     for i in range(0, 5):
@@ -38,7 +37,7 @@ def run_local_node(port):
         time.sleep(2)
 
     # dummy wait
-    time.sleep(2)
+    time.sleep(1)
     n.close()
 
 

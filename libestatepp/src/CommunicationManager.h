@@ -13,10 +13,17 @@
 #include <sstream>
 #include <zmqpp/zmqpp.hpp>
 #include "util.h"
+#include <assert.h>
+#include <tr1/unordered_map>
+
+class StateManager;
 
 class CommunicationManager
 {
 private:
+	/* references */
+	StateManager* sm;
+
 	/* identification of this node */
 	std::string my_ip;
 	int my_port;
@@ -27,6 +34,9 @@ private:
 
 	/* response puller */
 	zmqpp::socket* zresponsepull;
+
+	/* response pusher */
+	std::tr1::unordered_map<std::string, zmqpp::socket*> zresponsepush_map;
 
 	/* request subscriber thread management */
 	std::thread *request_subscriber_thread = NULL;
@@ -41,9 +51,9 @@ private:
 	zmqpp::context zmqctx;
 
 public:
-	CommunicationManager(std::string, int);
+	CommunicationManager(StateManager*, std::string, int);
 	virtual ~CommunicationManager();
-	virtual void request_global_state(std::string);
+	virtual std::list<std::string> request_global_state(std::string);
 };
 
 #endif /* COMMUNICATIONMANAGER_H_ */

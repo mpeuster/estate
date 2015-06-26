@@ -12,7 +12,7 @@
 StateManager::StateManager(std::string ip, int port)
 {
 	this->local_state = new LocalState();
-	this->comm = new CommunicationManager(ip, port);
+	this->comm = new CommunicationManager(this, ip, port);
 
 	std::cout << "Created eState StateManager for instance: " << ip << ":" << port << std::endl;
 }

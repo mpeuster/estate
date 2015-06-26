@@ -41,6 +41,7 @@ class Node(object):
     def fill_with_dummy_data(self, n=100):
         for i in range(0, n):
             self.set("key_n%d_%d" % (self.port, i), "value_n%d_%d" % (self.port, i))
+        self.set("k1", "value_of_node_%s:%d" % (self.ip, self.port))
 
     def start_endless_processing(self):
         """

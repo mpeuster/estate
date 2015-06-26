@@ -12,16 +12,16 @@
 #define UTIL_H_
 
 #define PRINT_CALLS 1
-#define print_call(...) do { if (PRINT_CALLS) fprintf(stdout, "CALL: %s:%d:%s()\n", __FILE__, __LINE__, __func__); } while (0)
+#define print_call(...) do { if (PRINT_CALLS) fprintf(stdout, "\e[33mCALL: %s:%d:%s()\e[0m\n", __FILE__, __LINE__, __func__); } while (0)
 
 #define PRINT_DEBUG 1
-#define debug(fmt, args...) do { if (PRINT_DEBUG) fprintf(stdout, "DEBUG: %s:%d:%s(): " fmt, __FILE__, __LINE__, __func__, ##args); } while (0)
+#define debug(fmt, args...) do { if (PRINT_DEBUG) fprintf(stdout, "\e[34mDEBUG: %s:%d:%s():\e[0m" fmt, __FILE__, __LINE__, __func__, ##args); } while (0)
 
 #define PRINT_INFO 1
-#define info(fmt, args...) do { if (PRINT_INFO) fprintf(stdout, "INFO: " fmt, ##args); } while (0)
+#define info(fmt, args...) do { if (PRINT_INFO) fprintf(stdout, "\e[32mINFO:\e[0m" fmt, ##args); } while (0)
 
 #define PRINT_ERROR 1
-#define error(fmt, args...) do { if (PRINT_ERROR) fprintf(stderr, "ERROR: %s:%d:%s(): " fmt, __FILE__, __LINE__, __func__, ##args); } while (0)
+#define error(fmt, args...) do { if (PRINT_ERROR) fprintf(stderr, "\e[31mERROR: %s:%d:%s():\e[0m" fmt, __FILE__, __LINE__, __func__, ##args); } while (0)
 
 std::string to_string(int);
 

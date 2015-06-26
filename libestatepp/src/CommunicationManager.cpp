@@ -6,11 +6,13 @@
  */
 
 #include "CommunicationManager.h"
+#include "StateManager.h"
 
 
-CommunicationManager::CommunicationManager(std::string ip, int port)
+CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int port)
 {
 	// initialization
+	this->sm = sm;
 	this->my_ip = ip;
 	this->my_port = port;
 
@@ -36,6 +38,12 @@ CommunicationManager::~CommunicationManager()
 	// close connections
 	this->zpublisher->close();
 	this->zresponsepull->close();
+	for(std::pair<std::string, zmqpp::socket*> kv : this->zresponsepush_map)
+	{
+		if(kv.second != NULL)
+			kv.second->close();
+	}
+
 	// delete objects
 	delete this->zpublisher;
 	delete this->zresponsepull;
@@ -46,9 +54,9 @@ CommunicationManager::~CommunicationManager()
  * Request the global state by sending a state request to all peer nodes.
  * This is done by publishing a request to the zpublisher.
  */
-void CommunicationManager::request_global_state(std::string k)
+std::list<std::string> CommunicationManager::request_global_state(std::string k)
 {
-	// create request
+	// create and send request to all peers
 	zmqpp::message request;
 	request.push_back("global_state_request");
 	request.push_back(this->my_ip);
@@ -56,12 +64,12 @@ void CommunicationManager::request_global_state(std::string k)
 	request.push_back(k);
 	this->zpublisher->send(request);
 
-	// TODO we need to ensure that we receive n results here .. print error if it is not the case.
-	// TODO how to process the results?
-	// receive results
-	int num_peers = this->get_peer_nodes().size();
-	// we always expect to get results from all peers
-	for(int i = 0; i < num_peers; i++)
+	// prepare results structure
+	std::list<std::string> results;
+
+	// receive results (we always expect to get results from all peers)
+	uint num_peers = this->get_peer_nodes().size();
+	for(uint i = 0; i < num_peers; i++)
 	{
 		zmqpp::message response;
 		this->zresponsepull->receive(response);
@@ -70,12 +78,20 @@ void CommunicationManager::request_global_state(std::string k)
 			std::string sender_ip = response.get(1);
 			int sender_port;
 			response.get(sender_port, 2);
-			std::cout << "(" << this->get_local_identity() << ")" << " Received response: " << response.get(0) << " from " << sender_ip << ":" << to_string(sender_port) << std::endl;
+			std::string data = response.get(3);
+			std::cout << "(" << this->get_local_identity() << ")" << " Received response: " << response.get(0) << " from " << sender_ip << ":" << to_string(sender_port) << " containing: " << data << std::endl;
+			// add response to results
+			results.push_back(data);
 		}
 		// if we run in a timeout, we skip further tries to receive more responses
 		if(response.parts() < 1)
 			break;
 	}
+
+	// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
+	if(num_peers != results.size() && results.size() != 1)
+		error("resulsts.size() != num_peers\n");
+	return results;
 }
 
 /**
@@ -110,28 +126,41 @@ void CommunicationManager::request_subscriber_thread_func()
 	// infinity subscriber loop
 	while(this->request_subscriber_active)
 	{
-		//std::cout << "(" << this->local_instance << ")" << " Subscriber thread wakeup." << std::endl;
 		zmqpp::message request;
 		zsubscriber.receive(request);
 		if(request.parts() > 2)
 		{
+			// parse request
 			std::string sender_ip = request.get(1);
 			int sender_port;
 			request.get(sender_port, 2);
+			std::string key = request.get(3);
 			std::cout << "(" << this->get_local_identity() << ")" << " Received: " << request.get(0) << " from " << sender_ip << ":" << to_string(sender_port) << std::endl;
-			//TODO respond to request. Queue it? Is queing not already presend thorugh ZMQ? -> just answer?
 
-			// create ZMQ push socket to send responses to requester
-			//FIXME this is inefficient! create on push socket for each peer, and keep it in a public list (or a peer object?)
-			zmqpp::socket zresponsepush (this->zmqctx, zmqpp::socket_type::push);
-			zresponsepush.connect("tcp://" + sender_ip + ":" + to_string(sender_port + 1000));
+			// create ZMQ push socket for the response if it is not already present
+			std::string conn_string = sender_ip + ":" + to_string(sender_port + 1000);
+			zmqpp::socket* zresponsepush;
+
+			if(!this->zresponsepush_map[conn_string])
+			{
+				// only if not present
+				zresponsepush = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::push);
+				zresponsepush->connect("tcp://" + conn_string);
+				this->zresponsepush_map[conn_string] = zresponsepush;
+				debug("Created push socket for: %s\n", conn_string.c_str());
+			}
+			zresponsepush = this->zresponsepush_map[conn_string];
+
+			// send response message to requester
 			zmqpp::message response;
 			response.push_back("global_state_response");
 			response.push_back(this->my_ip);
 			response.push_back(this->my_port);
-			response.push_back("DUMMY_CONTENT");
-			zresponsepush.send(response);
-			zresponsepush.close();
+			response.push_back(this->sm->get(key)); // actual data for key
+			zresponsepush->send(response);
+
+			// TODO close at end
+			//zresponsepush.close();
 		}
 	}
 }
