@@ -53,11 +53,21 @@ const char* es_get(const char* k)
 	return sm->get(str_k).c_str();
 }
 
-const char* es_get_global(const char* k)
+const char* es_get_global(const char* k, char* (*reduce)(char*[], int))
 {
 	print_call();
 	assert(sm != NULL);
 	assert(k != NULL);
+
+	char *data[] = {
+			"value1.1",
+			"value1.2",
+			"value1.3"
+	};
+
+	info("calling reduce function\n");
+	char* res = reduce(data, sizeof(data) / sizeof(char*));
+	info("reduce result: %s\n", res);
 
 	std::string str_k(k);
 	return sm->get_global(str_k).c_str();

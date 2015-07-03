@@ -7,6 +7,21 @@ import signal
 
 local_node = None
 
+def reduce_test(data_ptr, length):
+    """
+    Example reduce function.
+    Most important: Convertion from C char** to a python list 
+    of strings: data_lst = [data_ptr[i] for i in range(0, length)]
+    """
+    # TODO hide this when in a nice python module so that the outside does not
+    # notice that we are useing a C library
+    print "Python reduce: " + str(data_ptr)
+    # convert to pyhton list of strings
+    data_lst = [str(data_ptr[i]) for i in range(0, length)]
+    print str(data_lst)
+    print "Python reduce: " + str(length)
+    return "reduce_result_from_python"
+
 class Node(object):
 
     def __init__(self, ip, port):
@@ -16,7 +31,6 @@ class Node(object):
         print "Node %s:%d created" % (self.ip, self.port)
         self.init()
         
-
     def init(self):
         self.lib.es_init(self.ip, self.port)
 
@@ -32,7 +46,12 @@ class Node(object):
         return ctypes.c_char_p(rptr).value
 
     def get_global(self, k):
-        rptr = self.lib.es_get_global(k)
+        # define signature of reduce function (first argument is the return type)
+        CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int)
+        # create a callback pointer for the given reduce function
+        reduce_func = CMPFUNC(reduce_test)
+        # call the C library with the callback pointer
+        rptr = self.lib.es_get_global(k, reduce_func)
         return ctypes.c_char_p(rptr).value
 
     def delete(self, k):

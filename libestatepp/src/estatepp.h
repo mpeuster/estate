@@ -21,7 +21,17 @@ extern "C"
 	extern void es_set(const char*,const char*);
 	extern const char* es_get(const char*);
 	extern void es_del(const char*);
-	extern const char* es_get_global(const char* k); // TODO: reduce function needs a list of strings (linked list of char*, create a corresponding strunct in the lib?)
+
+	/**
+	 * get global function gets a key and a reduce function pointer with the following
+	 * signature:
+	 * char* func (char*)
+	 *
+	 * argument 1: array of strings (all possible results)
+	 * argument 2: length = number of items in array
+	 * reutrn: string (selected, reduced result)
+	 */
+	extern const char* es_get_global(const char* k, char* (*reduce)(char*[], int)); // TODO: reduce function needs a list of strings (linked list of char*, create a corresponding strunct in the lib?)
 
 #ifdef __cplusplus
 }
