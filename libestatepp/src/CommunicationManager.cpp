@@ -141,6 +141,7 @@ void CommunicationManager::request_subscriber_thread_func()
 			std::string conn_string = sender_ip + ":" + to_string(sender_port + 1000);
 			zmqpp::socket* zresponsepush;
 
+			//TODO: Dyn: This map has to be updated dynamically if nodes can join/leave
 			if(!this->zresponsepush_map[conn_string])
 			{
 				// only if not present
@@ -164,7 +165,7 @@ void CommunicationManager::request_subscriber_thread_func()
 
 std::list<std::string> CommunicationManager::get_peer_nodes()
 {
-	//TODO fake discovery: replace this with a real discovery method
+	//TODO Dyn: replace this with a real discovery method
 	std::list<std::string> lst;
 	lst.push_front("127.0.0.1:9000");
 	lst.push_front("127.0.0.1:9001");
@@ -172,7 +173,6 @@ std::list<std::string> CommunicationManager::get_peer_nodes()
 	lst.push_front("127.0.0.1:9003");
 	lst.push_front("127.0.0.1:9004");
 	lst.push_front("127.0.0.1:9005");
-	//TODO discovery list currently includes the local node! not sure if this may be helpful or a problem?
 	return lst;
 }
 
