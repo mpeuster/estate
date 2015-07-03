@@ -53,20 +53,23 @@ const char* es_get(const char* k)
 	return sm->get(str_k).c_str();
 }
 
-const char* es_get_global(const char* k, char* (*reduce)(char*[], int))
+const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int))
 {
 	print_call();
 	assert(sm != NULL);
 	assert(k != NULL);
 
-	char *data[] = {
-			"value1.1",
-			"value1.2",
-			"value1.3"
-	};
+	state_item_t d1, d2, d3;
+	d1.data = "value1.1"; d1.timestamp = 1;
+	d2.data = "value1.2"; d2.timestamp = 23;
+	d3.data = "vlaue1.3"; d3.timestamp = 42;
+	state_item_t data[3];
+	data[0] = d1;
+	data[1] = d2;
+	data[2] = d3;
 
 	info("calling reduce function\n");
-	char* res = reduce(data, sizeof(data) / sizeof(char*));
+	char* res = reduce(data, sizeof(data) / sizeof(state_item_t));
 	info("reduce result: %s\n", res);
 
 	std::string str_k(k);

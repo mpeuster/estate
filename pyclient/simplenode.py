@@ -7,6 +7,19 @@ import signal
 
 local_node = None
 
+class state_item_t(ctypes.Structure):
+    """
+    This custom structure corresponds to the state_item_t structure of
+    libestate.
+    It wraps the C struct to a normal pyhton class.
+    """
+    _fields_ = [("timestamp", ctypes.c_int),
+                ("node_identifier", ctypes.c_char_p),
+                ("data", ctypes.c_char_p)]
+
+    def __str__(self):
+        return "%s(%d)" % (str(self.data), self.timestamp)
+
 def reduce_test(data_ptr, length):
     """
     Example reduce function.
@@ -47,7 +60,7 @@ class Node(object):
 
     def get_global(self, k):
         # define signature of reduce function (first argument is the return type)
-        CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int)
+        CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.POINTER(state_item_t), ctypes.c_int)
         # create a callback pointer for the given reduce function
         reduce_func = CMPFUNC(reduce_test)
         # call the C library with the callback pointer

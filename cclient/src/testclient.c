@@ -12,13 +12,13 @@
 #include <estatepp.h>
 #include <time.h>
 
-
-char* reduce_test(char* d[], int length)
+//TODO remove eclipse error for state_item_t
+char* reduce_test(state_item_t d[], int length)
 {
 	printf("reduce input size: %d\n", length);
 	int i = 0;
 	for(i; i < length; i++)
-		printf("reduce input[%d]: %s\n", i, d[i]);
+		printf("reduce input[%d]: %s\n", i, d[i].data);
 	return "reduce_result";
 }
 

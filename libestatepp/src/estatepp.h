@@ -12,7 +12,15 @@
 extern "C"
 {
 #endif
+	/* basic data types */
+	struct state_item_struct {
+		int timestamp;
+		char* node_identifier;
+		char* data;
+	};
+	typedef struct state_item_struct state_item_t;
 
+	/* basic initialization API */
 	extern void es_init(const char* ip, int port);
 	extern void es_close(void);
 	extern void testpp(void);
@@ -31,7 +39,7 @@ extern "C"
 	 * argument 2: length = number of items in array
 	 * reutrn: string (selected, reduced result)
 	 */
-	extern const char* es_get_global(const char* k, char* (*reduce)(char*[], int)); // TODO: reduce function needs a list of strings (linked list of char*, create a corresponding strunct in the lib?)
+	extern const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int)); // TODO: reduce function needs a list of strings (linked list of char*, create a corresponding strunct in the lib?)
 
 #ifdef __cplusplus
 }
