@@ -7,3 +7,10 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 (this are just some nodes that help to keep track of everything already implemented in the system, early work, no ende-user documentation)
 
 ATTENTION: This software is currently under development and used as a very early prototype to test same basic ideas.
+
+
+## How to run?
+
+Add main folder to your PYTHONPATH: export PYTHONPATH="$HOME/estate:$PYTHONPATH"
+
+Run: python test

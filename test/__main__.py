@@ -2,11 +2,13 @@
  simple test script to check different libestate implementations
 """
 
-from elasticstate import estate as estater
-from elasticstate_cassandra import estate as estatec
-
-
 import unittest
+
+from libestateredis.estate_redis import estate as estater
+from libestatecassandra.estate_cassandra import estate as estatec
+
+
+
 
 
 class GenericEstateTestCase(unittest.TestCase):
