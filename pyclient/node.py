@@ -1,110 +1,59 @@
 #!/usr/bin/python
 
-import ctypes
+"""
+ simple executable to create a node process
+ running until it receives SIGTERM
+"""
+
 import sys
 import time
 import signal
+from libestatepp.estate import estate
+
 
 local_node = None
 
-class state_item_t(ctypes.Structure):
-    """
-    This custom structure corresponds to the state_item_t structure of
-    libestate.
-    It wraps the C struct to a normal pyhton class.
-    """
-    _fields_ = [("timestamp", ctypes.c_int),
-                ("node_identifier", ctypes.c_char_p),
-                ("data", ctypes.c_char_p)]
-
-    def __str__(self):
-        return "%s(%d)" % (str(self.data), self.timestamp)
-
-def reduce_test(data_ptr, length):
-    """
-    Example reduce function.
-    Most important: Convertion from C char** to a python list 
-    of strings: data_lst = [data_ptr[i] for i in range(0, length)]
-    """
-    # TODO hide this when in a nice python module so that the outside does not
-    # notice that we are useing a C library
-    print "Python reduce: " + str(data_ptr)
-    # convert to pyhton list of strings
-    data_lst = [str(data_ptr[i]) for i in range(0, length)]
-    print str(data_lst)
-    print "Python reduce: " + str(length)
-    return "reduce_result_from_python"
-
 class Node(object):
 
-    def __init__(self, ip, port):
-        self.lib = ctypes.cdll.LoadLibrary('../libestatepp/Debug/libestatepp.so')
-        self.ip = str(ip)
-        self.port = int(port)
-        print "Node %s:%d created" % (self.ip, self.port)
-        self.init()
-        
-    def init(self):
-        self.lib.es_init(self.ip, self.port)
-
-    def close(self):
-        self.lib.es_close()
-        print "Node %s:%d destroyed" % (self.ip, self.port)
-
-    def set(self, k, v):
-        self.lib.es_set(k, v)
-
-    def get(self, k):
-        rptr = self.lib.es_get(k)
-        return ctypes.c_char_p(rptr).value
-
-    def get_global(self, k):
-        # define signature of reduce function (first argument is the return type)
-        CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.POINTER(state_item_t), ctypes.c_int)
-        # create a callback pointer for the given reduce function
-        reduce_func = CMPFUNC(reduce_test)
-        # call the C library with the callback pointer
-        rptr = self.lib.es_get_global(k, reduce_func)
-        return ctypes.c_char_p(rptr).value
-
-    def delete(self, k):
-        self.lib.es_del(k)
+    def __init__(self, instance_id):
+        self.instance_id = instance_id
+        self.es = estate(instance_id)
 
     def fill_with_dummy_data(self, n=100):
         for i in range(0, n):
-            self.set("key_n%d_%d" % (self.port, i), "value_n%d_%d" % (self.port, i))
-        self.set("k1", "value_of_node_%s:%d" % (self.ip, self.port))
+            self.es.set("key_%d" % (i), "value_%d" % (i))
 
     def start_endless_processing(self):
         """
         This emulates endless processing of a node e.g. a firewall or IDS.
         """
         try:
-            while(True):
+            while True:
                 time.sleep(2)
-                print "Node %s:%d wakeup" % (self.ip, self.port)
+                print "Node:%d wakeup" % (self.instance_id)
         except:
-            pass
+            print "Error in endless processing"
         finally:
-            self.close()
+            self.es.close()
 
 
 def sigterm_handler(_signo, _stack_frame):
     global local_node
-    local_node.close()
+    local_node.es.close()
     sys.exit(0)
 
 
 def main():
     global local_node
     signal.signal(signal.SIGTERM, sigterm_handler)
-    ip = "127.0.0.1"
-    port = 9000
-    if len(sys.argv) > 2:
-        ip = str(sys.argv[1])
-        port = int(sys.argv[2])
+    if len(sys.argv) > 1:
+        instance_id = int(sys.argv[1])
+    else:
+        print "Argument missing: instance_id:int"
+        sys.exit(1)
+
     # create node
-    local_node = Node(ip, port)
+    local_node = Node(instance_id)
     local_node.fill_with_dummy_data()
     local_node.start_endless_processing()
 
