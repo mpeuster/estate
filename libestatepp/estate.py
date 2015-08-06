@@ -25,7 +25,7 @@ class estate(object):
         self.ip = str(ip)
         self.port = int(self.instance_id + base_port)
         self.lib.es_init(self.ip, self.port)
-        print "ES: Initialized estate for instance: %s" % self.instance_id
+        print "ES: Initialized estate for instance: %d" % self.instance_id
 
     def close(self):
         self.lib.es_close()

@@ -19,7 +19,7 @@ class Node(object):
         self.instance_id = instance_id
         self.es = estate(instance_id)
 
-    def fill_with_dummy_data(self, n=100):
+    def fill_with_dummy_data(self, n=1):
         for i in range(0, n):
             self.es.set("key_%d" % (i), "value_%d" % (i))
 
@@ -32,14 +32,15 @@ class Node(object):
                 time.sleep(2)
                 print "Node:%d wakeup" % (self.instance_id)
         except:
-            print "Error in endless processing"
+            print "Stopping..."
         finally:
             self.es.close()
 
 
 def sigterm_handler(_signo, _stack_frame):
     global local_node
-    local_node.es.close()
+    if local_node:
+        local_node.es.close()
     sys.exit(0)
 
 

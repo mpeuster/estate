@@ -3,19 +3,26 @@
 """
 
 import unittest
+import subprocess
+import time
+import sys
 
 from libestateredis.estate_redis import estate as estater
 from libestatecassandra.estate_cassandra import estate as estatec
-
-
-
+from libestatepp.estate import estate as estatep
 
 
 class GenericEstateTestCase(unittest.TestCase):
+    """
+    This is the generic use case in which our tests are defined.
+    All library speciffic use cases inherit from this class and apply
+    the tests to their own library instances.
+    """
 
     def __init__(self, args):
         super(GenericEstateTestCase, self).__init__(args)
         self.es = []
+        self.enode = []
 
     def setUp(self):
         pass
@@ -60,7 +67,7 @@ class GenericEstateTestCase(unittest.TestCase):
 class ReditEstateTestCase(GenericEstateTestCase):
 
     def setUp(self):
-        # create a number of es instances
+        # create a number of es instances (all running in test process)
         self.es = []
         for i in range(0, 5):
             self.es.append(estater(i))
@@ -69,36 +76,53 @@ class ReditEstateTestCase(GenericEstateTestCase):
 class CassandraEstateTestCase(GenericEstateTestCase):
 
     def setUp(self):
-        # create a number of es instances
+        # create a number of es instances (all running in test process)
         self.es = []
         for i in range(0, 5):
             self.es.append(estatec(i))
 
 
+class LibestateTestCase(GenericEstateTestCase):
 
-def old_test():
-    es = estatec(0)
-    es2 = estatec(1)
+    def setUp(self):
+        """
+        This test case is a bit different.
+        We need to start some other nodes as real external processes which
+        built our peer network.
 
-    print "-" * 42
-    print "TEST"
-    print "-" * 42
-    # local tests
-    print es.set("key1", "value1")
-    print es.get("key1")
-    print es.delete("key1")
-    print es.delete("key1")
-    print es.get("key1")
-    # global tests
-    print es.set("key1", "4")
-    print es.set("key2", "3")
-    print es2.set("key1", "2")
-    print es.set("key1", "8")
-    print es.get("key1")
-    print es2.get("key1")
-    print es.get_global("key1", red_sum)
-    print es.get_global("key1", red_avg)
-    print es.get_global("key1", None)
+        These nodes might need some time to stabalize their entwork so we need some delays.
+        Also, the nodes have to be killed after each test to ensure that the network
+        ports are free for the next test.
+        """
+        START_DELAY = 0.1
+
+        # run 4 environment instaces (node.py)
+        self.enodes = []
+        for i in range(1, 6):
+            self.enodes.append(subprocess.Popen(["./pyclient/node.py", str(i)]))
+            print "Started node.py %d" % i
+            time.sleep(START_DELAY)
+
+        # create local test instance
+        self.es = []
+        self.es.append(estatep(0))
+        time.sleep(START_DELAY)
+
+    def tearDown(self):
+        STOP_DELAY = 0.1
+
+        for e in self.enodes:
+            e.terminate()
+            time.sleep(STOP_DELAY)
+
+        # not nice, but helps if e.terminate does not work
+        subprocess.call(["pkill", "node.py"])
+        time.sleep(STOP_DELAY)
+
+        for e in self.es:
+            e.close()
+            time.sleep(STOP_DELAY)
+
 
 
 def red_sum(l):
@@ -119,10 +143,16 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
     # redis version
     ts1 = unittest.TestLoader().loadTestsFromTestCase(ReditEstateTestCase)
-    suite.addTest(ts1)
+    if len(sys.argv) < 2 or sys.argv[1] == "1":
+        suite.addTest(ts1)
     # cassandra version
     ts2 = unittest.TestLoader().loadTestsFromTestCase(CassandraEstateTestCase)
-    suite.addTest(ts2)
+    if len(sys.argv) < 2 or sys.argv[1] == "2":
+        suite.addTest(ts2)
+    # libestate version (UPB)
+    ts3 = unittest.TestLoader().loadTestsFromTestCase(LibestateTestCase)
+    if len(sys.argv) < 2 or sys.argv[1] == "3":
+        suite.addTest(ts3)
 
     #execute
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=0).run(suite)
