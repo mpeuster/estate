@@ -9,7 +9,7 @@ import sys
 
 from libestateredis.estate_redis import estate as estater
 from libestatecassandra.estate_cassandra import estate as estatec
-from libestatepp.estate import estate as estatep
+from pyclient.estate import estate as estatep
 
 
 class GenericEstateTestCase(unittest.TestCase):
