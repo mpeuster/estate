@@ -23,7 +23,7 @@ CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int
 	// pull socket to receive the request responses (on port = (orig_port + 1000)
 	this->zresponsepull = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pull);
 	this->zresponsepull->bind("tcp://*:" + to_string(this->my_port + 1000));
-	this->zresponsepull->set(zmqpp::socket_option::receive_timeout, 1000);
+	this->zresponsepull->set(zmqpp::socket_option::receive_timeout, 5000);
 
 	// start subscriber thread
 	this->request_subscriber_start();
@@ -54,7 +54,7 @@ CommunicationManager::~CommunicationManager()
  * Request the global state by sending a state request to all peer nodes.
  * This is done by publishing a request to the zpublisher.
  */
-std::list<std::string> CommunicationManager::request_global_state(std::string k)
+std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 {
 	// create and send request to all peers
 	zmqpp::message request;
@@ -65,7 +65,7 @@ std::list<std::string> CommunicationManager::request_global_state(std::string k)
 	this->zpublisher->send(request);
 
 	// prepare results structure
-	std::list<std::string> results;
+	std::list<StateItem> results;
 
 	// receive results (we always expect to get results from all peers)
 	uint num_peers = this->get_peer_nodes().size();
@@ -81,7 +81,7 @@ std::list<std::string> CommunicationManager::request_global_state(std::string k)
 			std::string data = response.get(3);
 			debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
 			// add response to results
-			results.push_back(data);
+			results.push_back(StateItem(data, "xyz", 99)); //TODO: transmit correct data here
 		}
 		// if we run in a timeout, we skip further tries to receive more responses
 		if(response.parts() < 1)
@@ -90,7 +90,8 @@ std::list<std::string> CommunicationManager::request_global_state(std::string k)
 
 	// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
 	if(num_peers != results.size() && results.size() != 1)
-		error("resulsts.size() != num_peers\n");
+		error("resulsts.size()=%d != num_peers=%d\n", results.size(), num_peers);
+
 	return results;
 }
 

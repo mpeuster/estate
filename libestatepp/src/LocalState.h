@@ -10,17 +10,18 @@
 
 #include <iostream>
 #include <tr1/unordered_map>
+#include "StateItem.h"
 
 class LocalState
 {
 private:
-	std::tr1::unordered_map<std::string, std::string> data;
+	std::tr1::unordered_map<std::string, StateItem*> data;
 
 public:
 	LocalState();
 	virtual ~LocalState();
-	virtual void set(std::string, std::string);
-	virtual std::string get(std::string);
+	virtual void set(std::string, StateItem* v);
+	virtual StateItem* get(std::string);
 	virtual void del(std::string);
 	virtual bool exists(std::string);
 };

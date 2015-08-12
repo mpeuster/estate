@@ -15,8 +15,8 @@ extern "C"
 	/* basic data types */
 	struct state_item_struct {
 		int timestamp;
-		char* node_identifier;
-		char* data;
+		const char* node_identifier;
+		const char* data;
 	};
 	typedef struct state_item_struct state_item_t;
 

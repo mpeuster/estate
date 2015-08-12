@@ -13,6 +13,7 @@
 #include <sstream>
 #include <zmqpp/zmqpp.hpp>
 #include "util.h"
+#include "StateItem.h"
 #include <assert.h>
 #include <tr1/unordered_map>
 
@@ -27,7 +28,6 @@ private:
 	/* identification of this node */
 	std::string my_ip;
 	int my_port;
-	virtual std::string get_local_identity();
 
 	/* request publisher */
 	zmqpp::socket* zpublisher;
@@ -53,7 +53,8 @@ private:
 public:
 	CommunicationManager(StateManager*, std::string, int);
 	virtual ~CommunicationManager();
-	virtual std::list<std::string> request_global_state(std::string);
+	virtual std::list<StateItem> request_global_state(std::string);
+	virtual std::string get_local_identity();
 };
 
 #endif /* COMMUNICATIONMANAGER_H_ */

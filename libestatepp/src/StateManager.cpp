@@ -21,25 +21,63 @@ StateManager::~StateManager()
 	delete this->comm;
 }
 
-void StateManager::test()
-{
-	print_call();
-}
-
 void StateManager::set(std::string k, std::string v)
 {
-	this->local_state->set(k, v);
+	StateItem* si;
+	if(this->local_state->exists(k))
+	{
+		// state item already exists: update it
+		si = this->local_state->get(k);
+		si->setData(k);
+		si->setTimestamp(si->getTimestamp() + 1); // currently simple local versions
+	}
+	else
+	{
+		// new state item object needed
+		si = new StateItem(v, this->comm->get_local_identity(), 0);
+	}
+
+	// make sure reference to state item is stored
+	this->local_state->set(k, si);
 }
 
 std::string StateManager::get(std::string k)
 {
-	return this->local_state->get(k);
+	if(this->local_state->exists(k) && this->local_state->get(k) != NULL)
+		return this->local_state->get(k)->getData();
+	return "ES_NONE";
 }
 
-std::string StateManager::get_global(std::string k)
+/**
+ * Collects all state items from other nodes and collects them in an
+ * array of type "state_item_t".
+ *
+ * Arguments:
+ * 	- k = key for item
+ * 	- result_array = array pointer to store results in
+ * Return: number of elements in result array
+ */
+int StateManager::get_global(std::string k, state_item_t* &result_array)
 {
-	this->comm->request_global_state(k);
-	return "ES_NONE";
+	std::list<StateItem> result_list = this->comm->request_global_state(k);
+
+	// allocate memory for the result array
+	int length = result_list.size();
+	result_array = (state_item_t*)malloc(length * sizeof(state_item_t));
+	debug("malloc size: %d\n", length);
+
+	// fill the result array with data
+	int i = 0;
+	for (std::list<StateItem>::const_iterator it = result_list.begin(), end = result_list.end(); it != end; ++it)
+	{
+	    result_array[i].timestamp = it->getTimestamp();
+	    result_array[i].node_identifier = it->getNodeIdentifier().c_str();
+	    result_array[i].data = it->getData().c_str();
+	    i++;
+	}
+
+	//static state_item_t result_array[result_list.size()];
+	return length;
 }
 
 void StateManager::del(std::string k)

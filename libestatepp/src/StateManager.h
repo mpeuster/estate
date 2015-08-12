@@ -11,6 +11,8 @@
 #include <iostream>
 #include "LocalState.h"
 #include "CommunicationManager.h"
+#include "StateItem.h"
+#include "estatepp.h"
 
 class StateManager
 {
@@ -21,10 +23,9 @@ private:
 public:
 	StateManager(std::string ip, int port);
 	virtual ~StateManager();
-	virtual void test();
 	virtual void set(std::string, std::string);
 	virtual std::string get(std::string);
-	virtual std::string get_global(std::string);
+	virtual int get_global(std::string, state_item_t* &result_array);
 	virtual void del(std::string);
 };
 

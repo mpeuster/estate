@@ -58,6 +58,10 @@ class estate(object):
         return None
 
     def get_global(self, k, red_func):
+
+        if red_func is None:
+            red_func = reduce_test
+
         print "ES: GET_GLOBAL k=%s f=%s" % (str(k), str(red_func))
         # define signature of reduce function (first argument is the return type)
         CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.POINTER(state_item_t), ctypes.c_int)
@@ -77,8 +81,8 @@ def reduce_test(data_ptr, length):
     # TODO hide this when in a nice python module so that the outside does not
     # notice that we are useing a C library
     print "Python reduce: " + str(data_ptr)
+    print "Python length: " + str(length)
     # convert to pyhton list of strings
     data_lst = [str(data_ptr[i]) for i in range(0, length)]
     print str(data_lst)
-    print "Python reduce: " + str(length)
-    return "reduce_result_from_python"
+    return "ES_NONE"

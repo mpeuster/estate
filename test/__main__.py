@@ -56,6 +56,15 @@ class GenericEstateTestCase(unittest.TestCase):
             else:
                 self.assertEqual(e.get("key1"), "value1.%s" % str(e.instance_id))
 
+
+    def test_get_globel_simple(self):
+        for e in self.es:
+            self.assertTrue(e.set("key1", "value1.%s" % str(e.instance_id)))
+
+        for e in self.es:
+            self.assertEqual(e.get_global("key1", None), "ES_NONE")
+
+
     # TODO get_global_avg
     # TODO get global sum
     # TODO get global latest
@@ -94,7 +103,7 @@ class LibestateTestCase(GenericEstateTestCase):
         Also, the nodes have to be killed after each test to ensure that the network
         ports are free for the next test.
         """
-        START_DELAY = 0.1
+        START_DELAY = 0.5
 
         # run 4 environment instaces (node.py)
         self.enodes = []
