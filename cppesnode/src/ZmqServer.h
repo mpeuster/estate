@@ -8,6 +8,9 @@
 #ifndef ZMQSERVER_H_
 #define ZMQSERVER_H_
 
+#include <iostream>
+#include <string>
+#include <sstream>
 #include <zmqpp/zmqpp.hpp>
 #include <estatepp.h>
 
@@ -21,12 +24,24 @@ private:
 	zmqpp::context zmqctx;
 	zmqpp::socket* recv_socket;
 
+	/* local configuration */
+	int local_api_port;
+	string estate_node_address;
+	int estate_node_port;
+	string peers;
+
+	virtual void init();
 
 public:
 	ZmqServer();
+	ZmqServer(int local_api_port, string estate_node_address, int estate_node_port);
 	virtual ~ZmqServer();
 	virtual void start();
+	virtual void set_peer_list(string);
 };
+
+/* Helper */
+string int_to_string(int i);
 
 } /* namespace std */
 

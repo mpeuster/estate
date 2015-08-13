@@ -24,12 +24,24 @@ char* reduce_latest(state_item_t d[], int length)
 
 ZmqServer::ZmqServer()
 {
-	// init estate
-	es_init("127.0.0.1", 9000);
+	this->local_api_port = 8800;
+	this->estate_node_address = "127.0.0.1";
+	this->estate_node_port = 9000;
+	this->recv_socket = NULL;
+	this->peers = "";
 
-	// init zmq
-	this->recv_socket = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::rep);
-	this->recv_socket->bind("tcp://*:8800");
+	this->init();
+}
+
+ZmqServer::ZmqServer(int local_api_port, string estate_node_address, int estate_node_port)
+{
+	this->local_api_port = local_api_port;
+	this->estate_node_address = estate_node_address;
+	this->estate_node_port = estate_node_port;
+	this->recv_socket = NULL;
+	this->peers = "";
+
+	this->init();
 }
 
 ZmqServer::~ZmqServer()
@@ -41,9 +53,24 @@ ZmqServer::~ZmqServer()
 	}
 }
 
+void ZmqServer::init()
+{
+	// init zmq
+	this->recv_socket = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::rep);
+	this->recv_socket->bind("tcp://*:" + int_to_string(this->local_api_port));
+
+	cout << "created estate node with address: " << this->estate_node_address << ":" << this->estate_node_port << endl;
+}
+
 void ZmqServer::start()
 {
-	cout << "running ZMQ server ..." << endl;
+	// init estate
+	if(this->peers.size() < 1)
+		es_init(this->estate_node_address.c_str(), this->estate_node_port);
+	else
+		es_init_with_peers(this->estate_node_address.c_str(), this->estate_node_port, this->peers.c_str());
+
+	cout << "ZMQ API server listening to port: " << this->local_api_port  << endl;
 	while (true)
 	{
 		// prepare messages
@@ -55,13 +82,11 @@ void ZmqServer::start()
 		if(request_msg.parts() > 1)
 		{
 			cout << "received: " << request_msg.get(0) << " " << request_msg.get(1) << endl;
-			// TODO call libestate
 
 			if(request_msg.get(0) == "SET")
 			{
 				//--- SET command
 				es_set(request_msg.get(1).c_str(), request_msg.get(2).c_str());
-				//cout << "SET VALUE: " << request_msg.get(2) << endl;
 				response_msg.push_back("OK");
 			}
 			else if(request_msg.get(0) == "GET")
@@ -108,6 +133,20 @@ void ZmqServer::start()
 		cout << "sending: " << response_msg.get(0) << endl;
 		this->recv_socket->send(response_msg);
 	}
+}
+
+void ZmqServer::set_peer_list(string peers)
+{
+	this->peers = peers;
+	cout << "setting peers: " << peers << endl;
+}
+
+/* Helper */
+string int_to_string(int i)
+{
+	stringstream s;
+	s << i;
+	return s.str();
 }
 
 } /* namespace std */

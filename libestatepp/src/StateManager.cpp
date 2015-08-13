@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include "StateManager.h"
 #include "util.h"
 
@@ -13,12 +14,23 @@ StateManager::StateManager(std::string ip, int port)
 {
 	this->local_state = new LocalState();
 	this->comm = new CommunicationManager(this, ip, port);
+
+	// always add this node as peer, if no other peers are specified
+	std::stringstream local_address;
+	local_address << ip << ":" << port;
+	this->set_peers(local_address.str());
 }
 
 StateManager::~StateManager()
 {
 	delete this->local_state;
 	delete this->comm;
+}
+
+void StateManager::start()
+{
+	if(this->comm)
+		this->comm->start();
 }
 
 void StateManager::set(std::string k, std::string v)
@@ -91,5 +103,21 @@ int StateManager::get_global(std::string k, state_item_t* &result_array)
 void StateManager::del(std::string k)
 {
 	this->local_state->del(k);
+}
+
+void StateManager::set_peers(std::string peer_str)
+{
+	// parse string an build peer list
+	std::list<std::string> peer_lst;
+	std::stringstream peers_stream(peer_str);
+	while(peers_stream.good())
+	{
+		std::string tmp;
+		peers_stream >> tmp;
+		if(tmp.size() > 0)
+			peer_lst.push_back(tmp);
+	}
+	// push peer list to comunication manager
+	this->comm->set_peer_nodes(peer_lst);
 }
 

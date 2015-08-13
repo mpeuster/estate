@@ -24,9 +24,6 @@ CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int
 	this->zresponsepull = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pull);
 	this->zresponsepull->bind("tcp://*:" + to_string(this->my_port + 1000));
 	this->zresponsepull->set(zmqpp::socket_option::receive_timeout, 5000);
-
-	// start subscriber thread
-	this->request_subscriber_start();
 }
 
 CommunicationManager::~CommunicationManager()
@@ -47,6 +44,13 @@ CommunicationManager::~CommunicationManager()
 	// delete objects
 	delete this->zpublisher;
 	delete this->zresponsepull;
+}
+
+void CommunicationManager::start()
+{
+	info("starting node with %d peers\n", this->get_peer_nodes().size());
+	// start subscriber thread
+	this->request_subscriber_start();
 }
 
 
@@ -179,15 +183,13 @@ void CommunicationManager::request_subscriber_thread_func()
 
 std::list<std::string> CommunicationManager::get_peer_nodes()
 {
+	return this->peer_lst;
+}
+
+void CommunicationManager::set_peer_nodes(std::list<std::string> peer_lst)
+{
 	//TODO Dyn: replace this with a real discovery method
-	std::list<std::string> lst;
-	lst.push_front("127.0.0.1:9000");
-	lst.push_front("127.0.0.1:9001");
-	lst.push_front("127.0.0.1:9002");
-	lst.push_front("127.0.0.1:9003");
-	lst.push_front("127.0.0.1:9004");
-	lst.push_front("127.0.0.1:9005");
-	return lst;
+	this->peer_lst = peer_lst;
 }
 
 std::string CommunicationManager::get_local_identity()

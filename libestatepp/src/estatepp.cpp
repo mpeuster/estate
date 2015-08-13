@@ -18,6 +18,21 @@ void es_init(const char* ip, int port)
 {
 	std::string str_ip(ip);
 	sm = new StateManager(str_ip, port);
+
+	// start node
+	sm->start();
+}
+
+void es_init_with_peers(const char* ip, int port, const char* peers)
+{
+	std::string str_ip(ip);
+	sm = new StateManager(str_ip, port);
+	// set peers
+	std::string str_peers(peers);
+	sm->set_peers(str_peers);
+
+	// start node
+	sm->start();
 }
 
 void es_close()

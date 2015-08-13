@@ -22,6 +22,7 @@ extern "C"
 
 	/* basic initialization API */
 	extern void es_init(const char* ip, int port);
+	extern void es_init_with_peers(const char* ip, int port, const char* peers);
 	extern void es_close(void);
 	extern void testpp(void);
 

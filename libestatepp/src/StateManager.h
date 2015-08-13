@@ -28,6 +28,8 @@ public:
 	virtual StateItem* getItem(std::string);
 	virtual int get_global(std::string, state_item_t* &result_array);
 	virtual void del(std::string);
+	virtual void set_peers(std::string);
+	virtual void start();
 };
 
 #endif /* STATEMANAGER_H_ */

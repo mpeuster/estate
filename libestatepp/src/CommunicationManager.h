@@ -44,17 +44,22 @@ private:
 	virtual void request_subscriber_thread_func();
 	bool request_subscriber_active = false;
 
-	/* peer discovery */
-	virtual std::list<std::string> get_peer_nodes();
-
 	/* zeromq management */
 	zmqpp::context zmqctx;
+
+	/* peer management */
+	std::list<std::string> peer_lst;
 
 public:
 	CommunicationManager(StateManager*, std::string, int);
 	virtual ~CommunicationManager();
+	virtual void start();
 	virtual std::list<StateItem> request_global_state(std::string);
 	virtual std::string get_local_identity();
+
+	/* peer discovery */
+	virtual std::list<std::string> get_peer_nodes();
+	virtual void set_peer_nodes(std::list<std::string>);
 };
 
 #endif /* COMMUNICATIONMANAGER_H_ */
