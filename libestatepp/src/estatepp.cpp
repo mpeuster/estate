@@ -70,7 +70,7 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int))
 	info("reduce result: %s\n", res);
 
 	// return reduced
-	return "ES_NONE";
+	return res;
 }
 
 void es_del(const char* k)
