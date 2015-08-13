@@ -19,7 +19,7 @@ class Node(object):
         self.instance_id = instance_id
         self.es = estate(instance_id)
 
-    def fill_with_dummy_data(self, n=1):
+    def fill_with_dummy_data(self, n=2):
         for i in range(0, n):
             self.es.set("key_%d" % (i), "value_%d" % (i))
 

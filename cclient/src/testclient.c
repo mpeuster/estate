@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <estatepp.h>
 #include <time.h>
+#include <string.h>
 
 //TODO remove eclipse error for state_item_t
 char* reduce_test(state_item_t d[], int length)
@@ -22,20 +23,96 @@ char* reduce_test(state_item_t d[], int length)
 	return "reduce_result";
 }
 
-int main(void) {
+void client_a()
+{
 	es_init("127.0.0.1", 9000);
-	//testpp();
 
-	es_set("k1", "value1");
-	const char* result = es_get("k1");
-	printf("GET k1 result: %s\n", result);
+	es_set("k1", "value1.a");
 
+	//const char* result = es_get("k1");
+	//printf("GET k1 result: %s\n", result);
+
+	usleep(1000 * 1000 * 10);
+	//es_get_global("k1", reduce_test);
 	usleep(1000 * 1000 * 1);
+
+	//es_del("k1");
+
+	es_close();
+}
+
+void client_b()
+{
+	es_init("127.0.0.1", 9001);
+
+		es_set("k1", "value1.b");
+
+		//const char* result = es_get("k1");
+		//printf("GET k1 result: %s\n", result);
+
+		usleep(1000 * 1000 * 10);
+		//es_get_global("k1", reduce_test);
+		usleep(1000 * 1000 * 1);
+
+		//es_del("k1");
+
+		es_close();
+}
+
+void client_c()
+{
+	es_init("127.0.0.1", 9002);
+
+		es_set("k1", "value1.c");
+
+		//const char* result = es_get("k1");
+		//printf("GET k1 result: %s\n", result);
+
+		usleep(1000 * 1000 * 10);
+		//es_get_global("k1", reduce_test);
+		usleep(1000 * 1000 * 1);
+
+		//es_del("k1");
+
+		es_close();
+}
+
+void client_d()
+{
+	es_init("127.0.0.1", 9003);
+
+	es_set("k1", "value1.d");
+
+	usleep(1000 * 1000 * 2);
+
 	es_get_global("k1", reduce_test);
+
 	usleep(1000 * 1000 * 1);
 
 	es_del("k1");
 
 	es_close();
+}
+
+
+int main(int argc, char *argv[]) {
+	if (strcmp("A", argv[1]) == 0)
+	{
+		client_a();
+	}
+	else if (strcmp("B", argv[1]) == 0)
+	{
+		client_b();
+	}
+	else if (strcmp("C", argv[1]) == 0)
+	{
+		client_c();
+	}
+	else
+	{
+		client_d();
+	}
+
+
 	return EXIT_SUCCESS;
 }

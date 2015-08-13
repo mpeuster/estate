@@ -15,7 +15,7 @@ class state_item_t(ctypes.Structure):
                 ("data", ctypes.c_char_p)]
 
     def __str__(self):
-        return "%s(%d)" % (str(self.data), self.timestamp)
+        return "StateItem: %s(time=%d,node=%s)" % (str(self.data), self.timestamp, str(self.node_identifier))
 
 class estate(object):
 

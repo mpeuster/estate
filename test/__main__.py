@@ -59,10 +59,10 @@ class GenericEstateTestCase(unittest.TestCase):
 
     def test_get_globel_simple(self):
         for e in self.es:
-            self.assertTrue(e.set("key1", "value1.%s" % str(e.instance_id)))
+            self.assertTrue(e.set("key_1", "value1.%s" % str(e.instance_id)))
 
         for e in self.es:
-            self.assertEqual(e.get_global("key1", None), "ES_NONE")
+            self.assertEqual(e.get_global("key_1", None), "ES_NONE")
 
 
     # TODO get_global_avg
