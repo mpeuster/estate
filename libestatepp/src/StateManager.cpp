@@ -28,7 +28,7 @@ void StateManager::set(std::string k, std::string v)
 	{
 		// state item already exists: update it
 		si = this->local_state->get(k);
-		si->setData(k);
+		si->setData(v);
 		si->setTimestamp(si->getTimestamp() + 1); // currently simple local versions
 	}
 	else
@@ -47,6 +47,14 @@ std::string StateManager::get(std::string k)
 		return this->local_state->get(k)->getData();
 	return "ES_NONE";
 }
+
+StateItem* StateManager::getItem(std::string k)
+{
+	if(this->local_state->exists(k) && this->local_state->get(k) != NULL)
+		return this->local_state->get(k);
+	return NULL;
+}
+
 
 /**
  * Collects all state items from other nodes and collects them in an

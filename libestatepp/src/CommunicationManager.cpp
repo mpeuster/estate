@@ -75,13 +75,19 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 		this->zresponsepull->receive(response);
 		if(response.parts() > 2)
 		{
+			// unpack response message
 			std::string sender_ip = response.get(1);
 			int sender_port;
 			response.get(sender_port, 2);
+			// actual state item data
 			std::string data = response.get(3);
-			debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
+			std::string node_identifier = response.get(4);
+			int timestamp;
+			response.get(timestamp, 5);
 			// add response to results
-			results.push_back(StateItem(data, "xyz", 99)); //TODO: transmit correct data here
+			results.push_back(StateItem(data, node_identifier, timestamp));
+
+			debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
 		}
 		// if we run in a timeout, we skip further tries to receive more responses
 		if(response.parts() < 1)
@@ -153,13 +159,20 @@ void CommunicationManager::request_subscriber_thread_func()
 			}
 			zresponsepush = this->zresponsepush_map[conn_string];
 
-			// send response message to requester
-			zmqpp::message response;
-			response.push_back("global_state_response");
-			response.push_back(this->my_ip);
-			response.push_back(this->my_port);
-			response.push_back(this->sm->get(key)); // actual data for key
-			zresponsepush->send(response);
+			// get local state item
+			StateItem* si = this->sm->getItem(key);
+			if(si != NULL)
+			{
+				// send response message to requester
+				zmqpp::message response;
+				response.push_back("global_state_response");
+				response.push_back(this->my_ip);
+				response.push_back(this->my_port);
+				response.push_back(si->getData()); // actual data for key
+				response.push_back(si->getNodeIdentifier());
+				response.push_back(si->getTimestamp());
+				zresponsepush->send(response);
+			}
 		}
 	}
 }

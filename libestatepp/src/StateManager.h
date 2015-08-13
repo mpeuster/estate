@@ -25,6 +25,7 @@ public:
 	virtual ~StateManager();
 	virtual void set(std::string, std::string);
 	virtual std::string get(std::string);
+	virtual StateItem* getItem(std::string);
 	virtual int get_global(std::string, state_item_t* &result_array);
 	virtual void del(std::string);
 };
