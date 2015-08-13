@@ -1,7 +1,22 @@
 #!/usr/bin/env python
 
 import zmq
+import IPython
+import sys
 
+DOC = """
+This is a interactive client that interacts with a running
+estate node.
+
+Command line arguments:
+    interactivenode.py [ip_addr] [port]
+
+Interactive API:
+    C.set(k, v)
+    C.get(k)
+    C.delete(k)
+    C.get_global(k, "LAST|AVG|SUM")
+"""
 
 class CppEsNodeClient(object):
 
@@ -67,13 +82,18 @@ class CppEsNodeClient(object):
 
 
 def main():
+    ip = "127.0.0.1"
+    port = 8800
+    if len(sys.argv) > 1:
+        ip = sys.argv[1]
+    if len(sys.argv) > 2:
+        port = int(sys.argv[2])
+
     C = CppEsNodeClient()
-    print C.set("k1", "v1")
-    print C.get("k1")
-    print C.get_global("k1")
-    print C.delete("k1")
-    print C.get("k1")
-    #TODO start interactive shell
+    C.set_connection_properties(ip, port)
+    # start interactive shell
+    print DOC
+    IPython.embed()
 
 
 if __name__ == '__main__':
