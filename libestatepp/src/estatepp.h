@@ -14,7 +14,7 @@ extern "C"
 #endif
 	/* basic data types */
 	struct state_item_struct {
-		int timestamp;
+		long timestamp;
 		const char* node_identifier;
 		const char* data;
 	};

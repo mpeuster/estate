@@ -10,6 +10,7 @@
 #include "StateManager.h"
 #include "util.h"
 
+
 StateManager::StateManager(std::string ip, int port)
 {
 	this->local_state = new LocalState();
@@ -41,14 +42,14 @@ void StateManager::set(std::string k, std::string v)
 		// state item already exists: update it
 		si = this->local_state->get(k);
 		si->setData(v);
-		si->setTimestamp(si->getTimestamp() + 1); // currently simple local versions
 	}
 	else
 	{
 		// new state item object needed
 		si = new StateItem(v, this->comm->get_local_identity(), 0);
 	}
-
+	// not down change
+	si->updateTimestamp();
 	// make sure reference to state item is stored
 	this->local_state->set(k, si);
 }

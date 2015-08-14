@@ -117,7 +117,7 @@ class CppesnodeEstateTestCase(GenericEstateTestCase):
         for e in self.es:
             e.stop_cppesnode_process()
         # just to be sure ;-)
-        #subprocess.call(["cppesnode", "node.py"])
+        subprocess.call(["pkill", "cppesnode"])
 
 
 class LibestateTestCase(GenericEstateTestCase):

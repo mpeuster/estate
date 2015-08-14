@@ -97,7 +97,7 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 				// actual state item data
 				std::string data = response.get(3);
 				std::string node_identifier = response.get(4);
-				int timestamp;
+				long timestamp;
 				response.get(timestamp, 5);
 				// add response to results
 				results.push_back(StateItem(data, node_identifier, timestamp));

@@ -13,15 +13,17 @@
 class StateItem
 {
 private:
-	int timestamp;
+	long timestamp;
 	std::string node_identifier;
 	std::string data;
 
 public:
-	StateItem(std::string data, std::string node_identfier, int timestamp);
+	StateItem(std::string data, std::string node_identfier, long timestamp);
 	virtual ~StateItem();
 
 	std::string toString();
+
+	void updateTimestamp();
 
 	const std::string& getData() const
 	{
@@ -43,12 +45,12 @@ public:
 		node_identifier = nodeIdentifier;
 	}
 
-	int getTimestamp() const
+	long getTimestamp() const
 	{
 		return timestamp;
 	}
 
-	void setTimestamp(int timestamp)
+	void setTimestamp(long timestamp)
 	{
 		this->timestamp = timestamp;
 	}
