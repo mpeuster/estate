@@ -79,6 +79,10 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int))
 	state_item_t* data_buffer; // array of state_item_t pointers (allocated in sm->get_global)
 	int size = sm->get_global(str_k, data_buffer);
 
+	// if we get an empty array, we'll abort before entering the reduce function
+	if(size < 1)
+		return "ES_NONE";
+
 	// run custom reduce function on returned data
 	info("calling reduce function\n");
 	char* res = reduce(data_buffer, size);

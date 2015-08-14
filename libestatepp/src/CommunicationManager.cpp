@@ -8,6 +8,8 @@
 #include "CommunicationManager.h"
 #include "StateManager.h"
 
+#define RESPONSE_TIMEOUT_MSEC 300
+#define MAX_REQUEST_RETRY 10
 
 CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int port)
 {
@@ -23,7 +25,7 @@ CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int
 	// pull socket to receive the request responses (on port = (orig_port + 1000)
 	this->zresponsepull = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pull);
 	this->zresponsepull->bind("tcp://*:" + to_string(this->my_port + 1000));
-	this->zresponsepull->set(zmqpp::socket_option::receive_timeout, 5000);
+	this->zresponsepull->set(zmqpp::socket_option::receive_timeout, RESPONSE_TIMEOUT_MSEC);
 }
 
 CommunicationManager::~CommunicationManager()
@@ -60,48 +62,61 @@ void CommunicationManager::start()
  */
 std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 {
-	// create and send request to all peers
-	zmqpp::message request;
-	request.push_back("global_state_request");
-	request.push_back(this->my_ip);
-	request.push_back(this->my_port);
-	request.push_back(k);
-	this->zpublisher->send(request);
-
 	// prepare results structure
 	std::list<StateItem> results;
 
-	// receive results (we always expect to get results from all peers)
-	uint num_peers = this->get_peer_nodes().size();
-	for(uint i = 0; i < num_peers; i++)
+	// try multiple times if something goes wrong
+	int request_try = 0;
+	bool result_complete = false;
+	while(request_try < MAX_REQUEST_RETRY && !result_complete)
 	{
-		zmqpp::message response;
-		this->zresponsepull->receive(response);
-		if(response.parts() > 2)
+		// remove results from last try
+		results.clear();
+		// create and send request to all peers
+		zmqpp::message request;
+		request.push_back("global_state_request");
+		request.push_back(this->my_ip);
+		request.push_back(this->my_port);
+		request.push_back(k);
+		this->zpublisher->send(request);
+
+
+
+		// receive results (we always expect to get results from all peers)
+		uint num_peers = this->get_peer_nodes().size();
+		for(uint i = 0; i < num_peers; i++)
 		{
-			// unpack response message
-			std::string sender_ip = response.get(1);
-			int sender_port;
-			response.get(sender_port, 2);
-			// actual state item data
-			std::string data = response.get(3);
-			std::string node_identifier = response.get(4);
-			int timestamp;
-			response.get(timestamp, 5);
-			// add response to results
-			results.push_back(StateItem(data, node_identifier, timestamp));
+			zmqpp::message response;
+			this->zresponsepull->receive(response);
+			if(response.parts() > 2)
+			{
+				// unpack response message
+				std::string sender_ip = response.get(1);
+				int sender_port;
+				response.get(sender_port, 2);
+				// actual state item data
+				std::string data = response.get(3);
+				std::string node_identifier = response.get(4);
+				int timestamp;
+				response.get(timestamp, 5);
+				// add response to results
+				results.push_back(StateItem(data, node_identifier, timestamp));
 
-			debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
+				debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
+			}
+			// if we run in a timeout, we skip further tries to receive more responses
+			if(response.parts() < 1)
+				break;
 		}
-		// if we run in a timeout, we skip further tries to receive more responses
-		if(response.parts() < 1)
-			break;
-	}
 
-	// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
-	if(num_peers != results.size() && results.size() != 1)
-		error("resulsts.size()=%d != num_peers=%d\n", results.size(), num_peers);
-
+		// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
+		if(num_peers != results.size() && results.size() != 1)
+			warn("get_global response resulsts.size()=%d != num_peers=%d\n", results.size(), num_peers);
+		else
+			result_complete = true; // stop while loop
+		// next try
+		request_try++;
+	} // end while
 	return results;
 }
 

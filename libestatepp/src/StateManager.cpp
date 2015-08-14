@@ -80,6 +80,12 @@ StateItem* StateManager::getItem(std::string k)
 int StateManager::get_global(std::string k, state_item_t* &result_array)
 {
 	std::list<StateItem> result_list = this->comm->request_global_state(k);
+	// check that we have at least one candidate value available for reduce
+	if(result_list.size() < 1)
+	{
+		error("Empty request_global_state result list. We can't run the reduce function on it.\n");
+		return 0;
+	}
 
 	// allocate memory for the result array
 	int length = result_list.size();

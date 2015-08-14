@@ -65,10 +65,7 @@ class GenericEstateTestCase(unittest.TestCase):
         # overwrite one value
         self.es[0].set("key_1", "value1.1.updated")
 
-        # problem, we have to wait here because, node 0 seems to be busy otherwise
-        # (9000) received request from 127.0.0.1:9001
-        #time.sleep(0.5)
-
+        # get latest value on each node!
         for e in self.es:
             self.assertEqual(e.get_global("key_1", None), "value1.1.updated")
 
