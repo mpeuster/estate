@@ -56,7 +56,7 @@ class estate(object):
     def get(self, k):
         kl = self.to_instance_key(k)
         print "ES: GET k=%s" % (str(kl))
-        return self.r.get(kl)
+        return self.r.get(kl) if self.r.get(kl) is not None else "ES_NONE"
 
     def delete(self, k):
         kl = self.to_instance_key(k)

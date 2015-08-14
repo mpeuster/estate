@@ -6,6 +6,8 @@
 """
 
 import zmq
+import subprocess
+import time
 
 class estate(object):
 
@@ -13,11 +15,22 @@ class estate(object):
         self.instance_id = int(instance_id)
         self.address = None
         self.port = 0
+        self.node_proc = None
         self.set_connection_properties()
         self.context = zmq.Context()
 
         print "ES: Initialized estate for instance: %s" % self.instance_id
 
+
+    def start_cppesnode_process(self, local_api_port=8800, peerlist=[("127.0.0.1", 9000)]):
+        peerlist_cmd = [str(x) for x in list(sum(peerlist, ()))]
+        self.node_proc = subprocess.Popen(
+            ["./cppesnode/Debug/cppesnode",
+             str(local_api_port)] + peerlist_cmd)
+
+    def stop_cppesnode_process(self):
+        if self.node_proc is not None:
+            self.node_proc.terminate()
 
     def set_connection_properties(self, address="127.0.0.1", port=8800):
         self.address = address
@@ -66,8 +79,24 @@ class estate(object):
             - SUM
             - AVG
         """
+        red = "LATEST" if red is None else str(red)
         r = self.do_request(["GET_GLOBAL", str(k), str(red)])
         if "OK" in r and len(r) > 1:
             return r[1]
         print r
-        return "ERROR"
+        return "ES_NONE"
+
+def main():
+    # test code
+    e = estate(0)
+    print "start:"
+    e.start_cppesnode_process()
+    for _ in range(0, 5):
+        print "wait ..."
+        time.sleep(1)
+    print "stop."
+    e.stop_cppesnode_process()
+
+
+if __name__ == '__main__':
+    main()

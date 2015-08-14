@@ -10,6 +10,7 @@ import sys
 from libestateredis.estate_redis import estate as estater
 from libestatecassandra.estate_cassandra import estate as estatec
 from pyclient.estate import estate as estatep
+from cppesnode.estate_zmqclient import estate as estatez
 
 
 class GenericEstateTestCase(unittest.TestCase):
@@ -52,17 +53,24 @@ class GenericEstateTestCase(unittest.TestCase):
 
         for e in self.es:
             if str(e.instance_id) == "0":
-                self.assertEqual(e.get("key1"), None)
+                self.assertEqual(e.get("key1"), "ES_NONE")
             else:
                 self.assertEqual(e.get("key1"), "value1.%s" % str(e.instance_id))
 
-
+    #@unittest.skip("skip globals")
     def test_get_globel_simple(self):
         for e in self.es:
             self.assertTrue(e.set("key_1", "value1.%s" % str(e.instance_id)))
 
+        # overwrite one value
+        self.es[0].set("key_1", "value1.1.updated")
+
+        # problem, we have to wait here because, node 0 seems to be busy otherwise
+        # (9000) received request from 127.0.0.1:9001
+        #time.sleep(0.5)
+
         for e in self.es:
-            self.assertEqual(e.get_global("key_1", None), "ES_NONE")
+            self.assertEqual(e.get_global("key_1", None), "value1.1.updated")
 
 
     # TODO get_global_avg
@@ -91,10 +99,34 @@ class CassandraEstateTestCase(GenericEstateTestCase):
             self.es.append(estatec(i))
 
 
-class LibestateTestCase(GenericEstateTestCase):
+class CppesnodeEstateTestCase(GenericEstateTestCase):
+    """
+        libestate (UPB) using direct Python-to-C wrapper
+    """
 
     def setUp(self):
-        """
+        # create a number of es instances (all running in separated process)
+        N_NODES = 5
+        peers = [("127.0.0.1", 9000+i) for i in range(0, N_NODES)]
+
+        self.es = []
+        for i in range(0, N_NODES):
+            e = estatez(i)
+            e.set_connection_properties(port=8800+i)
+            e.start_cppesnode_process(local_api_port=8800+i, peerlist=rotate_list(peers, i))
+            self.es.append(e)
+
+    def tearDown(self):
+        for e in self.es:
+            e.stop_cppesnode_process()
+        # just to be sure ;-)
+        #subprocess.call(["cppesnode", "node.py"])
+
+
+class LibestateTestCase(GenericEstateTestCase):
+    """
+        libestate (UPB) using direct Python-to-C wrapper
+
         This test case is a bit different.
         We need to start some other nodes as real external processes which
         built our peer network.
@@ -102,7 +134,9 @@ class LibestateTestCase(GenericEstateTestCase):
         These nodes might need some time to stabalize their entwork so we need some delays.
         Also, the nodes have to be killed after each test to ensure that the network
         ports are free for the next test.
-        """
+    """
+
+    def setUp(self):
         START_DELAY = 0.5
 
         # run 4 environment instaces (node.py)
@@ -147,6 +181,8 @@ def red_avg(l):
     print "red_avg: %s = %f" % (str(l), res)
     return res
 
+def rotate_list(lst, offset):
+        return lst[offset:] + lst[:offset]
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
@@ -158,10 +194,14 @@ if __name__ == '__main__':
     ts2 = unittest.TestLoader().loadTestsFromTestCase(CassandraEstateTestCase)
     if len(sys.argv) < 2 or sys.argv[1] == "2":
         suite.addTest(ts2)
-    # libestate version (UPB)
-    ts3 = unittest.TestLoader().loadTestsFromTestCase(LibestateTestCase)
+    # libestate version (UPB) using cppesnode as bridge
+    ts3 = unittest.TestLoader().loadTestsFromTestCase(CppesnodeEstateTestCase)
     if len(sys.argv) < 2 or sys.argv[1] == "3":
         suite.addTest(ts3)
+    # libestate version (UPB) direct Python-to-C wrapper
+    #ts4 = unittest.TestLoader().loadTestsFromTestCase(LibestateTestCase)
+    #if len(sys.argv) < 2 or sys.argv[1] == "4":
+    #    suite.addTest(ts4)
 
     #execute
     unittest.TextTestRunner(verbosity=0).run(suite)

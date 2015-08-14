@@ -63,9 +63,9 @@ class estate(object):
         try:
             kvi = KeyValueItem.get(key=k)
             val = str(kvi.data.get(self.instance_id))
-            return val if val != "None" else None
+            return val if val != "None" else "ES_NONE"
         except CQLEngineException:
-            return None
+            return "ES_NONE"
 
     def delete(self, k):
         """
@@ -94,7 +94,7 @@ class estate(object):
             # return all map items, except of the latest field
             return KeyValueItem.get(key=k).data.get(-1)
         except CQLEngineException:
-            return None
+            return "ES_NONE"
 
     def get_global(self, k, red_func):
         print "ES: GET_GLOBAL k=%s f=%s" % (str(k), str(red_func))

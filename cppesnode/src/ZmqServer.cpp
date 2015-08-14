@@ -12,14 +12,22 @@ namespace std
 
 char* reduce_latest(state_item_t d[], int length)
 {
-	// TODO implement real reduce latest functionality
-	printf("reduce input size: %d\n", length);
+	// maximum timestamp search
 	int i = 0;
+	state_item_t latest;
+	int max_timestamp = -1;
 	for(i=0; i < length; i++)
 	{
 		printf("reduce input[%d]: %s\n", i, d[i].data);
+		if(d[i].timestamp >= max_timestamp)
+		{
+			max_timestamp = d[i].timestamp;
+			latest = d [i];
+		}
 	}
-	return "reduce_result";
+	if(max_timestamp >= 0)
+		return (char*)latest.data;
+	return (char*)"ES_REDUCE_ERROR";
 }
 
 ZmqServer::ZmqServer()
