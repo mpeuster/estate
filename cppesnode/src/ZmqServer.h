@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <stdlib.h>
 #include <zmqpp/zmqpp.hpp>
 #include <estatepp.h>
 
@@ -41,7 +42,9 @@ public:
 };
 
 /* Helper */
-string int_to_string(int i);
+string int_to_string(int );
+string double_to_string(double);
+double string_to_double(string);
 
 } /* namespace std */
 

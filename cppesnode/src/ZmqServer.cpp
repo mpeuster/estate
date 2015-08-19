@@ -18,7 +18,7 @@ char* reduce_latest(state_item_t d[], int length)
 	long max_timestamp = -1;
 	for(i=0; i < length; i++)
 	{
-		printf("reduce input[%d]: %s ts=%l\n", i, d[i].data, d[i].timestamp);
+		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
 		if(d[i].timestamp >= max_timestamp)
 		{
 			max_timestamp = d[i].timestamp;
@@ -28,6 +28,32 @@ char* reduce_latest(state_item_t d[], int length)
 	if(max_timestamp >= 0)
 		return (char*)latest.data;
 	return (char*)"ES_REDUCE_ERROR";
+}
+
+char* reduce_sum(state_item_t d[], int length)
+{
+	// sum up all item values (treated as double)
+	double sum = 0;
+	int i = 0;
+	for(i=0; i < length; i++)
+	{
+		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
+		sum += string_to_double(d[i].data);
+	}
+	return (char*)double_to_string(sum).c_str();
+}
+
+char* reduce_avg(state_item_t d[], int length)
+{
+	// avg of all item values (treated as double)
+	double sum = 0;
+	int i = 0;
+	for(i=0; i < length; i++)
+	{
+		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
+		sum += string_to_double(d[i].data);
+	}
+	return (char*)double_to_string(sum/(double)length).c_str();
 }
 
 ZmqServer::ZmqServer()
@@ -119,6 +145,18 @@ void ZmqServer::start()
 					response_msg.push_back("OK");
 					response_msg.push_back(data);
 				}
+				else if(request_msg.get(2) == "SUM")
+				{
+					const char* data = es_get_global(request_msg.get(1).c_str(), reduce_sum);
+					response_msg.push_back("OK");
+					response_msg.push_back(data);
+				}
+				else if(request_msg.get(2) == "AVG")
+				{
+					const char* data = es_get_global(request_msg.get(1).c_str(), reduce_avg);
+					response_msg.push_back("OK");
+					response_msg.push_back(data);
+				}
 				else
 				{
 					response_msg.push_back("ERROR");
@@ -155,6 +193,18 @@ string int_to_string(int i)
 	stringstream s;
 	s << i;
 	return s.str();
+}
+
+string double_to_string(double d)
+{
+	stringstream s;
+	s << d;
+	return s.str();
+}
+
+double string_to_double(string s)
+{
+	return atof(s.c_str());
 }
 
 } /* namespace std */

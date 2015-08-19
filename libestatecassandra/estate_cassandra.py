@@ -55,7 +55,7 @@ class estate(object):
     def set(self, k, s):
         print "ES: SET k=%s s=%s" % (str(k), str(s))
         # always update map field "latest" (-1) to contain the latest value for this key
-        KeyValueItem.objects(key=k).update(data__update={-1: s, self.instance_id: s})
+        KeyValueItem.objects(key=k).update(data__update={-1: str(s), self.instance_id: str(s)})
         return True
 
     def get(self, k):

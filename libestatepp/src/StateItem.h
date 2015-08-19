@@ -13,7 +13,7 @@
 class StateItem
 {
 private:
-	long timestamp;
+	unsigned long timestamp;
 	std::string node_identifier;
 	std::string data;
 

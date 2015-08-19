@@ -50,7 +50,7 @@ CommunicationManager::~CommunicationManager()
 
 void CommunicationManager::start()
 {
-	info("starting node with %d peers\n", this->get_peer_nodes().size());
+	info("starting node with %lu peers\n", this->get_peer_nodes().size());
 	// start subscriber thread
 	this->request_subscriber_start();
 }
@@ -111,7 +111,7 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 
 		// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
 		if(num_peers != results.size() && results.size() != 1)
-			warn("get_global response resulsts.size()=%d != num_peers=%d\n", results.size(), num_peers);
+			warn("get_global response resulsts.size()=%lu != num_peers=%du\n", results.size(), num_peers);
 		else
 			result_complete = true; // stop while loop
 		// next try
