@@ -161,7 +161,6 @@ void ZmqServer::start()
 				{
 					response_msg.push_back("ERROR");
 					response_msg.push_back("reduce function not implemented");
-					//TODO add avg, sum reduce functions
 				}
 			}
 			else
