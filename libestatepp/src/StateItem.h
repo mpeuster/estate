@@ -18,7 +18,7 @@ private:
 	std::string data;
 
 public:
-	StateItem(std::string data, std::string node_identfier, long timestamp);
+	StateItem(std::string data, std::string node_identfier, unsigned long timestamp);
 	virtual ~StateItem();
 
 	std::string toString();

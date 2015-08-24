@@ -15,14 +15,14 @@ char* reduce_latest(state_item_t d[], int length)
 	// maximum timestamp search
 	int i = 0;
 	state_item_t latest;
-	long max_timestamp = -1;
+	unsigned long max_timestamp = 0;
 	for(i=0; i < length; i++)
 	{
 		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
 		if(d[i].timestamp >= max_timestamp)
 		{
 			max_timestamp = d[i].timestamp;
-			latest = d [i];
+			latest = d[i];
 		}
 	}
 	if(max_timestamp >= 0)

@@ -15,7 +15,7 @@
 #define TIMESTAMPTYPE 1
 
 
-StateItem::StateItem(std::string data, std::string node_identifier, long timestamp)
+StateItem::StateItem(std::string data, std::string node_identifier, unsigned long timestamp)
 {
 	this->timestamp = timestamp;
 	this->node_identifier = node_identifier;
