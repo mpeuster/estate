@@ -95,16 +95,33 @@ class LibestateTopology(GenericMiddleBoxTopology):
         Assumes that the management network is the first interface of a host.
         """
         for mb in self.middlebox_hosts:
-            print "Run cppesnode ..."
             # get list of peer instances
             peers = [p for p in self.middlebox_hosts if p is not mb]
             # build argument string
             arg_str = "%s 9000" % mb.IP()
             for p in peers:
                 arg_str += " %s 9000" % p.IP()
-            print arg_str
+            print "%s run cppesnode with args: %s " % (mb.name, arg_str)
             # run libestate node with and tell it which peers to use
-            mb.cmd("cppesnode 8800 %s > log/cppesnode_%s.log 2>&1 &" % (arg_str, mb.name))
+            mb.cmd("cppesnode 8800 %s > log/cppesnode_%s.log 2>&1 &"
+                   % (arg_str, mb.name))
+
+
+class CassandraTopology(GenericMiddleBoxTopology):
+
+    def __init__(self, **kwargs):
+        super(CassandraTopology, self).__init__(**kwargs)
+
+    def config_middlebox_hosts(self):
+        for mb in self.middlebox_hosts:
+            # set all environment variables for each middlebox host
+            print mb.cmd("source environment_vars.sh")
+
+    def run_middlebox_hosts(self):
+        for mb in self.middlebox_hosts:
+            # run cassandra instance
+            mb.cmd("cassandra > log/cassandra_%s.log 2>&1 &"
+                   % (mb.name))
 
 
 
@@ -113,7 +130,8 @@ class LibestateTopology(GenericMiddleBoxTopology):
 if __name__ == '__main__':
     setLogLevel('info')
     #mt = GenericMiddleBoxTopology(mbox_instances=3)
-    mt = LibestateTopology(mbox_instances=3)
+    #mt = LibestateTopology(mbox_instances=3)
+    mt = CassandraTopology(mbox_instances=1)
     mt.start_network()
     mt.test_network()
     mt.enter_cli()
