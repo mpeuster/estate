@@ -90,10 +90,21 @@ class LibestateTopology(GenericMiddleBoxTopology):
             print mb.cmd("source environment_vars.sh")
 
     def run_middlebox_hosts(self):
+        """
+        Executes the libestate node on each host.
+        Assumes that the management network is the first interface of a host.
+        """
         for mb in self.middlebox_hosts:
             print "Run cppesnode ..."
-            # FIXME: start non blocking and add log output to files
-            print mb.cmd("cppesnode 8880 127.0.0.1 9000")
+            # get list of peer instances
+            peers = [p for p in self.middlebox_hosts if p is not mb]
+            # build argument string
+            arg_str = "%s 9000" % mb.IP()
+            for p in peers:
+                arg_str += " %s 9000" % p.IP()
+            print arg_str
+            # run libestate node with and tell it which peers to use
+            mb.cmd("cppesnode 8800 %s > log/cppesnode_%s.log 2>&1 &" % (arg_str, mb.name))
 
 
 
