@@ -6,6 +6,7 @@
 # PATH
 export PATH="$PATH:$HOME/estate/cppesnode/Debug/"
 export PATH="$PATH:$HOME/cassandra/bin/"
+export PATH="$PATH:$HOME/redis-3.0.0/src/"
 
 # PYTHON
 export PYTHONPATH="$HOME/estate:$PYTHONPATH"

@@ -20,14 +20,14 @@ class GenericMiddleBoxTopology(object):
         self.controllers = []
         self.switches = []
         self.middlebox_hosts = []
+        # single pointers to nw components
+        self.control_switch = None
 
         # do network setup
         self.setup_controllers()
         self.setup_switches()
         self.setup_middlebox_hosts()
 
-        # single pointers to nw components
-        self.control_switch = None
 
     def start_network(self):
         # run the network
@@ -120,10 +120,34 @@ class CassandraTopology(GenericMiddleBoxTopology):
     def run_middlebox_hosts(self):
         for mb in self.middlebox_hosts:
             # run cassandra instance
+            # BUG: This won't work for multiple instances. Cassandra clustering need work!
             mb.cmd("cassandra > log/cassandra_%s.log 2>&1 &"
                    % (mb.name))
 
 
+class RedisTopology(GenericMiddleBoxTopology):
+
+    def __init__(self, **kwargs):
+        # pointer to additional redis host
+        self.redis_host = None
+        super(RedisTopology, self).__init__(**kwargs)
+
+    def setup_middlebox_hosts(self):
+        """
+        overwrite and extend host setup: we need an additional redis host
+        """
+        super(RedisTopology, self).setup_middlebox_hosts()
+        # add additional host running central redis instance
+        self.redis_host = self.net.addHost("redis")
+        self.net.addLink(self.redis_host, self.control_switch)
+
+    def config_middlebox_hosts(self):
+        for mb in self.middlebox_hosts + [self.redis_host]:
+            # set all environment variables for each middlebox host
+            print mb.cmd("source environment_vars.sh")
+
+    def run_middlebox_hosts(self):
+        self.redis_host.cmd("redis-server > log/redis.log 2>&1 &")
 
 
 
@@ -131,7 +155,8 @@ if __name__ == '__main__':
     setLogLevel('info')
     #mt = GenericMiddleBoxTopology(mbox_instances=3)
     #mt = LibestateTopology(mbox_instances=3)
-    mt = CassandraTopology(mbox_instances=1)
+    #mt = CassandraTopology(mbox_instances=1)
+    mt = RedisTopology(mbox_instances=3)
     mt.start_network()
     mt.test_network()
     mt.enter_cli()
