@@ -1,16 +1,54 @@
 #!/usr/bin/python
 
 from mininet.net import Mininet
-#from mininet.util import dumpNodeConnections
+from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel
 from mininet.cli import CLI
 #from mininet.node import RemoteController
 #import time
 
 
-class GenericMiddleBoxTopology(object):
+def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
+    """
+    Creates a bridge interface and connects the two specified
+    network interfaces to it.
+    """
+    print "Setting up bridge on node: %s" % node.name
+    # shutdown both interfaces
+    node.cmdPrint("ifconfig %s-%s 0.0.0.0 down" % (node.name, if0))
+    node.cmdPrint("ifconfig %s-%s 0.0.0.0 down" % (node.name, if1))
+    # create bridge
+    node.cmdPrint("brctl addbr %s" % (br))
+    # add interfaces to bridge
+    node.cmdPrint("brctl addif %s %s-%s" % (br, node.name, if0))
+    node.cmdPrint("brctl addif %s %s-%s" % (br, node.name, if1))
+    # manage STP
+    node.cmdPrint("brctl stp %s off" % br)
+    # bring up all interfaces and bridge
+    node.cmdPrint("ifconfig %s-%s up" % (node.name, if0))
+    node.cmdPrint("ifconfig %s-%s up" % (node.name, if1))
+    node.cmdPrint("ifconfig %s up" % (br))
 
-    def __init__(self, source_instances=2, target_instances=2, mbox_instances=3):
+
+class GenericMiddleBoxTopology(object):
+    """
+    This class creates a basic experminet topology containing
+    traffic sources and targets as well as intermediate middlebox
+    machines. The number of hosts per type can be defined in the
+    constructor.
+
+    Management network: 10.0.0.0/8
+    User data network:  20.0.0.0/8
+
+     client1  --         -- mb1 --          -- target1
+                |       |    |    |        |
+                -- s1 --    s3     -- s2 --
+                |       |    |    |        |
+     client2  --         -- mb2 --          -- target2
+
+    """
+
+    def __init__(self, source_instances=2, target_instances=2, mbox_instances=1):
         self.source_instances = source_instances
         self.target_instances = target_instances
         self.mbox_instances = mbox_instances
@@ -44,6 +82,9 @@ class GenericMiddleBoxTopology(object):
         self.run_middlebox_hosts()
 
     def test_network(self):
+        # debugging
+        print "### Dumping host connections"
+        dumpNodeConnections(self.net.hosts)
         print "### Testing middlebox replica connectivity"
         if self.net.ping(hosts=self.middlebox_hosts) < 0.1:
             print "### OK"
@@ -70,9 +111,6 @@ class GenericMiddleBoxTopology(object):
         s = self.net.addSwitch("s3")
         self.switches.append(s)
         self.target_switch = s
-        # TODO remove
-        # helpful inter-switch shortcut
-        self.net.addLink(self.source_switch, self.target_switch)
 
     def setup_middlebox_hosts(self):
         """
@@ -96,14 +134,19 @@ class GenericMiddleBoxTopology(object):
         for i in range(0, self.mbox_instances):
             mb = self.net.addHost("mb%d" % (i + 1))
             self.middlebox_hosts.append(mb)
+            # management plane links
             self.net.addLink(mb, self.control_switch)
+            # data plane links
+            self.net.addLink(mb, self.source_switch)
+            self.net.addLink(mb, self.target_switch)
 
 
     def config_middlebox_hosts(self):
         """
         additional runtime configurations of MB hosts
         """
-        pass
+        for mb in self.middlebox_hosts:
+            config_bridge(mb)
 
     def run_middlebox_hosts(self):
         """
@@ -118,6 +161,7 @@ class LibestateTopology(GenericMiddleBoxTopology):
         super(LibestateTopology, self).__init__(**kwargs)
 
     def config_middlebox_hosts(self):
+        super(LibestateTopology, self).config_middlebox_hosts()
         for mb in self.middlebox_hosts:
             # set all environment variables for each middlebox host
             print mb.cmd("source environment_vars.sh")
@@ -127,6 +171,7 @@ class LibestateTopology(GenericMiddleBoxTopology):
         Executes the libestate node on each host.
         Assumes that the management network is the first interface of a host.
         """
+        super(LibestateTopology, self).run_middlebox_hosts()
         for mb in self.middlebox_hosts:
             # get list of peer instances
             peers = [p for p in self.middlebox_hosts if p is not mb]
@@ -146,11 +191,13 @@ class CassandraTopology(GenericMiddleBoxTopology):
         super(CassandraTopology, self).__init__(**kwargs)
 
     def config_middlebox_hosts(self):
+        super(CassandraTopology, self).config_middlebox_hosts()
         for mb in self.middlebox_hosts:
             # set all environment variables for each middlebox host
             print mb.cmd("source environment_vars.sh")
 
     def run_middlebox_hosts(self):
+        super(CassandraTopology, self).run_middlebox_hosts()
         for mb in self.middlebox_hosts:
             # run cassandra instance
             # BUG: This won't work for multiple instances. Cassandra clustering need work!
@@ -175,21 +222,23 @@ class RedisTopology(GenericMiddleBoxTopology):
         self.net.addLink(self.redis_host, self.control_switch)
 
     def config_middlebox_hosts(self):
+        super(RedisTopology, self).config_middlebox_hosts()
         for mb in self.middlebox_hosts + [self.redis_host]:
             # set all environment variables for each middlebox host
             print mb.cmd("source environment_vars.sh")
 
     def run_middlebox_hosts(self):
+        super(RedisTopology, self).run_middlebox_hosts()
         self.redis_host.cmd("redis-server > log/redis.log 2>&1 &")
 
 
 
 if __name__ == '__main__':
     setLogLevel('info')
-    #mt = GenericMiddleBoxTopology(mbox_instances=3)
-    #mt = LibestateTopology(mbox_instances=3)
-    #mt = CassandraTopology(mbox_instances=1)
-    mt = RedisTopology(mbox_instances=3)
+    #mt = GenericMiddleBoxTopology()
+    #mt = LibestateTopology()s
+    #mt = CassandraTopology()
+    mt = RedisTopology()
     mt.start_network()
     mt.test_network()
     mt.enter_cli()
