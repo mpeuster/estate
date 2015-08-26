@@ -4,7 +4,8 @@ from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel
 from mininet.cli import CLI
-#from mininet.node import RemoteController
+from mininet.node import OVSSwitch
+from mininet.node import Controller, RemoteController
 #import time
 
 
@@ -28,6 +29,25 @@ def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
     node.cmdPrint("ifconfig %s-%s up" % (node.name, if0))
     node.cmdPrint("ifconfig %s-%s up" % (node.name, if1))
     node.cmdPrint("ifconfig %s up" % (br))
+
+
+class MultiSwitch(OVSSwitch):
+    """
+    Custom switch that connects to specified controller.
+    """
+
+    #def __init__(self, **kwargs):
+    #    super(MultiSwitch, self).__init__(**kwargs)
+    #    self.custom_ctrl = None
+
+    def set_custom_controller(self, c):
+        self.custom_ctrl = c
+
+    def start(self, controllers):
+        if self.custom_ctrl is not None:
+            return OVSSwitch.start(self, [self.custom_ctrl])
+        else:
+            return OVSSwitch.start(self, controllers)
 
 
 class GenericMiddleBoxTopology(object):
@@ -66,17 +86,28 @@ class GenericMiddleBoxTopology(object):
         self.control_switch = None
         self.source_switch = None
         self.target_switch = None
+        self.default_controller = None
+        self.data_controller = None
 
         # do network setup
         self.setup_controllers()
         self.setup_switches()
-        self.setup_middlebox_hosts()
+        self.setup_hosts()
 
 
     def start_network(self):
         # run the network
         self.net.staticArp()
-        self.net.start()
+        #self.net.start()
+        # build network
+        self.net.build()
+        # start controllers
+        self.data_controller.start()
+        self.default_controller.start()
+        # start switches and assign controller
+        self.control_switch.start([self.default_controller])
+        self.source_switch.start([self.data_controller])
+        self.target_switch.start([self.data_controller])
         # additional start tasks
         self.config_middlebox_hosts()
         self.run_middlebox_hosts()
@@ -95,8 +126,15 @@ class GenericMiddleBoxTopology(object):
         self.net.stop()
 
     def setup_controllers(self):
-        c1 = self.net.addController("c1")
+        # default controller for managemen switch
+        c1 = self.net.addController("c1", port=6634)
+        self.default_controller = c1
         self.controllers.append(c1)
+        # custom controller for user traffic management
+        c2 = self.net.addController(
+            "c2", controller=RemoteController, ip='127.0.0.1', port=6633)
+        self.data_controller = c2
+        self.controllers.append(c2)
 
     def setup_switches(self):
         # management switch
@@ -112,7 +150,7 @@ class GenericMiddleBoxTopology(object):
         self.switches.append(s)
         self.target_switch = s
 
-    def setup_middlebox_hosts(self):
+    def setup_hosts(self):
         """
         basic host setup
         """
@@ -212,11 +250,11 @@ class RedisTopology(GenericMiddleBoxTopology):
         self.redis_host = None
         super(RedisTopology, self).__init__(**kwargs)
 
-    def setup_middlebox_hosts(self):
+    def setup_hosts(self):
         """
         overwrite and extend host setup: we need an additional redis host
         """
-        super(RedisTopology, self).setup_middlebox_hosts()
+        super(RedisTopology, self).setup_hosts()
         # add additional host running central redis instance
         self.redis_host = self.net.addHost("redis")
         self.net.addLink(self.redis_host, self.control_switch)
