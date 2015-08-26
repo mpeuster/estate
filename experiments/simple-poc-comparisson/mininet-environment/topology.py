@@ -68,7 +68,7 @@ class GenericMiddleBoxTopology(object):
 
     """
 
-    def __init__(self, source_instances=2, target_instances=2, mbox_instances=1):
+    def __init__(self, source_instances=2, target_instances=1, mbox_instances=2):
         self.source_instances = source_instances
         self.target_instances = target_instances
         self.mbox_instances = mbox_instances
@@ -154,6 +154,15 @@ class GenericMiddleBoxTopology(object):
         """
         basic host setup
         """
+        # middlebox hosts
+        for i in range(0, self.mbox_instances):
+            mb = self.net.addHost("mb%d" % (i + 1))
+            self.middlebox_hosts.append(mb)
+            # management plane links
+            self.net.addLink(mb, self.control_switch)
+            # data plane links
+            self.net.addLink(mb, self.source_switch)
+            self.net.addLink(mb, self.target_switch)
         # source hosts
         for i in range(0, self.source_instances):
             sh = self.net.addHost(
@@ -168,15 +177,6 @@ class GenericMiddleBoxTopology(object):
                 ip="20.0.1.%d" % (i + 1))
             self.target_hosts.append(th)
             self.net.addLink(th, self.target_switch)
-        # middlebox hosts
-        for i in range(0, self.mbox_instances):
-            mb = self.net.addHost("mb%d" % (i + 1))
-            self.middlebox_hosts.append(mb)
-            # management plane links
-            self.net.addLink(mb, self.control_switch)
-            # data plane links
-            self.net.addLink(mb, self.source_switch)
-            self.net.addLink(mb, self.target_switch)
 
 
     def config_middlebox_hosts(self):
