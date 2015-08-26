@@ -4,8 +4,12 @@
 # Mininet host.
 
 # PATH
+
+# cppesnode executable
 export PATH="$PATH:$HOME/estate/cppesnode/Debug/"
+# cassandra executable
 export PATH="$PATH:$HOME/cassandra/bin/"
+# redis executable
 export PATH="$PATH:$HOME/redis-3.0.0/src/"
 
 # PYTHON

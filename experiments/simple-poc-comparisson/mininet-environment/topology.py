@@ -10,7 +10,9 @@ from mininet.cli import CLI
 
 class GenericMiddleBoxTopology(object):
 
-    def __init__(self, mbox_instances=3):
+    def __init__(self, source_instances=2, target_instances=2, mbox_instances=3):
+        self.source_instances = source_instances
+        self.target_instances = target_instances
         self.mbox_instances = mbox_instances
 
         # bring up Mininet
@@ -20,8 +22,12 @@ class GenericMiddleBoxTopology(object):
         self.controllers = []
         self.switches = []
         self.middlebox_hosts = []
+        self.source_hosts = []
+        self.target_hosts = []
         # single pointers to nw components
         self.control_switch = None
+        self.source_switch = None
+        self.target_switch = None
 
         # do network setup
         self.setup_controllers()
@@ -52,14 +58,41 @@ class GenericMiddleBoxTopology(object):
         self.controllers.append(c1)
 
     def setup_switches(self):
+        # management switch
         s = self.net.addSwitch("s1")
         self.switches.append(s)
         self.control_switch = s
+        # source switch
+        s = self.net.addSwitch("s2")
+        self.switches.append(s)
+        self.source_switch = s
+        # target switch
+        s = self.net.addSwitch("s3")
+        self.switches.append(s)
+        self.target_switch = s
+        # TODO remove
+        # helpful inter-switch shortcut
+        self.net.addLink(self.source_switch, self.target_switch)
 
     def setup_middlebox_hosts(self):
         """
-        basic host setup of MB hosts
+        basic host setup
         """
+        # source hosts
+        for i in range(0, self.source_instances):
+            sh = self.net.addHost(
+                "source%d" % (i + 1),
+                ip="20.0.0.%d" % (i + 1))
+            self.source_hosts.append(sh)
+            self.net.addLink(sh, self.source_switch)
+        # target hosts
+        for i in range(0, self.target_instances):
+            th = self.net.addHost(
+                "target%d" % (i + 1),
+                ip="20.0.1.%d" % (i + 1))
+            self.target_hosts.append(th)
+            self.net.addLink(th, self.target_switch)
+        # middlebox hosts
         for i in range(0, self.mbox_instances):
             mb = self.net.addHost("mb%d" % (i + 1))
             self.middlebox_hosts.append(mb)
