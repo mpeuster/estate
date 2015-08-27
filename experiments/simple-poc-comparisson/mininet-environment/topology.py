@@ -267,7 +267,15 @@ class RedisTopology(GenericMiddleBoxTopology):
 
     def run_middlebox_hosts(self):
         super(RedisTopology, self).run_middlebox_hosts()
+        # run redis server on redis node
         self.redis_host.cmd("redis-server > log/redis.log 2>&1 &")
+        # run monitor.py on each MB node
+        c = 0
+        for mb in self.middlebox_hosts:
+
+            mb.cmd("./monitor.py redis %d %s > log/monitor_%s.log 2>&1 &"
+                   % (c, self.redis_host.IP(), mb.name))
+            c += 1
 
 
 

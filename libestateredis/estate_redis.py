@@ -8,11 +8,11 @@ import time
 
 class estate(object):
 
-    def __init__(self, instance_id):
+    def __init__(self, instance_id, redis_host="127.0.0.1", redis_port=6379):
         # used to distinguish between NF instances
         self.instance_id = str(instance_id)
         # setup redis connection
-        self.r = redis.StrictRedis(host="127.0.0.1", port=6379, db=0)
+        self.r = redis.StrictRedis(host=redis_host, port=redis_port, db=0)
         self.r.flushdb()
         print "ES: Initialized estate for instance: %s" % self.instance_id
 
@@ -30,7 +30,7 @@ class estate(object):
         """
         Attention: Needs global value key!
         Simplification: Redis INCR should already be atomic so that no
-        lock mechanism is needed. However, we keep for easy debugging of
+        lock mechanism is needed. However, we keep it for easy debugging of
         locking times.
         """
         self._acquire_lock("lock.%s" % k)

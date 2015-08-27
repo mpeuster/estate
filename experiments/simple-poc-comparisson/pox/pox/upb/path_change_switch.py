@@ -83,6 +83,10 @@ class SwitchController(object):
     def setup_static_rules(self):
         if self.switch == 2:
             log.info("Setup rules for s%d" % self.switch)
+            # TODO add constants for port numbers
+            # SRC1_S2 = 3
+            # MB1_S2 = 1
+            # ...
             # always use first link as default
             self.set_static_rule(3, 1, 0)
             self.set_static_rule(4, 1, 0)
