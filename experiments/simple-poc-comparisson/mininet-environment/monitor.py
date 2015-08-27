@@ -26,15 +26,15 @@ def set_ecounter(k, v):
 
 def pkt_callback(pkt):
     global es
-    # count packets
-    packet_count = get_ecounter("packet_count")
-    packet_count += 1
-    set_ecounter("packet_count", packet_count)
     # we focus on TCP packets
     if IP not in pkt:
         return
     if TCP not in pkt:
         return
+    # count packets
+    packet_count = get_ecounter("packet_count")
+    packet_count += 1
+    set_ecounter("packet_count", packet_count)
     # 5 tuple of flow
     src_ip = pkt[IP].src
     dst_ip = pkt[IP].dst
@@ -80,6 +80,8 @@ def red_sum(l):
 
 
 def red_avg(l):
+    if len(l) < 1:
+        return 0
     res = sum([float(i) for i in l]) / float(len(l))
     print "red_avg: %s = %f" % (str(l), res)
     return res
