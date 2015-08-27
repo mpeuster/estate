@@ -33,7 +33,7 @@
 
 # Produced files
 *.log
-
+*.rdb
 
 testclient/Debug
 libestate/Debug
