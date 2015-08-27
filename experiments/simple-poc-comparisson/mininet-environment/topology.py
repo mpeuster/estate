@@ -8,6 +8,8 @@ from mininet.node import OVSSwitch
 from mininet.node import Controller, RemoteController
 #import time
 
+# defines start of portrange for generated user connections
+USER_BASE_PORT = 1200
 
 def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
     """
@@ -111,6 +113,8 @@ class GenericMiddleBoxTopology(object):
         # additional start tasks
         self.config_middlebox_hosts()
         self.run_middlebox_hosts()
+        self.run_target_hosts()
+        self.run_source_hosts()
 
     def test_network(self):
         # debugging
@@ -191,6 +195,33 @@ class GenericMiddleBoxTopology(object):
         run NF functionality inside MB hosts
         """
         pass
+
+    def run_target_hosts(self):
+        """
+        run server functionality in target hosts
+        """
+        for th in self.target_hosts:
+            # start target.py on each target machine
+            p = USER_BASE_PORT
+            for sh in self.source_hosts:
+                # start target.py for each source host once on each target host
+                th.cmd("./target.py %d > log/target_%s_%s.log 2>&1 &"
+                   % (p, th.name, sh.name))  # one port for each source
+                p += 1
+
+    def run_source_hosts(self):
+        """
+        run client functionality in source hosts
+        """
+        th = self.target_hosts[0]
+        p = USER_BASE_PORT
+        for sh in self.source_hosts:
+            # start source.py on source hosts and connect to first target host
+            sh.cmd("./source.py %s %d > log/source_%s.log 2>&1 &"
+                % (th.IP(), p, sh.name))
+            print("./source.py %s %d > log/source_%s.log 2>&1 &"
+                % (th.IP(), p, sh.name))
+            p += 1
 
 
 class LibestateTopology(GenericMiddleBoxTopology):
