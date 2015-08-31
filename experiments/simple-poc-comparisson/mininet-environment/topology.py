@@ -240,6 +240,7 @@ class LibestateTopology(GenericMiddleBoxTopology):
         Executes the libestate node on each host.
         Assumes that the management network is the first interface of a host.
         """
+        c = 0
         super(LibestateTopology, self).run_middlebox_hosts()
         for mb in self.middlebox_hosts:
             # get list of peer instances
@@ -250,8 +251,12 @@ class LibestateTopology(GenericMiddleBoxTopology):
                 arg_str += " %s 9000" % p.IP()
             print "%s run cppesnode with args: %s " % (mb.name, arg_str)
             # run libestate node with and tell it which peers to use
-            mb.cmd("cppesnode 8800 %s > log/cppesnode_%s.log 2>&1 &"
-                   % (arg_str, mb.name))
+            #mb.cmd("cppesnode 8800 %s > log/cppesnode_%s.log 2>&1 &"
+            #       % (arg_str, mb.name))
+            # run monitor.py on each MB node
+            mb.cmd("./monitor.py estatepp %d %s > log/monitor_%s.log 2>&1 &"
+                   % (c, "options", mb.name))
+            c += 1
 
 
 class CassandraTopology(GenericMiddleBoxTopology):
@@ -313,9 +318,9 @@ class RedisTopology(GenericMiddleBoxTopology):
 if __name__ == '__main__':
     setLogLevel('info')
     #mt = GenericMiddleBoxTopology()
-    #mt = LibestateTopology()s
+    mt = LibestateTopology()
     #mt = CassandraTopology()
-    mt = RedisTopology()
+    #mt = RedisTopology()
     mt.start_network()
     mt.test_network()
     mt.enter_cli()

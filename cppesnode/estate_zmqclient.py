@@ -22,11 +22,10 @@ class estate(object):
         print "ES: Initialized estate for instance: %s" % self.instance_id
 
 
-    def start_cppesnode_process(self, local_api_port=8800, peerlist=[("127.0.0.1", 9000)]):
-        peerlist_cmd = [str(x) for x in list(sum(peerlist, ()))]
+    def start_cppesnode_process(self, local_api_port=8800, peerlist=["127.0.0.1", "9000"]):
         self.node_proc = subprocess.Popen(
-            ["./cppesnode/Debug/cppesnode",
-             str(local_api_port)] + peerlist_cmd)
+            ["cppesnode",
+             str(local_api_port)] + peerlist)
 
     def stop_cppesnode_process(self):
         if self.node_proc is not None:
@@ -79,6 +78,15 @@ class estate(object):
             - SUM
             - AVG
         """
+        # if someone thorws in a function pointer, try to translate it
+        if "function" in str(red):
+            if "latest" in str(red):
+                red = "LATEST"
+            if "sum" in str(red):
+                red = "SUM"
+            if "avg" in str(red):
+                red = "AVG"
+
         red = "LATEST" if red is None else str(red)
         r = self.do_request(["GET_GLOBAL", str(k), str(red)])
         if "OK" in r and len(r) > 1:

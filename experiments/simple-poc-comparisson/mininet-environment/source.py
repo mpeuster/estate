@@ -17,7 +17,7 @@ def random_bytes(size):
 
 def run_client(host, port):
     size = 32
-    wait = 1
+    wait = 10
     print "Running source.py ... connect to %s:%s" % (host, port)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sys.stdout.flush()

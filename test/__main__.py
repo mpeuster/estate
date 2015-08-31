@@ -148,13 +148,16 @@ class CppesnodeEstateTestCase(GenericEstateTestCase):
     def setUp(self):
         # create a number of es instances (all running in separated process)
         N_NODES = 5
-        peers = [("127.0.0.1", 9000+i) for i in range(0, N_NODES)]
+        peers = []
+        for i in range(0, N_NODES):
+            peers.append("127.0.0.1")
+            peers.append("%d" % (9000 + i))
 
         self.es = []
         for i in range(0, N_NODES):
             e = estatez(i)
             e.set_connection_properties(port=8800+i)
-            e.start_cppesnode_process(local_api_port=8800+i, peerlist=rotate_list(peers, i))
+            e.start_cppesnode_process(local_api_port=8800+i, peerlist=rotate_list(peers, i * 2))
             self.es.append(e)
 
     def tearDown(self):
