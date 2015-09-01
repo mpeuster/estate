@@ -19,13 +19,14 @@ class estate(object):
         self.set_connection_properties()
         self.context = zmq.Context()
 
-        print "ES: Initialized estate for instance: %s" % self.instance_id
+        print "ES-ZMQ: Initialized estate for instance: %s" % self.instance_id
 
 
     def start_cppesnode_process(self, local_api_port=8800, peerlist=["127.0.0.1", "9000"]):
         self.node_proc = subprocess.Popen(
             ["cppesnode",
              str(local_api_port)] + peerlist)
+
 
     def stop_cppesnode_process(self):
         if self.node_proc is not None:
@@ -36,6 +37,7 @@ class estate(object):
         self.port = port
 
     def do_request(self, request_parts):
+        print "do request " + str(request_parts)
         socket = self.context.socket(zmq.REQ)
         socket.connect("tcp://%s:%d" % (self.address, self.port))
         # send request

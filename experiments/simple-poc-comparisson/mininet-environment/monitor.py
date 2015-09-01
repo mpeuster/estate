@@ -36,12 +36,15 @@ def pkt_callback_debug(pkt):
 
 def pkt_callback(pkt):
     global es
-    sys.stdout.flush()
     # we focus on TCP packets
     if IP not in pkt:
         return
     if TCP not in pkt:
         return
+
+    #print pkt.summary()
+    sys.stdout.flush()
+
     # count packets
     packet_count = get_ecounter("packet_count")
     packet_count += 1
@@ -69,6 +72,7 @@ def pkt_callback(pkt):
     # get global view on the system
     # FIXME do not do this for each packet, it will overload everthing
     global_packet_count = es.get_global("packet_count", red_sum)
+    # attention: these calls use wildcard matching
     global_flow_count = es.get_global("flow_count", red_sum)
     global_pattern_count_1 = es.get_global("pattern_count_1:%s" % flow_id, red_sum)
     avg_packet_count = es.get_global("packet_count", red_avg)
@@ -119,7 +123,7 @@ def main():
     elif backend == "estatepp":
         es = estatez(instance_id)
         es.set_connection_properties()
-        es.start_cppesnode_process(local_api_port=8800, peerlist=options)
+        es.start_cppesnode_process(peerlist=options)
     else:
         print "specified backend not known"
 

@@ -242,20 +242,20 @@ class LibestateTopology(GenericMiddleBoxTopology):
         """
         c = 0
         super(LibestateTopology, self).run_middlebox_hosts()
+
         for mb in self.middlebox_hosts:
             # get list of peer instances
-            peers = [p for p in self.middlebox_hosts if p is not mb]
-            # build argument string
-            arg_str = "%s 9000" % mb.IP()
-            for p in peers:
-                arg_str += " %s 9000" % p.IP()
-            print "%s run cppesnode with args: %s " % (mb.name, arg_str)
-            # run libestate node with and tell it which peers to use
-            #mb.cmd("cppesnode 8800 %s > log/cppesnode_%s.log 2>&1 &"
-            #       % (arg_str, mb.name))
+            peers = []
+            peers.append(mb.IP())
+            peers.append("9000")
+            for p in self.middlebox_hosts:
+                if p is not mb:
+                    peers.append(p.IP())
+                    peers.append("9000")
+            print "%s run cppesnode with peers: %s " % (mb.name, str(peers))
             # run monitor.py on each MB node
             mb.cmd("./monitor.py estatepp %d %s > log/monitor_%s.log 2>&1 &"
-                   % (c, "options", mb.name))
+                   % (c, " ".join(peers), mb.name))
             c += 1
 
 
