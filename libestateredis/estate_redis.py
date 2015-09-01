@@ -73,8 +73,8 @@ class estate(object):
             1. state list
             2. timestamp list
         """
-        # ATTENTION: we use wildcard matching here
-        keys = self.r.keys("%s*" % k)
+        # we use a single-wildcard symbol to get all replica values
+        keys = self.r.keys("%s.?" % k)
         states = []
         timestamps = []
         for kl in keys:
