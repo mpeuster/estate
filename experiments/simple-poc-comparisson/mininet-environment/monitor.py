@@ -6,18 +6,18 @@ from scapy.all import sniff
 from scapy.layers.inet import TCP, IP
 import sys
 import time
+import thread
 
 es = None
 
 
 def get_ecounter(k):
-    global es
     count = es.get(k)
     if count is None:
         return 0
     if count == "ES_NONE":
         return 0
-
+    # TODO try get_global latest if we have a miss
     try:
         res = int(count)
     except ValueError:
@@ -25,76 +25,91 @@ def get_ecounter(k):
         print "ERROR monitor.py: cannot convert get_ecounter value to int."
     return res
 
-
 def set_ecounter(k, v):
-    global es
     es.set(k, v)
+
+def incr_ecounter(k, incr=1):
+    c = get_ecounter(k)
+    set_ecounter(k, c + incr)
+
+def get_ecounter_sum(k):
+    c = es.get_global(k, red_sum)
+    try:
+        return int(c)
+    except ValueError:
+        print "ERROR monitor.py: cannot convert get_ecounter_sum value to int."
+    return 0
 
 def pkt_callback_debug(pkt):
     sys.stdout.flush()
     return pkt.summary()
 
 def pkt_callback(pkt):
-    global es
-    # we focus on TCP packets
+    """
+    Called for each packet seen on br0.
+    Updates NF state, e.g., packet counters.
+    """
+    # filter for IPv4/TCP packets
     if IP not in pkt:
         return
     if TCP not in pkt:
         return
 
-    #print pkt.summary()
-    sys.stdout.flush()
+    # create 5 tuple flow identifier
+    flow_id = "flow_%s" % str(
+        (pkt[IP].src,
+         pkt[TCP].sport,
+         pkt[IP].dst,
+         pkt[TCP].dport,
+         str(pkt[IP].proto))
+        ).replace(" ", "")
 
-    # count packets
-    packet_count = get_ecounter("packet_count")
-    packet_count += 1
-    set_ecounter("packet_count", packet_count)
-    # 5 tuple of flow
-    src_ip = pkt[IP].src
-    dst_ip = pkt[IP].dst
-    proto = str(pkt[IP].proto)  # tcp = 6
-    src_port = pkt[TCP].sport
-    dst_port = pkt[TCP].dport
-    flow_id = "flow_%s" % str((src_ip, src_port, dst_ip, dst_port, proto)).replace(" ", "")
-
-    # count packets for each flow
-    flow_count = get_ecounter("flow_count:%s" % flow_id)
-    flow_count += 1
-    set_ecounter("flow_count:%s" % flow_id, flow_count)
-
-    # get raw data and do pattern matching
+    # do pattern matching on raw data
+    PATTERN = "a"
+    pattern_count = 0
     data = str(pkt[TCP].payload)
-    pattern_count_1 = get_ecounter("pattern_count_1:%s" % flow_id)
     if len(data) > 0:
-        pattern_count_1 += data.count("a")
-        set_ecounter("pattern_count_1:%s" % flow_id, pattern_count_1)
+        pattern_count = data.count(PATTERN)
 
-    # get global view on the system
-    # FIXME do not do this for each packet, it will overload everthing
-    global_packet_count = es.get_global("packet_count", red_sum)
-    # attention: these calls use wildcard matching
-    global_flow_count = es.get_global("flow_count", red_sum)
-    global_pattern_count_1 = es.get_global("pattern_count_1:%s" % flow_id, red_sum)
-    avg_packet_count = es.get_global("packet_count", red_avg)
-    avg_flow_count = es.get_global("flow_count", red_avg)
-    avg_pattern_count_1 = es.get_global("pattern_count_1", red_avg)
+    # update state values:
+    # general packet count
+    incr_ecounter("pcount")
+    # flow specific packet count
+    incr_ecounter("pcount:%s" % flow_id)
+    # general match count
+    incr_ecounter("matchcount", pattern_count)
+    # flow specific match count
+    incr_ecounter("matchcount:%s" % flow_id, pattern_count)
 
-    # artifical delay for debugging
-    time.sleep(5)
+    # TODO: add state: flows seen, flows active on instance (requires local dict)
 
-    # return "Packet #" + str(packet_count) + ": " + src_ip + ":" + str(src_port) + "  ==>  " + dst_ip + ":" + str(dst_port)
-    return "#MON#%s# time:%f flow:%s pcount:%d fpcount:%d m1count:%d gpcount:%d gfpcount:%d gm1count:%d apcount:%d afpcount:%d am1count:%d" % (
-        es.instance_id, time.time(), flow_id, packet_count, flow_count, pattern_count_1,
-        global_packet_count, global_flow_count, global_pattern_count_1,
-        avg_packet_count, avg_flow_count, avg_pattern_count_1)
-    # return pkt.summary()
-    # debug
-    # pkt.show()
+    # debugging:
+    #return "PKT: " + str(pkt.summary())
+
+def log_global_state():
+    """
+    Executed periodically.
+    Requets local and global state and logs (outputs it).
+    """
+    pcount_local = get_ecounter("pcount")
+    pcount_global = get_ecounter_sum("pcount")
+    matchcount_local = get_ecounter("matchcount")
+    matchcount_global = get_ecounter_sum("matchcount")
+    print("LOG:pcount_local=%d;pcount_global=%d;matchcount_local=%d;matchcount_global=%d"
+        % (pcount_local, pcount_global, matchcount_local, matchcount_global))
+
+
+def log_thread_func():
+    while True:
+        time.sleep(5)
+        log_global_state()
+        sys.stdout.flush()
+        
 
 
 def red_sum(l):
     res = sum([float(i) for i in l])
-    print "red_sum: %s = %f" % (str(l), res)
+    #print "red_sum: %s = %f" % (str(l), res)
     return res
 
 
@@ -102,8 +117,10 @@ def red_avg(l):
     if len(l) < 1:
         return 0
     res = sum([float(i) for i in l]) / float(len(l))
-    print "red_avg: %s = %f" % (str(l), res)
+    #print "red_avg: %s = %f" % (str(l), res)
     return res
+
+#TODO add red_latest implementation
 
 
 def main():
@@ -131,7 +148,10 @@ def main():
         print "backend not initialized. abort."
         exit(1)
 
-    # start monitoring
+    #start logger
+    thread.start_new_thread(log_thread_func, ())
+
+    # start monitoring (and block!)
     sniff(iface="br0", prn=pkt_callback, filter="ip and tcp", store=0)
 
 

@@ -37,7 +37,6 @@ class estate(object):
         self.port = port
 
     def do_request(self, request_parts):
-        print "do request " + str(request_parts)
         socket = self.context.socket(zmq.REQ)
         socket.connect("tcp://%s:%d" % (self.address, self.port))
         # send request

@@ -4,6 +4,8 @@
 """
 import redis
 import time
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 class estate(object):
@@ -14,17 +16,17 @@ class estate(object):
         # setup redis connection
         self.r = redis.StrictRedis(host=redis_host, port=redis_port, db=0)
         self.r.flushdb()
-        print "ES: Initialized estate for instance: %s" % self.instance_id
+        logging.info("ES-REDIS: Initialized estate for instance: %s" % self.instance_id)
 
     def _acquire_lock(self, lockname):
         while not self.r.setnx(lockname, 1):
-            print "ES: Wait for lock..."
+            logging.debug("ES: Wait for lock...")
             time.sleep(0.1)
-        print "ES: Acquired: %s" % lockname
+        logging.debug("ES: Acquired: %s" % lockname)
 
     def _release_lock(self, lockname):
         self.r.delete(lockname)
-        print "ES: Released: %s" % lockname
+        logging.debug("ES: Released: %s" % lockname)
 
     def _update_time(self, k):
         """
@@ -35,7 +37,7 @@ class estate(object):
         """
         self._acquire_lock("lock.%s" % k)
         val = self.r.incr("globaltime.%s" % k)
-        print "ES: Update time: %s is %d" % (k, val)
+        logging.debug("ES: Update time: %s is %d" % (k, val))
         self._release_lock("lock.%s" % k)
         return int(val)
 
@@ -46,7 +48,7 @@ class estate(object):
         # fetch new timestamp for this update
         ts = self._update_time(k)
         kl = self.to_instance_key(k)
-        print "ES: SET k=%s s=%s" % (str(kl), str(s))
+        logging.debug("ES: SET k=%s s=%s" % (str(kl), str(s)))
         # use pipelined command execution for consistency
         pipe = self.r.pipeline()
         pipe.set("timestamp.%s" % kl, ts)
@@ -55,12 +57,12 @@ class estate(object):
 
     def get(self, k):
         kl = self.to_instance_key(k)
-        print "ES: GET k=%s" % (str(kl))
+        logging.debug("ES: GET k=%s" % (str(kl)))
         return self.r.get(kl) if self.r.get(kl) is not None else "ES_NONE"
 
     def delete(self, k):
         kl = self.to_instance_key(k)
-        print "ES: DEL k=%s" % (str(kl))
+        logging.debug("ES: DEL k=%s" % (str(kl)))
         # use pipelined command execution for consistency
         pipe = self.r.pipeline()
         pipe.delete("timestamp.%s" % kl)
@@ -91,7 +93,7 @@ class estate(object):
         return states[timestamps.index(max(timestamps))]
 
     def get_global(self, k, red_func):
-        print "ES: GET_GLOBAL k=%s f=%s" % (str(k), str(red_func))
+        logging.debug("ES: GET_GLOBAL k=%s f=%s" % (str(k), str(red_func)))
         if red_func is not None:  # custom red function
             return red_func(self._get_all_replicas(k)[0])
         return self._get_newest_replica(k)  # return newest replica
