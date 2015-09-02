@@ -102,7 +102,7 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 				// add response to results
 				results.push_back(StateItem(data, node_identifier, timestamp));
 
-				debug("(%s) received response from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
+				debug("(%s) received response from %s:%d: k=%s; v=%s\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str());
 			}
 			// if we run in a timeout, we skip further tries to receive more responses
 			if(response.parts() < 1)
@@ -209,8 +209,9 @@ void CommunicationManager::set_peer_nodes(std::list<std::string> peer_lst)
 
 std::string CommunicationManager::get_local_identity()
 {
-	//return this->my_ip + std::string(":") + to_string(this->my_port);
-	return to_string(this->my_port);
+	// this is used to identify each estate node
+	return this->my_ip + std::string(":") + to_string(this->my_port);
+	//return to_string(this->my_port);
 }
 
 

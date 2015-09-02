@@ -10,47 +10,47 @@
 namespace std
 {
 
-char* reduce_latest(state_item_t d[], int length)
+char* reduce_latest(state_item_t* d, int length)
 {
 	// maximum timestamp search
 	int i = 0;
-	state_item_t latest;
+	const char* latest;
 	unsigned long max_timestamp = 0;
 	for(i=0; i < length; i++)
 	{
-		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
+		printf("reduce(latest) input: n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
 		if(d[i].timestamp >= max_timestamp)
 		{
 			max_timestamp = d[i].timestamp;
-			latest = d[i];
+			latest = d[i].data;
 		}
 	}
 	if(max_timestamp >= 0)
-		return (char*)latest.data;
+		return (char*)latest;
 	return (char*)"ES_REDUCE_ERROR";
 }
 
-char* reduce_sum(state_item_t d[], int length)
+char* reduce_sum(state_item_t* d, int length)
 {
 	// sum up all item values (treated as double)
 	double sum = 0;
-	int i = 0;
-	for(i=0; i < length; i++)
+	int i;
+	for(i = 0; i < length; i++)
 	{
-		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
+		printf("reduce input(sum): n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
 		sum += string_to_double(d[i].data);
 	}
 	return (char*)double_to_string(sum).c_str();
 }
 
-char* reduce_avg(state_item_t d[], int length)
+char* reduce_avg(state_item_t* d, int length)
 {
 	// avg of all item values (treated as double)
 	double sum = 0;
 	int i = 0;
 	for(i=0; i < length; i++)
 	{
-		printf("reduce input: ts=%lu value=%s\n", d[i].timestamp,  d[i].data);
+		printf("reduce(avg) input: n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
 		sum += string_to_double(d[i].data);
 	}
 	return (char*)double_to_string(sum/(double)length).c_str();

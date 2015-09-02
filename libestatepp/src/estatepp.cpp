@@ -68,7 +68,7 @@ const char* es_get(const char* k)
 	return sm->get(str_k).c_str();
 }
 
-const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int))
+const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 {
 	print_call();
 	assert(sm != NULL);
@@ -87,6 +87,7 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int))
 	info("calling reduce function\n");
 	char* res = reduce(data_buffer, size);
 	info("reduce result: %s\n", res);
+	free(data_buffer);
 
 	// return reduced
 	return res;

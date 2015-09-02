@@ -9,6 +9,7 @@
 #include <sstream>
 #include "StateManager.h"
 #include "util.h"
+#include <stdlib.h>
 
 
 StateManager::StateManager(std::string ip, int port)
@@ -90,16 +91,17 @@ int StateManager::get_global(std::string k, state_item_t* &result_array)
 
 	// allocate memory for the result array
 	int length = result_list.size();
-	result_array = (state_item_t*)malloc(length * sizeof(state_item_t));
-	debug("malloc size: %d\n", length);
+	result_array = (state_item_t*) calloc(length, sizeof(state_item_t));
+	debug("malloc size: %d * %d\n", length, sizeof(state_item_t));
 
 	// fill the result array with data
 	int i = 0;
 	for (std::list<StateItem>::const_iterator it = result_list.begin(), end = result_list.end(); it != end; ++it)
 	{
+		//important: use strdup here to allocate fresh memory (otherwise bad things will happen)
 	    result_array[i].timestamp = it->getTimestamp();
-	    result_array[i].node_identifier = it->getNodeIdentifier().c_str();
-	    result_array[i].data = it->getData().c_str();
+	    result_array[i].node_identifier = strdup(it->getNodeIdentifier().c_str());
+	    result_array[i].data = strdup(it->getData().c_str());
 	    i++;
 	}
 

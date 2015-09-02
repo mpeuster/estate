@@ -40,7 +40,7 @@ extern "C"
 	 * argument 2: length = number of items in array
 	 * return: string (selected, reduced result)
 	 */
-	extern const char* es_get_global(const char* k, char* (*reduce)(state_item_t[], int));
+	extern const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int));
 
 #ifdef __cplusplus
 }

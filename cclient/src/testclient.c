@@ -32,7 +32,7 @@ void client_a()
 	//printf("GET k1 result: %s\n", result);
 
 	usleep(1000 * 1000 * 10);
-	//es_get_global("k1", reduce_test);
+	es_get_global("k1", reduce_test);
 	usleep(1000 * 1000 * 1);
 
 	//es_del("k1");
