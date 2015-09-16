@@ -114,14 +114,18 @@ def log_global_state():
     global last_log_timestamp
     global last_local_pcount
     global last_global_pcount
+
     # receive local values
+    t_get_local_start = time.time()
     pcount_local = get_ecounter("pcount")
     matchcount_local = get_ecounter("matchcount")
+    time_local_request = time.time() - t_get_local_start
+
     # receive global values
     t_get_global_start = time.time()
     pcount_global = get_ecounter_global_sum("pcount")
     matchcount_global = get_ecounter_global_sum("matchcount")
-    print ("LOG_GET_GLOBAL_TIME:t=%f" % (time.time() - t_get_global_start))
+    time_global_request = time.time() - t_get_global_start
 
     # calculate pps
     timespan = abs(time.time() - last_log_timestamp)
@@ -134,7 +138,14 @@ def log_global_state():
     last_global_pcount = pcount_global
 
     # generate log output
-    print("LOG_MONITOR:"
+    print("LOG_REQUEST_PERFORMANCE:"
+          "t_request_local=%f;"
+          "t_request_global=%f;"
+          % (time_local_request,
+             time_global_request
+             )
+          )
+    print("LOG_NETWORK_MONITOR:"
           "t=%d;"
           "pps_local=%f;"
           "pps_global=%f;"

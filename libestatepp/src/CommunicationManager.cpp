@@ -94,8 +94,8 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 				std::string sender_ip = response.get(1);
 				int sender_port;
 				response.get(sender_port, 2);
-				if (response.parts() > 3)
-				{	// respons contains a state item
+				if (response.parts() > 3) // check if response contains a state item
+				{
 					// actual state item data
 					std::string data = response.get(3);
 					std::string node_identifier = response.get(4);

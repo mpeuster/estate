@@ -165,6 +165,7 @@ class GenericMiddleBoxTopology(object):
             self.middlebox_hosts.append(mb)
             # management plane links
             self.net.addLink(mb, self.control_switch)
+            #self.net.addLink(mb, self.control_switch, delay="10ms")
             # data plane links
             self.net.addLink(mb, self.source_switch)
             self.net.addLink(mb, self.target_switch)
