@@ -6,6 +6,7 @@ from mininet.log import setLogLevel
 from mininet.cli import CLI
 from mininet.node import OVSSwitch
 from mininet.node import Controller, RemoteController
+from mininet.link import TCLink
 #import time
 
 # defines start of portrange for generated user connections
@@ -76,7 +77,7 @@ class GenericMiddleBoxTopology(object):
         self.mbox_instances = mbox_instances
 
         # bring up Mininet
-        self.net = Mininet()
+        self.net = Mininet(link=TCLink)
 
         # topology elements
         self.controllers = []
@@ -294,6 +295,7 @@ class RedisTopology(GenericMiddleBoxTopology):
         # add additional host running central redis instance
         self.redis_host = self.net.addHost("redis")
         self.net.addLink(self.redis_host, self.control_switch)
+        #self.net.addLink(self.redis_host, self.control_switch, delay="100ms")
 
     def config_middlebox_hosts(self):
         super(RedisTopology, self).config_middlebox_hosts()

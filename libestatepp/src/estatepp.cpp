@@ -84,9 +84,9 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 		return "ES_NONE";
 
 	// run custom reduce function on returned data
-	info("calling reduce function\n");
+	debug("calling reduce function\n");
 	char* res = reduce(data_buffer, size);
-	info("reduce result: %s\n", res);
+	debug("reduce result: %s\n", res);
 	free(data_buffer);
 
 	// return reduced

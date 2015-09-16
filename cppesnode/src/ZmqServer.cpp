@@ -18,7 +18,7 @@ char* reduce_latest(state_item_t* d, int length)
 	unsigned long max_timestamp = 0;
 	for(i=0; i < length; i++)
 	{
-		printf("reduce(latest) input: n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
+		//printf("reduce(latest) input: n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
 		if(d[i].timestamp >= max_timestamp)
 		{
 			max_timestamp = d[i].timestamp;
@@ -37,7 +37,7 @@ char* reduce_sum(state_item_t* d, int length)
 	int i;
 	for(i = 0; i < length; i++)
 	{
-		printf("reduce input(sum): n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
+		//printf("reduce input(sum): n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
 		sum += string_to_double(d[i].data);
 	}
 	return (char*)double_to_string(sum).c_str();
@@ -50,7 +50,7 @@ char* reduce_avg(state_item_t* d, int length)
 	int i = 0;
 	for(i=0; i < length; i++)
 	{
-		printf("reduce(avg) input: n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
+		//printf("reduce(avg) input: n_id=%s ts=%lu value=%s\n", d[i].node_identifier, d[i].timestamp,  d[i].data);
 		sum += string_to_double(d[i].data);
 	}
 	return (char*)double_to_string(sum/(double)length).c_str();
@@ -115,7 +115,7 @@ void ZmqServer::start()
 		// work on request
 		if(request_msg.parts() > 1)
 		{
-			cout << "received: " << request_msg.get(0) << " " << request_msg.get(1) << endl;
+			//cout << "received: " << request_msg.get(0) << " " << request_msg.get(1) << endl;
 
 			if(request_msg.get(0) == "SET")
 			{
@@ -175,7 +175,7 @@ void ZmqServer::start()
 			response_msg.push_back("missing message parts");
 		}
 		// send reply
-		cout << "sending: " << response_msg.get(0) << endl;
+		//cout << "sending: " << response_msg.get(0) << endl;
 		this->recv_socket->send(response_msg);
 	}
 }

@@ -17,7 +17,7 @@ def random_bytes(size):
 
 def run_client(host, port):
     size = 32
-    wait = 10
+    lamda = 0.01
     print "Running source.py ... connect to %s:%s" % (host, port)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sys.stdout.flush()
@@ -33,7 +33,7 @@ def run_client(host, port):
             print "-- Received %d bytes." % len(data)
         sys.stdout.flush()
             # print data
-        time.sleep(wait)
+        time.sleep(lamda)
     s.close()
 
 

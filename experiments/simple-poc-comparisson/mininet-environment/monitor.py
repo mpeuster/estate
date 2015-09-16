@@ -10,6 +10,11 @@ import thread
 
 es = None
 
+# global values for pps calculation
+last_log_timestamp = 0
+last_local_pcount = 0
+last_global_pcount = 0
+
 
 def get_ecounter(k):
     count = es.get(k)
@@ -25,24 +30,30 @@ def get_ecounter(k):
         print "ERROR monitor.py: cannot convert get_ecounter value to int."
     return res
 
+
 def set_ecounter(k, v):
     es.set(k, v)
+
 
 def incr_ecounter(k, incr=1):
     c = get_ecounter(k)
     set_ecounter(k, c + incr)
 
-def get_ecounter_sum(k):
+
+def get_ecounter_global_sum(k):
     c = es.get_global(k, red_sum)
     try:
         return int(c)
     except ValueError:
-        print "ERROR monitor.py: cannot convert get_ecounter_sum value to int."
+        print ("ERROR monitor.py: cannot convert get_ecounter_global_sum"
+               " value to int.")
     return 0
+
 
 def pkt_callback_debug(pkt):
     sys.stdout.flush()
     return pkt.summary()
+
 
 def pkt_callback(pkt):
     """
@@ -81,22 +92,60 @@ def pkt_callback(pkt):
     # flow specific match count
     incr_ecounter("matchcount:%s" % flow_id, pattern_count)
 
-    # TODO: add state: flows seen, flows active on instance (requires local dict)
+    # TODO: add state: flows seen, flows active on instance (local dict)
 
     # debugging:
     #return "PKT: " + str(pkt.summary())
+
+
+def init_state():
+    """
+    Initializes estate values, and lcoal values.
+    """
+    global last_log_timestamp
+    last_log_timestamp = time.time()
+
 
 def log_global_state():
     """
     Executed periodically.
     Requets local and global state and logs (outputs it).
     """
+    global last_log_timestamp
+    global last_local_pcount
+    global last_global_pcount
+    # receive global values
     pcount_local = get_ecounter("pcount")
-    pcount_global = get_ecounter_sum("pcount")
+    pcount_global = get_ecounter_global_sum("pcount")
     matchcount_local = get_ecounter("matchcount")
-    matchcount_global = get_ecounter_sum("matchcount")
-    print("LOG:pcount_local=%d;pcount_global=%d;matchcount_local=%d;matchcount_global=%d"
-        % (pcount_local, pcount_global, matchcount_local, matchcount_global))
+    matchcount_global = get_ecounter_global_sum("matchcount")
+
+    # calculate pps
+    timespan = abs(time.time() - last_log_timestamp)
+    last_log_timestamp = time.time()
+    if timespan == 0:
+        raise Exception("We have a zero timespan for PPS calculation")
+    pps_local = (pcount_local - last_local_pcount) / timespan
+    last_local_pcount = pcount_local
+    pps_global = (pcount_global - last_global_pcount) / timespan
+    last_global_pcount = pcount_global
+
+    # generate log output
+    print("LOG:"
+          "t=%d;"
+          "pps_local=%f;"
+          "pps_global=%f;"
+          "pcount_local=%d;"
+          "pcount_global=%d;"
+          "matchcount_local=%d;"
+          "matchcount_global=%d;"
+          % (time.time(),
+             pps_local,
+             pps_global,
+             pcount_local,
+             pcount_global,
+             matchcount_local,
+             matchcount_global))
 
 
 def log_thread_func():
@@ -104,7 +153,6 @@ def log_thread_func():
         time.sleep(5)
         log_global_state()
         sys.stdout.flush()
-        
 
 
 def red_sum(l):
@@ -147,6 +195,9 @@ def main():
     if es is None:
         print "backend not initialized. abort."
         exit(1)
+
+    # initialize state
+    init_state()
 
     #start logger
     thread.start_new_thread(log_thread_func, ())
