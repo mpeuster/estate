@@ -316,7 +316,6 @@ class RedisTopology(GenericMiddleBoxTopology):
             c += 1
 
 
-
 if __name__ == '__main__':
     setLogLevel('info')
     #mt = GenericMiddleBoxTopology()

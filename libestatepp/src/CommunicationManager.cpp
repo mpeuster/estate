@@ -94,15 +94,21 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 				std::string sender_ip = response.get(1);
 				int sender_port;
 				response.get(sender_port, 2);
-				// actual state item data
-				std::string data = response.get(3);
-				std::string node_identifier = response.get(4);
-				long timestamp;
-				response.get(timestamp, 5);
-				// add response to results
-				results.push_back(StateItem(data, node_identifier, timestamp));
-
-				debug("(%s) received response from %s:%d: k=%s; v=%s\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str());
+				if (response.parts() > 3)
+				{	// respons contains a state item
+					// actual state item data
+					std::string data = response.get(3);
+					std::string node_identifier = response.get(4);
+					long timestamp;
+					response.get(timestamp, 5);
+					// add response to results
+					results.push_back(StateItem(data, node_identifier, timestamp));
+					debug("(%s) received response from %s:%d: k=%s; v=%s\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str());
+				}
+				else
+				{   // empty response (key was not found on sender)
+					debug("(%s) received response from %s:%d: k=%s; v=NOT_PRESENT\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str());
+				}
 			}
 			// if we run in a timeout, we skip further tries to receive more responses
 			if(response.parts() < 1)
@@ -180,18 +186,23 @@ void CommunicationManager::request_subscriber_thread_func()
 
 			// get local state item
 			StateItem* si = this->sm->getItem(key);
+
+			// send response message to requester
+			zmqpp::message response;
+			response.push_back("global_state_response");
+			response.push_back(this->my_ip);
+			response.push_back(this->my_port);
 			if(si != NULL)
-			{
-				// send response message to requester
-				zmqpp::message response;
-				response.push_back("global_state_response");
-				response.push_back(this->my_ip);
-				response.push_back(this->my_port);
+			{	// return state item if present on this node
 				response.push_back(si->getData()); // actual data for key
 				response.push_back(si->getNodeIdentifier());
 				response.push_back(si->getTimestamp());
-				zresponsepush->send(response);
 			}
+			else
+			{	// return indicator that state item was not found
+				//response.push_back("ES_NOT_PRESENT");
+			}
+			zresponsepush->send(response);
 		}
 	}
 }

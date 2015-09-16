@@ -58,7 +58,7 @@ class GenericEstateTestCase(unittest.TestCase):
                 self.assertEqual(e.get("key1"), "value1.%s" % str(e.instance_id))
 
     #@unittest.skip("skip globals")
-    def test_get_globel_latest(self):
+    def test_get_global_latest(self):
         # set values to all nodes
         for e in self.es:
             self.assertTrue(e.set("key_1", "value1.%s" % str(e.instance_id)))
@@ -75,7 +75,7 @@ class GenericEstateTestCase(unittest.TestCase):
             self.assertEqual(e.get_global("key_1", None), "value1.1.updated")
 
     #@unittest.skip("skip globals")
-    def test_get_globel_sum(self):
+    def test_get_global_sum(self):
         # set values to all nodes
         for e in self.es:
             self.assertTrue(e.set("key_1", 0.8))
@@ -96,7 +96,7 @@ class GenericEstateTestCase(unittest.TestCase):
                     float(e.get_global("key_1", red_sum)), (len(self.es) - 1) * 0.8 + 0.7)
 
     #@unittest.skip("skip globals")
-    def test_get_globel_avg(self):
+    def test_get_global_avg(self):
         # set values to all nodes
         for e in self.es:
             self.assertTrue(e.set("key_1", 0.8))
@@ -117,6 +117,23 @@ class GenericEstateTestCase(unittest.TestCase):
                 self.assertAlmostEqual(
                     float(e.get_global("key_1", red_avg)),
                     ((len(self.es) - 1) * 0.8 + 0.7) / len(self.es))
+
+    #@unittest.skip("skip globals")
+    def test_get_global_key_not_present_on_all_nodes(self):
+        # set values to one node
+        self.assertTrue(self.es[0].set("key_1", 0.8))
+
+        # get global value (expected: 0.8)
+        for e in self.es:
+            if str(self.__class__.__name__) == "CppesnodeEstateTestCase":
+                # Cppesnode cases have to be handled different, since reduce functions
+                # are implemented remotely
+                self.assertAlmostEqual(
+                    float(e.get_global("key_1", "SUM")), 0.8)
+            else:
+                # normal case, with local defined reduce functions
+                self.assertAlmostEqual(
+                    float(e.get_global("key_1", red_sum)), 0.8)
 
 
 
