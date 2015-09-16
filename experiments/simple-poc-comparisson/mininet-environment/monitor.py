@@ -27,7 +27,8 @@ def get_ecounter(k):
         res = int(count)
     except ValueError:
         res = 0
-        print "ERROR monitor.py: cannot convert get_ecounter value to int."
+        print ("ERROR monitor.py:"
+               " Cannot convert get_ecounter value to int: %s" % str(count))
     return res
 
 

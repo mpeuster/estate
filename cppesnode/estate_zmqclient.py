@@ -9,6 +9,7 @@ import zmq
 import subprocess
 import time
 
+
 class estate(object):
 
     def __init__(self, instance_id):
@@ -21,12 +22,11 @@ class estate(object):
 
         print "ES-ZMQ: Initialized estate for instance: %s" % self.instance_id
 
-
-    def start_cppesnode_process(self, local_api_port=8800, peerlist=["127.0.0.1", "9000"]):
+    def start_cppesnode_process(
+            self, local_api_port=8800, peerlist=["127.0.0.1", "9000"]):
         self.node_proc = subprocess.Popen(
             ["cppesnode",
              str(local_api_port)] + peerlist)
-
 
     def stop_cppesnode_process(self):
         if self.node_proc is not None:
@@ -38,14 +38,14 @@ class estate(object):
 
     def do_request(self, request_parts):
         socket = self.context.socket(zmq.REQ)
-        socket.connect("tcp://%s:%d" % (self.address, self.port))
+        # socket.connect("tcp://%s:%d" % (self.address, self.port))
+        socket.connect("ipc://estatezmq:%d" % (self.port))
         # send request
         socket.send_multipart(request_parts)
         # get reply
         reply = socket.recv_multipart()
         socket.close()
         return reply
-
 
     def set(self, k, v):
         r = self.do_request(["SET", str(k), str(v)])
@@ -94,6 +94,7 @@ class estate(object):
             return r[1]
         print r
         return "ES_NONE"
+
 
 def main():
     # test code
