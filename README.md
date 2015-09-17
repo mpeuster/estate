@@ -29,6 +29,6 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 
 In experiment folder:
 
-`sduo python experiment.py`
+`sudo python experiment.py`
 
 
