@@ -52,10 +52,13 @@ def run_scenario(name, args):
     print "*" * 40
     # 1. clear output folder
     helper_cleanup_folder("mininet-environment/log")
+    wait(3)
     # 2. run scenario
     helper_call_topology(args)
+    wait(3)
     # 3. archive results
     helper_archive_results(name)
+    wait(3)
     # 4. cleanup again
     helper_cleanup_folder("mininet-environment/log")
     wait(3)
