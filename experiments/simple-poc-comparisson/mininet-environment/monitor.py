@@ -140,15 +140,7 @@ def log_global_state():
 
     # generate log output
     print("LOG_NETWORK_MONITOR:"
-          "t=%d;"
-          "pps_local=%f;"
-          "pps_global=%f;"
-          "pcount_local=%d;"
-          "pcount_global=%d;"
-          "matchcount_local=%d;"
-          "matchcount_global=%d;"
-          "t_request_local=%f;"
-          "t_request_global=%f;"
+          "%f;%f;%f;%f;%f;%f;%f;%f;%f;"
           % (time.time(),
              pps_local,
              pps_global,
@@ -159,6 +151,19 @@ def log_global_state():
              time_local_request,
              time_global_request))
 
+
+def print_log_header():
+    # generate log output
+    print("LOG_NETWORK_MONITOR:"
+          "t;"
+          "pps_local;"
+          "pps_global;"
+          "pcount_local;"
+          "pcount_global;"
+          "matchcount_local;"
+          "matchcount_global;"
+          "t_request_local;"
+          "t_request_global;")
 
 def log_thread_func():
     while True:
@@ -215,6 +220,7 @@ def main():
     #start logger
     thread.start_new_thread(log_thread_func, ())
 
+    print_log_header()
     # start monitoring (and block!)
     sniff(iface="br0", prn=pkt_callback, filter="ip and tcp", store=0)
 
