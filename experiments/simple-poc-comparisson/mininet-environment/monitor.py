@@ -165,6 +165,7 @@ def print_log_header():
           "t_request_local;"
           "t_request_global;")
 
+
 def log_thread_func():
     while True:
         time.sleep(5)
