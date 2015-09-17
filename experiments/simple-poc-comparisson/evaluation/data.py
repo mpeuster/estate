@@ -6,6 +6,11 @@ RESULT_PATH = "../results/"
 
 
 class Scenario():
+    """
+    One emulation run.
+    - name
+    - mblogs: dict of middlebox logs as pandas df
+    """
 
     def __init__(self, path, name):
         self.path = "%s%s/" % (path, name)
@@ -27,8 +32,9 @@ class Scenario():
             # filers non-data lines
             if "LOG_NETWORK_MONITOR" not in l:
                 return ""
-            l = l.replace("LOG_NETWORK_MONITOR:", "")
+            l = l.replace("LOG_NETWORK_MONITOR:", "").rstrip().rstrip(";") + "\n"
             return l
+
         # open file and read line by line
         with open(fpath, "r") as f:
             for line in f:
@@ -38,8 +44,9 @@ class Scenario():
     def _load_middlebox_log_to_pandas(self, fname):
         # TODO cleanup
         data = self._load_logfile_as_csv(fname)
-        df = pd.read_csv(io.StringIO(data), sep=";")
+        df = pd.read_csv(io.StringIO(data), sep=";", dtype=float)
         print df
+        print list(df.columns.values)
         return None
 
     def load_middlebox_logs(self):
