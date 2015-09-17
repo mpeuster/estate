@@ -7,7 +7,12 @@ from mininet.cli import CLI
 from mininet.node import OVSSwitch
 from mininet.node import Controller, RemoteController
 from mininet.link import TCLink
-#import time
+
+import os
+import signal
+import subprocess
+
+import time
 
 # defines start of portrange for generated user connections
 USER_BASE_PORT = 1200
@@ -317,12 +322,38 @@ class RedisTopology(GenericMiddleBoxTopology):
             c += 1
 
 
+def start_custom_pox():
+    print "Starting esternal POX..."
+    return subprocess.Popen(
+        "./start_pox.sh", cwd="../", stdout=subprocess.PIPE,
+        shell=True, preexec_fn=os.setsid)
+
+
+def stop_custom_pox(p):
+    print "Stopping external POX..."
+    os.killpg(p.pid, signal.SIGTERM)
+
+
+def wait(sec):
+    for i in range(sec, 0, -1):
+        print "Exeriment running. Time left: %d seconds." % i
+        time.sleep(1)
+
+
 if __name__ == '__main__':
     setLogLevel('info')
+    # start custom controller
+    p = start_custom_pox()
+
     #mt = GenericMiddleBoxTopology()
     mt = LibestateTopology()
     #mt = CassandraTopology()
     #mt = RedisTopology()
     mt.start_network()
     mt.test_network()
-    mt.enter_cli()
+
+    #mt.enter_cli()
+    wait(120)
+
+    # stop custom controller
+    stop_custom_pox(p)
