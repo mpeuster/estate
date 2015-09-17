@@ -39,3 +39,5 @@ testclient/Debug
 libestate/Debug
 libestatepp/Debug
 cppesnode/Debug/cppesnode
+
+estatezmq:8*
