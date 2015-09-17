@@ -11,11 +11,13 @@ from mininet.link import TCLink
 import os
 import signal
 import subprocess
+import argparse
 
 import time
 
 # defines start of portrange for generated user connections
 USER_BASE_PORT = 1200
+PARAMS = None
 
 def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
     """
@@ -164,13 +166,17 @@ class GenericMiddleBoxTopology(object):
         """
         basic host setup
         """
+        global PARAMS
         # middlebox hosts
         for i in range(0, self.mbox_instances):
             mb = self.net.addHost("mb%d" % (i + 1))
             self.middlebox_hosts.append(mb)
             # management plane links
-            self.net.addLink(mb, self.control_switch)
-            #self.net.addLink(mb, self.control_switch, delay="10ms")
+            cdl = int(PARAMS.controldelay)
+            if cdl > 0:
+                self.net.addLink(mb, self.control_switch, delay="%dms" % cdl)
+            else:
+                self.net.addLink(mb, self.control_switch)
             # data plane links
             self.net.addLink(mb, self.source_switch)
             self.net.addLink(mb, self.target_switch)
@@ -340,8 +346,27 @@ def wait(sec):
         time.sleep(1)
 
 
+def setup_cli_parser():
+    """
+    CLI definition
+    """
+    parser = argparse.ArgumentParser()
+    # duration until experiment exits in s:
+    parser.add_argument("--duration", default="120")
+    # delay of control network links in ms:
+    parser.add_argument("--controldelay", default="0")
+    return parser
+
+
 if __name__ == '__main__':
     setLogLevel('info')
+    parser = setup_cli_parser()
+    PARAMS = parser.parse_args()
+
+    print PARAMS
+    with open("log/params.json", 'w') as f:
+        f.write(str(vars(PARAMS)))
+
     # start custom controller
     p = start_custom_pox()
 
@@ -353,7 +378,7 @@ if __name__ == '__main__':
     mt.test_network()
 
     #mt.enter_cli()
-    wait(120)
+    wait(int(PARAMS.duration))
 
     # stop custom controller
     stop_custom_pox(p)

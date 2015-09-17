@@ -39,5 +39,6 @@ testclient/Debug
 libestate/Debug
 libestatepp/Debug
 cppesnode/Debug/cppesnode
+experiments/simple-poc-comparisson/results
 
 estatezmq:8*
