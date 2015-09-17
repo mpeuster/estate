@@ -139,13 +139,6 @@ def log_global_state():
     last_global_pcount = pcount_global
 
     # generate log output
-    print("LOG_REQUEST_PERFORMANCE:"
-          "t_request_local=%f;"
-          "t_request_global=%f;"
-          % (time_local_request,
-             time_global_request
-             )
-          )
     print("LOG_NETWORK_MONITOR:"
           "t=%d;"
           "pps_local=%f;"
@@ -154,13 +147,17 @@ def log_global_state():
           "pcount_global=%d;"
           "matchcount_local=%d;"
           "matchcount_global=%d;"
+          "t_request_local=%f;"
+          "t_request_global=%f;"
           % (time.time(),
              pps_local,
              pps_global,
              pcount_local,
              pcount_global,
              matchcount_local,
-             matchcount_global))
+             matchcount_global,
+             time_local_request,
+             time_global_request))
 
 
 def log_thread_func():

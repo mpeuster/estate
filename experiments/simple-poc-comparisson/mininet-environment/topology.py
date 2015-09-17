@@ -353,6 +353,8 @@ def setup_cli_parser():
     parser = argparse.ArgumentParser()
     # duration until experiment exits in s:
     parser.add_argument("--duration", default="120")
+    # backend used for state management
+    parser.add_argument("--backend", default="libestate")
     # delay of control network links in ms:
     parser.add_argument("--controldelay", default="0")
     return parser
@@ -370,15 +372,19 @@ if __name__ == '__main__':
     # start custom controller
     p = start_custom_pox()
 
-    #mt = GenericMiddleBoxTopology()
-    mt = LibestateTopology()
-    #mt = CassandraTopology()
-    #mt = RedisTopology()
-    mt.start_network()
-    mt.test_network()
+    if PARAMS.backend == "libestate":
+        mt = LibestateTopology()
+    elif PARAMS.backend == "redis":
+        mt = RedisTopology()
+    else:
+        mt = None
+        print "No backend selected"
 
-    #mt.enter_cli()
-    wait(int(PARAMS.duration))
+    if mt is not None:
+        mt.start_network()
+        mt.test_network()
+        #mt.enter_cli()
+        wait(int(PARAMS.duration))
 
     # stop custom controller
     stop_custom_pox(p)

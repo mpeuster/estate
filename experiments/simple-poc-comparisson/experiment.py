@@ -71,13 +71,19 @@ def main():
     # cleanup old results
     helper_cleanup_folder("results")
 
-    # scenarios
-    run_scenario("scenario_000", ["--controldelay", "0"])
-    run_scenario("scenario_010", ["--controldelay", "10"])
-    run_scenario("scenario_020", ["--controldelay", "20"])
-    run_scenario("scenario_030", ["--controldelay", "30"])
-    run_scenario("scenario_040", ["--controldelay", "40"])
-    run_scenario("scenario_050", ["--controldelay", "50"])
+    # scenarios: 0-50ms delay with libestate
+    for i in range(0, 60, 10):
+        run_scenario(
+            "scenario_libestate_%03d" % i,
+            ["--backend", "libestate",
+             "--controldelay", "%d" % i])
+
+    # scenarios: 0-50ms delay with redis
+    for i in range(0, 60, 10):
+        run_scenario(
+            "scenario_redis_%03d" % i,
+            ["--backend", "redis",
+             "--controldelay", "%d" % i])
 
     print "*" * 40
     print "Finish!"
