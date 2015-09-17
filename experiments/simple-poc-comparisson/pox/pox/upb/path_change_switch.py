@@ -1,3 +1,13 @@
+"""
+SDN controller for eState experiments.
+
+Scenario:
+ * t = 0: flows of c1, c2 pass through mb1
+ * t = 60: flow of c2 is moved to mb2
+"""
+
+
+
 from pox.core import core
 import pox.openflow.libopenflow_01 as of
 import pox.lib.packet as pkt
@@ -18,11 +28,11 @@ def countdown_thread(sc):
         time.sleep(10)
     sc.flow_move_1()
     # second step move client1 also to mb2
-    for i in range(FLOW_MOVE_DELAY, 0, -10):
-        log.debug(
-            "Wakeup controller s%d. Flow move in %d seconds!" % (sc.switch, i))
-        time.sleep(10)
-    sc.flow_move_2()
+    #for i in range(FLOW_MOVE_DELAY, 0, -10):
+    #    log.debug(
+    #        "Wakeup controller s%d. Flow move in %d seconds!" % (sc.switch, i))
+    #    time.sleep(10)
+    #sc.flow_move_2()
 
 
 class SwitchController(object):
@@ -120,7 +130,7 @@ class SwitchController(object):
         # log.debug("SET RULE: %s" % str(msg))
 
     def flow_move_1(self):
-        log.info("Flow move on s%d" % self.switch)
+        log.info("Flow move c2 on s%d" % self.switch)
         if self.switch == 2:
             # move flow from client2 to second link
             self.set_static_rule(
@@ -131,7 +141,7 @@ class SwitchController(object):
                 3, 2, 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.2")
 
     def flow_move_2(self):
-        log.info("Flow move on s%d" % self.switch)
+        log.info("Flow move c1 on s%d" % self.switch)
         if self.switch == 2:
             # move flow from client1 to second link
             self.set_static_rule(

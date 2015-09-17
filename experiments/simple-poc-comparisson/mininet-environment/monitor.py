@@ -202,8 +202,9 @@ def main():
         es = estater(instance_id, redis_host=options[0])
     elif backend == "estatepp":
         es = estatez(instance_id)
-        es.set_connection_properties()
-        es.start_cppesnode_process(peerlist=options)
+        es.set_connection_properties(port=(8800 + instance_id))
+        es.start_cppesnode_process(
+            local_api_port=(8800 + instance_id), peerlist=options)
     else:
         print "specified backend not known"
 
