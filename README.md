@@ -9,6 +9,7 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 
 ### Environment
 * running Mininet installation
+* gcc / g++ > 4.8.1 installed
 
 ### Python:
 * `sudo apt-get install libzmq3`
