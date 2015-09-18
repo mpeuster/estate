@@ -51,6 +51,21 @@ class SwitchController(object):
         log.info("Controlling s%d" % self.switch)
         log.info("Port information {}".format(connection.ports))
 
+        # terrible dirty quick hack, but we can not rely
+        # on OF portnumber they are not always the same
+        pstr = str(connection.ports)
+        pstr = pstr.replace("<Ports:", "").replace(">", "")
+        parts = pstr.split(",")
+        parts = [p.strip() for p in parts]
+        mapping = {}
+        for p in parts:
+            k, v = p.split(":")
+            mapping[k] = int(v)
+
+        log.info(mapping)
+        self.mapping = mapping
+
+
         # setup static forwarding rules for experiment
         self.setup_static_rules()
 
@@ -91,23 +106,25 @@ class SwitchController(object):
         self.connection.send(msg)
 
     def setup_static_rules(self):
+        m = self.mapping
         if self.switch == 2:
             log.info("Setup rules for s%d" % self.switch)
             # TODO add constants for port numbers
             # SRC1_S2 = 3
             # MB1_S2 = 1
             # ...
+            
             # always use first link as default
-            self.set_static_rule(3, 1, 0)
-            self.set_static_rule(4, 1, 0)
-            self.set_static_rule(1, [3, 4], 0)
-            self.set_static_rule(2, [3, 4], 0)
+            self.set_static_rule(m["s2-eth3"], m["s2-eth1"], 0)
+            self.set_static_rule(m["s2-eth4"], m["s2-eth1"], 0)
+            self.set_static_rule(m["s2-eth1"], [m["s2-eth3"], m["s2-eth4"]], 0)
+            self.set_static_rule(m["s2-eth2"], [m["s2-eth3"], m["s2-eth4"]], 0)
         elif self.switch == 3:
             log.info("Setup rules for s%d" % self.switch)
             # always use first link as default
-            self.set_static_rule(1, 3, 0)
-            self.set_static_rule(2, 3, 0)
-            self.set_static_rule(3, 1, 0)
+            self.set_static_rule(m["s3-eth1"], m["s3-eth3"], 0)
+            self.set_static_rule(m["s3-eth2"], m["s3-eth3"], 0)
+            self.set_static_rule(m["s3-eth3"], m["s3-eth1"], 0)
         #else:
             # set static hub behavior
             #self.set_static_rule(None, of.OFPP_ALL, 0)
@@ -131,25 +148,26 @@ class SwitchController(object):
 
     def flow_move_1(self):
         log.info("Flow move c2 on s%d" % self.switch)
+        m = self.mapping
         if self.switch == 2:
             # move flow from client2 to second link
             self.set_static_rule(
-                4, 2, 10, dl_type=0x800, nw_src="20.0.0.2", nw_dst="20.0.1.1")
+                m["s2-eth4"], m["s2-eth2"], 10, dl_type=0x800, nw_src="20.0.0.2", nw_dst="20.0.1.1")
         elif self.switch == 3:
             # move flow from client2 to second link
             self.set_static_rule(
-                3, 2, 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.2")
+                m["s3-eth3"], m["s3-eth2"], 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.2")
 
     def flow_move_2(self):
         log.info("Flow move c1 on s%d" % self.switch)
         if self.switch == 2:
             # move flow from client1 to second link
             self.set_static_rule(
-                3, 2, 10, dl_type=0x800, nw_src="20.0.0.1", nw_dst="20.0.1.1")
+                m["s2-eth3"], m["s2-eth2"], 10, dl_type=0x800, nw_src="20.0.0.1", nw_dst="20.0.1.1")
         elif self.switch == 3:
             # move flow from client1 to second link
             self.set_static_rule(
-                3, 2, 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.1")
+                m["s3-eth3"], m["s3-eth2"], 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.1")
 
 
 def launch():

@@ -14,6 +14,7 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 ### Packages
 * `sudo apt-get install libzmq3`
 * `sudo apt-get install libzmq3-dev`
+* `sudo apt-get install bridge-utils`
 
 ### Python:
 * `sudo pip install zmq`
