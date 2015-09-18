@@ -11,18 +11,32 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 * running Mininet installation
 * gcc / g++ > 4.8.1 installed
 
-### Python:
+### Packages
 * `sudo apt-get install libzmq3`
 * `sudo apt-get install libzmq3-dev`
+
+### Python:
+* `sudo pip install zmq`
+* `sudo pip install redis`
+* `sudo pip install cassandra-driver`
 
 ### C++:
 * `git clone https://github.com/zeromq/zmqpp`
  * `make & make install`
 
+### Redis:
+* http://redis.io/download
+
+### Cassandra:
+* TODO
+
+
 #### Setup `.bashrc`
-* `export PATH="$PATH:$HOME/estate/cppesnode/Debug/"`
+* `export PATH="$PATH:$HOME/estate/cppesnode/Debug/:$HOME/redis-3.0.4/src/"`
 * `export PYTHONPATH="$HOME/estate:$PYTHONPATH"`
-* `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/estate/libestate/Debug/:$HOME/estate/libestatepp/Debug/:/usr/local/lib`
+* `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/estate/libestatepp/Debug/:/usr/local/lib`
+
+If ld error occurs: Hardlink the lib: `sudo ln libestatepp.so /lib/libestatepp.so`
 
 ## Built
 * `estate/libestatepp/Debug$ make all`
@@ -32,21 +46,21 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 ### Folder Structure
 
 * experiment-name/
- * mininet-environment/
-  * topology.py (mininet script for a single experiment)
-  * logs/ (folder with outputs of one exeriment)
- * pox/
-  * upb/ (sdn scripts)
- * evaluation
-  * plot.py
-  * figures/
- * results/
-  * scenario_name1/ (copy of log folder from one run)
-  * scenario_name2/
-  * ...
- * start_mininet.sh (debugging)
- * start_pox.sh (defines which sdn cript is used)
- * experiment.py (central run script)
+	* mininet-environment/
+		- topology.py (mininet script for a single experiment)
+		- logs/ (folder with outputs of one exeriment)
+	* pox/
+		- upb/ (sdn scripts)
+	* evaluation
+		- plot.py
+		- figures/
+	* results/
+		- scenario_name1/ (copy of log folder from one run)
+		- scenario_name2/
+		- ...
+	* start_mininet.sh (debugging)
+	* start_pox.sh (defines which sdn cript is used)
+	* experiment.py (central run script)
 
 
 ### Run an Experiment
