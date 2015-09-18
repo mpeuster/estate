@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.d
+*.D
 *.obj
 
 # Python
