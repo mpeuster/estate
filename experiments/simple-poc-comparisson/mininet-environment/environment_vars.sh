@@ -10,7 +10,7 @@ export PATH="$PATH:$HOME/estate/cppesnode/Debug/"
 # cassandra executable
 export PATH="$PATH:$HOME/cassandra/bin/"
 # redis executable
-export PATH="$PATH:$HOME/redis-3.0.0/src/"
+export PATH="$PATH:$HOME/redis-3.0.4/src/"
 
 # PYTHON
 export PYTHONPATH="$HOME/estate:$PYTHONPATH"
