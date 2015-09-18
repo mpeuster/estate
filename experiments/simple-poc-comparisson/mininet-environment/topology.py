@@ -219,7 +219,7 @@ class GenericMiddleBoxTopology(object):
             for sh in self.source_hosts:
                 # start target.py for each source host once on each target host
                 th.cmd("./target.py %d > log/target_%s_%s.log 2>&1 &"
-                   % (p, th.name, sh.name))  # one port for each source
+                       % (p, th.name, sh.name))  # one port for each source
                 p += 1
 
     def run_source_hosts(self):
@@ -235,6 +235,12 @@ class GenericMiddleBoxTopology(object):
             print("./source.py %s %d %s > log/source_%s.log 2>&1 &"
                   % (th.IP(), p, PARAMS.srclambda, sh.name))
             p += 1
+
+    def stop_topo(self):
+        """
+        Do cleanup tasks.
+        """
+        pass
 
 
 class LibestateTopology(GenericMiddleBoxTopology):
@@ -327,6 +333,10 @@ class RedisTopology(GenericMiddleBoxTopology):
                    % (c, self.redis_host.IP(), mb.name))
             c += 1
 
+    def stop_topo(self):
+        self.redis_host.cmd("pkill redis-server")
+        super(RedisTopology, self).stop_topo()
+
 
 def start_custom_pox():
     print "Starting esternal POX..."
@@ -352,7 +362,7 @@ def setup_cli_parser():
     """
     parser = argparse.ArgumentParser()
     # duration until experiment exits in s:
-    parser.add_argument("--duration", default="20")
+    parser.add_argument("--duration", default="120")
     # backend used for state management
     parser.add_argument("--backend", default="libestate")
     # delay of control network links in ms:
@@ -387,6 +397,6 @@ if __name__ == '__main__':
         mt.test_network()
         #mt.enter_cli()
         wait(int(PARAMS.duration))
-
+        mt.stop_topo()
     # stop custom controller
     stop_custom_pox(p)

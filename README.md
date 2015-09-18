@@ -7,6 +7,9 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 
 ## Requirements
 
+### Environment
+* running Mininet installation
+
 ### Python:
 * `sudo apt-get install libzmq3`
 * `sudo apt-get install libzmq3-dev`

@@ -22,6 +22,9 @@ def helper_ensure_dir(directory):
 
 
 def helper_call_topology(args):
+    # always cleanup mininet, just to be on the safe side
+    shell("mn -c")
+    # call mininet experiment
     cmd = ["cd", "mininet-environment;", "./topology.py"]
     cmd = " ".join(cmd + args)
     #print "calling: %s" % str(cmd)
@@ -71,20 +74,30 @@ def main():
     # cleanup old results
     helper_cleanup_folder("results")
 
+    # global parameters
+    DURATION = 120  # duration of one scenario
+
     # scenarios: 0-50ms delay with libestate
-    for i in range(0, 1, 10):
-        run_scenario(
-            "scenario_libestate_%03d" % i,
-            ["--backend", "libestate",
-             "--controldelay", "%d" % i,
-             "--srclambda", "%f" % 0.5])
+    for i in range(0, 51, 10):
+        # scenarios: lambda 1.0, 0.1, 0.01
+        for l in [1.0, 0.1, 0.01]:
+            run_scenario(
+                "sc_libestate_lambda%03d_delay%03d" % (l*100, i),
+                ["--backend", "libestate",
+                 "--duration", "%d" % DURATION,
+                 "--controldelay", "%d" % i,
+                 "--srclambda", "%f" % l])
 
     # scenarios: 0-50ms delay with redis
-    for i in range(0, 0, 10):
-        run_scenario(
-            "scenario_redis_%03d" % i,
-            ["--backend", "redis",
-             "--controldelay", "%d" % i])
+    for i in range(0, 51, 10):
+        # scenarios: lambda 1.0, 0.1, 0.01
+        for l in [1.0, 0.1, 0.01]:
+            run_scenario(
+                "sc_redis_lambda%03d_delay%03d" % (l*100, i),
+                ["--backend", "redis",
+                 "--duration", "%d" % DURATION,
+                 "--controldelay", "%d" % i,
+                 "--srclambda", "%f" % l])
 
     print "*" * 40
     print "Finish!"
