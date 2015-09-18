@@ -1,8 +1,8 @@
-import data
+import plot_single_scenario
 
 
 def main():
-    pass
+    plot_single_scenario.plot()
 
 
 if __name__ == '__main__':

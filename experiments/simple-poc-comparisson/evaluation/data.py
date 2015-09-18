@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import io
+import sys
 
 RESULT_PATH = "../results/"
 
@@ -13,7 +14,7 @@ class Scenario():
     """
 
     def __init__(self, path, name):
-        self.path = "%s%s/" % (path, name)
+        self.path = os.path.join(path, name)
         self.name = name
         self.mblogs = {}  # dict containing pandas frames of middlebox logs
         print "Creating scenario '%s' location: '%s'" % (self.name, self.path)
@@ -25,7 +26,7 @@ class Scenario():
             if "monitor_" in f]
 
     def _load_logfile_as_csv(self, fname):
-        fpath = "%s%s" % (self.path, fname)
+        fpath = os.path.join(self.path, fname)
         data = u""
 
         def filter_line(l):
@@ -42,25 +43,53 @@ class Scenario():
         return data
 
     def _load_middlebox_log_to_pandas(self, fname):
-        # TODO cleanup
         data = self._load_logfile_as_csv(fname)
         df = pd.read_csv(io.StringIO(data), sep=";", dtype=float)
-        print df
-        print list(df.columns.values)
-        return None
+        # for now we will have only positive values
+        num = df._get_numeric_data()
+        num[num < 0] = 0
+        return df
 
     def load_middlebox_logs(self):
         files = self._get_monitoring_files()
         for f in files:
             self.mblogs[f] = self._load_middlebox_log_to_pandas(f)
-            print "Loaded log from: %s" % f
+            print ("Loaded log from: %s containing %d rows."
+                   % (f, len(self.mblogs[f].index)))
+            print "Columns: %s" % list(self.mblogs[f].columns.values)
+
+    def normalize_times(self, timefield="t"):
+        """
+        Change times so that min(t) is aligned to 0.
+        """
+        print "Normalizing timestamps %s" % timefield
+        tmin = sys.maxint
+        for df in self.mblogs.itervalues():
+            tmin = df[timefield].min() if df[timefield].min() < tmin else tmin
+        for df in self.mblogs.itervalues():
+            df[timefield] = df[timefield] - tmin
+
+    def get_middlerbox_names(self):
+        return self.mblogs.keys()
+
+    def get_values(self, mbname, fieldname):
+        df = self.mblogs.get(mbname, None)
+        if df is None:
+            raise Exception("mbname not found")
+        return df[fieldname].tolist()
 
 
 class ExperimentData():
+    """
+    Represents all data collected within one experiment.
+    Typically:
+    - scenarios dict: name -> scenario_obj
+    """
 
     def __init__(self, path=RESULT_PATH):
         self.path = path
         self.scenarios = {}
+        self.load()
 
     def _get_scenario_names(self):
         return os.listdir(self.path)
@@ -71,11 +100,16 @@ class ExperimentData():
         for n in ns:
             self.scenarios[n] = Scenario(self.path, n)
 
+    def load(self):
+        self.load_scenarios()
+
+    def normalize_times(self):
+        for s in self.scenarios.itervalues():
+            s.normalize_times()
 
 
 def main():
     ed = ExperimentData()
-    ed.load_scenarios()
 
 
 if __name__ == '__main__':
