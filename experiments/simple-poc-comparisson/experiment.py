@@ -71,6 +71,7 @@ def main():
     """
     Define different experiment runs here.
     """
+    helper_ensure_dir("mininet-environment/log")
     # cleanup old results
     helper_cleanup_folder("results")
 
