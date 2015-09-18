@@ -38,7 +38,7 @@ class estate(object):
 
     def do_request(self, request_parts):
         socket = self.context.socket(zmq.REQ)
-        # socket.connect("tcp://%s:%d" % (self.address, self.port))
+        #socket.connect("tcp://%s:%d" % (self.address, self.port))
         socket.connect("ipc:///tmp/estatezmq:%d" % (self.port))
         # send request
         socket.send_multipart(request_parts)

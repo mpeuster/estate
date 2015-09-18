@@ -5,7 +5,27 @@ Questions: manuel.peuster [a-t] uni-paderborn [d-o-t] . de
 
 Basic documentation: [https://github.com/mpeuster/estate/wiki]
 
-## Experiment Folder Structure
+## Requirements
+
+### Python:
+* `sudo apt-get install libzmq3`
+* `sudo apt-get install libzmq3-dev`
+
+### C++:
+* `git clone https://github.com/zeromq/zmqpp`
+** `make & make install`
+
+#### Setup `.bashrc`
+* `export PATH="$PATH:$HOME/estate/cppesnode/Debug/"`
+* `export PYTHONPATH="$HOME/estate:$PYTHONPATH"`
+* `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/estate/libestate/Debug/:$HOME/estate/libestatepp/Debug/:/usr/local/lib`
+
+## Built
+* `estate/libestatepp/Debug$ make all`
+* `estate/cppesnode/Debug$ make all`
+
+## Experiments
+### Folder Structure
 
 * experiment-name/
 ** mininet-environment/
@@ -25,10 +45,14 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 ** experiment.py (central run script)
 
 
-## Run an Experiment
+### Run an Experiment
 
 In experiment folder:
 
 `sudo python experiment.py`
 
+### Run Tests:
+* `python test` (in root directory)
+** use `python test 1-3` to select which kind of implementation to test
+** Attention: You have to run local Cassandra / Redis instances in order to run the corresponding test cases.
 

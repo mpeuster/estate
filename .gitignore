@@ -36,9 +36,10 @@
 *.rdb
 
 testclient/Debug
-libestate/Debug
-libestatepp/Debug
+libestate/Debug/libestate.so
+libestatepp/Debug/libestatepp.so
 cppesnode/Debug/cppesnode
 experiments/simple-poc-comparisson/results
+experiments/simple-poc-comparisson/mininet-environment/log
 
 estatezmq:8*

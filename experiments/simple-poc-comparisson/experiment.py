@@ -72,14 +72,15 @@ def main():
     helper_cleanup_folder("results")
 
     # scenarios: 0-50ms delay with libestate
-    for i in range(0, 51, 10):
+    for i in range(0, 1, 10):
         run_scenario(
             "scenario_libestate_%03d" % i,
             ["--backend", "libestate",
-             "--controldelay", "%d" % i])
+             "--controldelay", "%d" % i,
+             "--srclambda", "%f" % 0.5])
 
     # scenarios: 0-50ms delay with redis
-    for i in range(0, 51, 10):
+    for i in range(0, 0, 10):
         run_scenario(
             "scenario_redis_%03d" % i,
             ["--backend", "redis",

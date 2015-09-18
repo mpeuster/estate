@@ -8,8 +8,8 @@
 #include "CommunicationManager.h"
 #include "StateManager.h"
 
-#define RESPONSE_TIMEOUT_MSEC 300
-#define MAX_REQUEST_RETRY 10
+#define RESPONSE_TIMEOUT_MSEC 1000
+#define MAX_REQUEST_RETRY 3
 
 CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int port)
 {
@@ -117,7 +117,7 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 
 		// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
 		if(num_peers != results.size() && results.size() != 1)
-			warn("get_global response resulsts.size()=%lu != num_peers=%du\n", results.size(), num_peers);
+			warn("get_global response resulsts.size()=%lu != num_peers=%d\n", results.size(), num_peers);
 		else
 			result_complete = true; // stop while loop
 		// next try

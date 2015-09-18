@@ -230,10 +230,10 @@ class GenericMiddleBoxTopology(object):
         p = USER_BASE_PORT
         for sh in self.source_hosts:
             # start source.py on source hosts and connect to first target host
-            sh.cmd("./source.py %s %d > log/source_%s.log 2>&1 &"
-                % (th.IP(), p, sh.name))
-            print("./source.py %s %d > log/source_%s.log 2>&1 &"
-                % (th.IP(), p, sh.name))
+            sh.cmd("./source.py %s %d %s > log/source_%s.log 2>&1 &"
+                   % (th.IP(), p, PARAMS.srclambda, sh.name))
+            print("./source.py %s %d %s > log/source_%s.log 2>&1 &"
+                  % (th.IP(), p, PARAMS.srclambda, sh.name))
             p += 1
 
 
@@ -352,11 +352,13 @@ def setup_cli_parser():
     """
     parser = argparse.ArgumentParser()
     # duration until experiment exits in s:
-    parser.add_argument("--duration", default="120")
+    parser.add_argument("--duration", default="20")
     # backend used for state management
     parser.add_argument("--backend", default="libestate")
     # delay of control network links in ms:
     parser.add_argument("--controldelay", default="0")
+    # interarrival of simple traffic generator
+    parser.add_argument("--srclambda", default="1.0")
     return parser
 
 

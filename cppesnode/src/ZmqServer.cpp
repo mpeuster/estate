@@ -90,11 +90,10 @@ ZmqServer::~ZmqServer()
 void ZmqServer::init()
 {
 	// init zmq
+	cout << "creating estate node with address: " << this->estate_node_address << ":" << this->estate_node_port << endl;
 	this->recv_socket = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::rep);
 	//this->recv_socket->bind("tcp://*:" + int_to_string(this->local_api_port));
 	this->recv_socket->bind("ipc:///tmp/estatezmq:" + int_to_string(this->local_api_port));
-
-	cout << "created estate node with address: " << this->estate_node_address << ":" << this->estate_node_port << endl;
 }
 
 void ZmqServer::start()
