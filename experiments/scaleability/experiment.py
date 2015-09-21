@@ -76,29 +76,21 @@ def main():
     helper_cleanup_folder("results")
 
     # global parameters
-    DURATION = 120  # duration of one scenario
+    DURATION = 60 * 34  # duration of one scenario
 
-    # scenarios: 0-50ms delay with libestate
-    for i in range(0, 51, 10):
-        # scenarios: lambda 1.0, 0.1, 0.01
-        for l in [1.0, 0.1, 0.01]:
-            run_scenario(
-                "sc_libestate_lambda%03d_delay%03d" % (l*100, i),
-                ["--backend", "libestate",
-                 "--duration", "%d" % DURATION,
-                 "--controldelay", "%d" % i,
-                 "--srclambda", "%f" % l])
-
-    # scenarios: 0-50ms delay with redis
-    for i in range(0, 51, 10):
-        # scenarios: lambda 1.0, 0.1, 0.01
-        for l in [1.0, 0.1, 0.01]:
-            run_scenario(
-                "sc_redis_lambda%03d_delay%03d" % (l*100, i),
-                ["--backend", "redis",
-                 "--duration", "%d" % DURATION,
-                 "--controldelay", "%d" % i,
-                 "--srclambda", "%f" % l])
+    # different backends
+    for be in ["redis", "libestate"]:
+        # different delays
+        for i in [0]:
+            # different lambdas 1.0, 0.1, 0.01
+            for l in [0.01]:
+                run_scenario(
+                    "sc_%s_lambda%03d_delay%03d" % (be, l*100, i),
+                    ["--backend", "%s" % be,
+                     "--duration", "%d" % DURATION,
+                     "--controldelay", "%d" % i,
+                     "--numbermb", "%d" % 16,
+                     "--srclambda", "%f" % l])
 
     print "*" * 40
     print "Finish!"

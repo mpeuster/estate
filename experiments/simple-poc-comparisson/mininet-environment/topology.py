@@ -347,7 +347,13 @@ def start_custom_pox():
 
 def stop_custom_pox(p):
     print "Stopping external POX..."
+    print subprocess.call("ps", shell=True)
     os.killpg(p.pid, signal.SIGTERM)
+    wait(2)
+    os.killpg(p.pid, signal.SIGKILL)
+    wait(2)
+    subprocess.call("pkill pox", shell=True)
+    print subprocess.call("ps", shell=True)
 
 
 def wait(sec):
@@ -364,11 +370,13 @@ def setup_cli_parser():
     # duration until experiment exits in s:
     parser.add_argument("--duration", default="120")
     # backend used for state management
-    parser.add_argument("--backend", default="libestate")
+    parser.add_argument("--backend", default="redis")
     # delay of control network links in ms:
     parser.add_argument("--controldelay", default="0")
     # interarrival of simple traffic generator
     parser.add_argument("--srclambda", default="1.0")
+    # number of middleboxes in experiment
+    parser.add_argument("--numbermb", default="2")
     return parser
 
 
@@ -385,9 +393,9 @@ if __name__ == '__main__':
     p = start_custom_pox()
 
     if PARAMS.backend == "libestate":
-        mt = LibestateTopology()
+        mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
     elif PARAMS.backend == "redis":
-        mt = RedisTopology()
+        mt = RedisTopology(mbox_instances=int(PARAMS.numbermb))
     else:
         mt = None
         print "No backend selected"
@@ -395,8 +403,10 @@ if __name__ == '__main__':
     if mt is not None:
         mt.start_network()
         mt.test_network()
-        #mt.enter_cli()
-        wait(int(PARAMS.duration))
+        if int(PARAMS.duration) < 0:
+            mt.enter_cli()
+        else:
+            wait(int(PARAMS.duration))
         mt.stop_topo()
     # stop custom controller
     stop_custom_pox(p)

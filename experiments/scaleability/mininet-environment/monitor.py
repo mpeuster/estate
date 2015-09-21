@@ -96,7 +96,7 @@ def pkt_callback(pkt):
     # TODO: add state: flows seen, flows active on instance (local dict)
 
     # debugging:
-    return "PKT: " + str(pkt.summary())
+    #return "PKT: " + str(pkt.summary())
 
 
 def init_state():

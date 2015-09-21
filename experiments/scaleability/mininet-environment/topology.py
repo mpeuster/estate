@@ -351,7 +351,13 @@ def start_custom_pox():
 
 def stop_custom_pox(p):
     print "Stopping external POX..."
+    print subprocess.call("ps", shell=True)
     os.killpg(p.pid, signal.SIGTERM)
+    wait(2)
+    os.killpg(p.pid, signal.SIGKILL)
+    wait(2)
+    subprocess.call("pkill pox", shell=True)
+    print subprocess.call("ps", shell=True)
 
 
 def wait(sec):
@@ -388,7 +394,7 @@ if __name__ == '__main__':
         f.write(str(vars(PARAMS)))
 
     # start custom controller
-    #p = start_custom_pox()
+    p = start_custom_pox()
 
     if PARAMS.backend == "libestate":
         mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
@@ -401,8 +407,10 @@ if __name__ == '__main__':
     if mt is not None:
         mt.start_network()
         mt.test_network()
-        mt.enter_cli()
-        #wait(int(PARAMS.duration))
+        if int(PARAMS.duration) < 0:
+            mt.enter_cli()
+        else:
+            wait(int(PARAMS.duration))
         mt.stop_topo()
     # stop custom controller
-    #stop_custom_pox(p)
+    stop_custom_pox(p)

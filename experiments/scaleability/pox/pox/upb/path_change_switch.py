@@ -2,8 +2,10 @@
 SDN controller for eState experiments.
 
 Scenario:
- * t = 0: flows of c1, c2 pass through mb1
- * t = 60: flow of c2 is moved to mb2
+ * n middleboxes
+ * add one MB to the loadbalancing each 60s
+ * stay on full scale 60s
+ * scale down: remove one MB each 60s
 """
 
 
@@ -16,7 +18,7 @@ from thread import start_new_thread
 log = core.getLogger()
 
 
-FLOW_MOVE_DELAY = 20
+FLOW_MOVE_DELAY = 60
 
 
 def countdown_thread(sc):
@@ -27,9 +29,27 @@ def countdown_thread(sc):
     while ACTIVE_MB < len(sc.mb_ports):
         for i in range(FLOW_MOVE_DELAY, 0, -10):
             log.debug(
-                "Wakup %d. Re-balance in %d s! MB active: %d" % (sc.switch, i, ACTIVE_MB))
+                "%s Wakup %d. Re-balance in %d s! MB active: %d" % (str(time.time()), sc.switch, i, ACTIVE_MB))
             time.sleep(10)
         ACTIVE_MB += 1
+        sc.clear_all_rules()
+        sc.install_default_rules()
+        sc.install_load_balancing_rules(
+            32, n_middleboxes=ACTIVE_MB)
+        log.info("Load re-balanced on %d active middleboxes.", ACTIVE_MB)
+    """
+    Wait
+    """
+    log.debug("Full scale reached. Wait for FLOW_MOVE_DELAY and scale down.")
+    """
+    Remove everey FLOW_MOVE_DELAY one more MB to the system.
+    """
+    while ACTIVE_MB > 1:
+        for i in range(FLOW_MOVE_DELAY, 0, -10):
+            log.debug(
+                "%s Wakup %d. Re-balance in %d s! MB active: %d" % (str(time.time()), sc.switch, i, ACTIVE_MB))
+            time.sleep(10)
+        ACTIVE_MB -= 1
         sc.clear_all_rules()
         sc.install_default_rules()
         sc.install_load_balancing_rules(
