@@ -1,1 +1,1 @@
-{'duration': '120', 'controldelay': '0', 'numbermb': '3', 'srclambda': '1', 'backend': 'redis'}
+{'duration': '120', 'controldelay': '0', 'numbermb': '4', 'srclambda': '1', 'backend': 'redis'}

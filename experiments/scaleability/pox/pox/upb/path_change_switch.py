@@ -16,22 +16,27 @@ from thread import start_new_thread
 log = core.getLogger()
 
 
-FLOW_MOVE_DELAY = 60
+FLOW_MOVE_DELAY = 20
 
 
 def countdown_thread(sc):
-    # first step move client2 to mb2
-    for i in range(FLOW_MOVE_DELAY, 0, -10):
-        log.debug(
-            "Wakeup controller s%d. Flow move in %d seconds!" % (sc.switch, i))
-        time.sleep(10)
-    sc.flow_move_1()
-    # second step move client1 also to mb2
-    #for i in range(FLOW_MOVE_DELAY, 0, -10):
-    #    log.debug(
-    #        "Wakeup controller s%d. Flow move in %d seconds!" % (sc.switch, i))
-    #    time.sleep(10)
-    #sc.flow_move_2()
+    """
+    Add everey FLOW_MOVE_DELAY one more MB to the system.
+    """
+    ACTIVE_MB = 1
+    while ACTIVE_MB < len(sc.mb_ports):
+        for i in range(FLOW_MOVE_DELAY, 0, -10):
+            log.debug(
+                "Wakup %d. Re-balance in %d s! MB active: %d" % (sc.switch, i, ACTIVE_MB))
+            time.sleep(10)
+        ACTIVE_MB += 1
+        sc.clear_all_rules()
+        sc.install_default_rules()
+        sc.install_load_balancing_rules(
+            32, n_middleboxes=ACTIVE_MB)
+        log.info("Load re-balanced on %d active middleboxes.", ACTIVE_MB)
+
+
 
 
 class SwitchController(object):
@@ -59,17 +64,31 @@ class SwitchController(object):
         mapping = {}
         for p in parts:
             k, v = p.split(":")
-            mapping[k] = int(v)
+            if "-" in k:  # only use "real ports"
+                mapping[k] = int(v)
 
-        log.info(mapping)
+        log.info("Parsed port mappings: %s" % str(mapping))
         self.mapping = mapping
 
+        # extract connections to src/target servers from mapping
+        if self.switch == 2:  # source client
+            self.st_port = self.mapping["s2-eth1"]
+            del self.mapping["s2-eth1"]
+        else:  # target server
+            self.st_port = self.mapping["s3-eth1"]
+            del mapping["s3-eth1"]
+        # now mapping our mapping contains only valid middlebox connections
 
-        # setup static forwarding rules for experiment
-        self.setup_static_rules()
+        # get ordered list of middlebox ports available for load balancing
+        # TODO alphabetical sorting on things like eth11 vs. eth2 is not perfect!
+        self.mb_ports = [v for k, v in sorted(self.mapping.items())]
+
+        # install rules in swtiches
+        # install a default rule, always present, all traffic through 1st MB
+        self.install_default_rules()
 
         # start countdown thread for flow change
-        #start_new_thread(countdown_thread, (self,))
+        start_new_thread(countdown_thread, (self,))
 
     def _handle_PacketIn(self, event):
         """
@@ -87,7 +106,6 @@ class SwitchController(object):
         #log.debug("PACKET_IN: " + str(packet))
         # forward them to all ports (act like a HUB)
         #self.resend_packet(packet_in, of.OFPP_ALL)
-   
 
     def resend_packet(self, packet_in, out_port):
         """
@@ -105,56 +123,75 @@ class SwitchController(object):
         # Send message to switch
         self.connection.send(msg)
 
-    def setup_static_rules(self):
+    def install_default_rules(self):
+        """
+        Installs default roules to route all traffic
+        through the first middlebox in the system.
+        These rules are "overloaded" by the load balancing rules
+        due to its low priorization.
+        """
         # port mappings
         m = self.mapping
-        # get number of midleboxes connected to the system
-        num_mbs = len(m) - 2
-        # defince base port for traffic generation
-        USER_BASE_PORT = 1200
-
+        # set default static routes on both switches
         if self.switch == 2:
-            log.info("Setup rules for s%d" % self.switch)
-            # always use first link as default
-            self.set_static_rule(m["s2-eth1"], m["s2-eth2"], 0)
-            self.set_static_rule(m["s2-eth2"], m["s2-eth1"], 0)
-
-            # distribute generated TCP traffic over all middleboxes
-            for i in range(0, num_mbs):
-                self.set_static_rule(
-                    m["s2-eth1"], m["s2-eth2"] + i, 10,
-                    dl_type=pkt.ethernet.IP_TYPE,
-                    nw_proto=pkt.ipv4.TCP_PROTOCOL,
-                    tp_dst=1200 + i)
-
-                self.set_static_rule(
-                    m["s2-eth2"] + i, m["s2-eth1"], 10,
-                    dl_type=pkt.ethernet.IP_TYPE,
-                    nw_proto=pkt.ipv4.TCP_PROTOCOL,
-                    tp_src=1200 + i)
-
+            self.set_static_rule(self.st_port, m["s2-eth2"], 0)
+            self.set_static_rule(m["s2-eth2"], self.st_port, 0)
         elif self.switch == 3:
-            log.info("Setup rules for s%d" % self.switch)
-            # always use first link as default
-            self.set_static_rule(m["s3-eth2"], m["s3-eth1"], 0)
-            self.set_static_rule(m["s3-eth1"], m["s3-eth2"], 0)
+            self.set_static_rule(m["s3-eth2"], self.st_port, 0)
+            self.set_static_rule(self.st_port, m["s3-eth2"], 0)
 
-            # distribute generated TCP traffic over all middleboxes
-            for i in range(0, num_mbs):
+    def install_load_balancing_rules(
+            self,
+            n_flows,
+            n_middleboxes=9999,
+            BASE_PORT=1200):
+        """
+        Assumes n_flows TCP flows between source and target.
+        Each flow on its own TCP port starting with BASE_PORT.
+        Distributes this load over the n_middleboxes first middlebox
+        replicas available in the port mapping.
+        """
+        # port mappings
+        m = self.mapping
+        # calc modulo value
+        mod = min(len(self.mb_ports), n_middleboxes)
+
+        # set load balancing rules
+        if self.switch == 2:
+            for i in range(0, n_flows):
+                # s -> t
                 self.set_static_rule(
-                    m["s3-eth2"] + i, m["s3-eth1"], 10,
+                    self.st_port, self.mb_ports[i % mod], 10,
                     dl_type=pkt.ethernet.IP_TYPE,
                     nw_proto=pkt.ipv4.TCP_PROTOCOL,
-                    tp_dst=1200 + i)
-
+                    tp_dst=BASE_PORT + i)
+                # t <- s
                 self.set_static_rule(
-                    m["s3-eth1"], m["s3-eth2"] + i, 10,
+                    self.mb_ports[i % mod], self.st_port, 10,
                     dl_type=pkt.ethernet.IP_TYPE,
                     nw_proto=pkt.ipv4.TCP_PROTOCOL,
-                    tp_src=1200 + i)
-        #else:
-            # set static hub behavior
-            #self.set_static_rule(None, of.OFPP_ALL, 0)
+                    tp_src=BASE_PORT + i)
+        elif self.switch == 3:
+            for i in range(0, n_flows):
+                # s -> t
+                self.set_static_rule(
+                    self.mb_ports[i % mod], self.st_port, 10,
+                    dl_type=pkt.ethernet.IP_TYPE,
+                    nw_proto=pkt.ipv4.TCP_PROTOCOL,
+                    tp_dst=BASE_PORT + i)
+                # t -> s
+                self.set_static_rule(
+                    self.st_port, self.mb_ports[i % mod], 10,
+                    dl_type=pkt.ethernet.IP_TYPE,
+                    nw_proto=pkt.ipv4.TCP_PROTOCOL,
+                    tp_src=BASE_PORT + i)
+
+    def clear_all_rules(self):
+        """
+        Removes all flows from a switch.
+        """
+        msg = of.ofp_flow_mod(command=of.OFPFC_DELETE)
+        self.connection.send(msg)
 
     def set_static_rule(self, in_port, out_port, prio, **match_args):
         msg = of.ofp_flow_mod()
@@ -171,46 +208,6 @@ class SwitchController(object):
         # install rule
         self.connection.send(msg)
         #log.info("SET STATIC PORT RULE: %s" % str(msg))
-
-    def set_tcp_rule(self, in_port=None, out_port=None, prio=0, **match_args):
-        msg = of.ofp_flow_mod()
-        msg.priority = prio
-        of_match = of.ofp_match(**match_args)
-        if in_port is not None:
-            of_match.in_port = (in_port)
-        msg.match = of_match
-        if isinstance(out_port, list):
-            for oport in out_port:
-                of_action = of.ofp_action_output(port=(oport))
-                msg.actions.append(of_action)
-        else:
-            of_action = of.ofp_action_output(port=(out_port))
-            msg.actions.append(of_action)
-        self.connection.send(msg)
-        log.info("SET TCP RULE: %s" % str(msg))
-
-    def flow_move_1(self):
-        log.info("Flow move c2 on s%d" % self.switch)
-        m = self.mapping
-        if self.switch == 2:
-            # move flow from client2 to second link
-            self.set_static_rule(
-                m["s2-eth4"], m["s2-eth2"], 10, dl_type=0x800, nw_src="20.0.0.2", nw_dst="20.0.1.1")
-        elif self.switch == 3:
-            # move flow from client2 to second link
-            self.set_static_rule(
-                m["s3-eth3"], m["s3-eth2"], 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.2")
-
-    def flow_move_2(self):
-        log.info("Flow move c1 on s%d" % self.switch)
-        if self.switch == 2:
-            # move flow from client1 to second link
-            self.set_static_rule(
-                m["s2-eth3"], m["s2-eth2"], 10, dl_type=0x800, nw_src="20.0.0.1", nw_dst="20.0.1.1")
-        elif self.switch == 3:
-            # move flow from client1 to second link
-            self.set_static_rule(
-                m["s3-eth3"], m["s3-eth2"], 10, dl_type=0x800, nw_src="20.0.1.1", nw_dst="20.0.0.1")
 
 
 def launch():
