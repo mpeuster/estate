@@ -12,12 +12,14 @@ import os
 import signal
 import subprocess
 import argparse
+import json
 
 import time
 
 # defines start of portrange for generated user connections
 USER_BASE_PORT = 1200
 PARAMS = None
+
 
 def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
     """
@@ -391,7 +393,7 @@ if __name__ == '__main__':
 
     print PARAMS
     with open("log/params.json", 'w') as f:
-        f.write(str(vars(PARAMS)))
+        f.write(json.dumps(vars(PARAMS)))
 
     # start custom controller
     p = start_custom_pox()
