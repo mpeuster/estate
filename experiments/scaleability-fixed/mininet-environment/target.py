@@ -28,8 +28,8 @@ def run_server(port):
                     break
                 if data:
                     # print data
-                    print "Received %d bytes from %s" % (len(data), str(address))
-                    sys.stdout.flush()
+                    #print "Received %d bytes from %s" % (len(data), str(address))
+                    #sys.stdout.flush()
                     client.send(data)
             except Exception as e:
                 print str(e)

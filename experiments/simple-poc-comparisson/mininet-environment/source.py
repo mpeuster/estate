@@ -29,12 +29,12 @@ def run_client(host, port, arr_lambda=1.0):
 
     while True:
         s.send(random_bytes(size))
-        print "-- Send %d bytes to %s:%d" % (size, host, port)
-        sys.stdout.flush()
+        #print "-- Send %d bytes to %s:%d" % (size, host, port)
+        #sys.stdout.flush()
         data = s.recv(size)
-        if data:
-            print "-- Received %d bytes." % len(data)
-        sys.stdout.flush()
+        #if data:
+        #    print "-- Received %d bytes." % len(data)
+        #sys.stdout.flush()
             # print data
         time.sleep(arr_lambda)
     s.close()
