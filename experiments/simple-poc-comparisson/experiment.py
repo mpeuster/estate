@@ -79,7 +79,7 @@ def main():
     DURATION = 120  # duration of one scenario
 
     # scenarios: 0-50ms delay with libestate
-    for i in range(0, 51, 10):
+    for i in range(0, 201, 10):
         # scenarios: lambda 1.0, 0.1, 0.01
         for l in [1.0, 0.1, 0.01]:
             run_scenario(
