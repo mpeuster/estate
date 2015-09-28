@@ -47,7 +47,7 @@ class Scenario():
         df = pd.read_csv(io.StringIO(data), sep=";", dtype=float)
         # for now we will have only positive values
         num = df._get_numeric_data()
-        num[num < 0] = 0
+        #num[num < 0] = 0
         return df
 
     def load_middlebox_logs(self):

@@ -135,7 +135,8 @@ class ExperimentData():
         ns = self._get_scenario_names()
         print "Loading scenarios: %s" % str(ns)
         for n in ns:
-            self.scenarios[n] = Scenario(self.path, n)
+            if "DS_Store" not in n:
+                self.scenarios[n] = Scenario(self.path, n)
 
     def load(self):
         self.load_scenarios()

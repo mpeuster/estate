@@ -99,6 +99,19 @@ def main():
                  "--duration", "%d" % DURATION,
                  "--controldelay", "%d" % i,
                  "--srclambda", "%f" % l])
+    # different backends
+    for be in ["redis", "libestate"]:
+        # different delays
+        for i in [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]:
+            # different lambdas 1.0, 0.1, 0.01
+            for l in [1.0, 0.1, 0.01]:
+                # different number of middleboxes
+                run_scenario(
+                    "sc_%s_lambda%03d_delay%03d" % (be, l*100, i),
+                    ["--backend", "%s" % be,
+                     "--duration", "%d" % DURATION,
+                     "--controldelay", "%d" % i,
+                     "--srclambda", "%f" % l])
 
     print "*" * 40
     print "Finish!"
