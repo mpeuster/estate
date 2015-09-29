@@ -413,5 +413,7 @@ if __name__ == '__main__':
         else:
             wait(int(PARAMS.duration))
         mt.stop_topo()
-    # stop custom controller
-    stop_custom_pox(p)
+
+    if int(PARAMS.duration) > 0:
+        # stop custom controller
+        stop_custom_pox(p)

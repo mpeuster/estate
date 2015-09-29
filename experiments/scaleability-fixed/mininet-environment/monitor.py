@@ -124,9 +124,11 @@ def log_global_state():
 
     # receive global values
     t_get_global_start = time.time()
+    print "start: %f" % t_get_global_start
     pcount_global = get_ecounter_global_sum("pcount")
     matchcount_global = get_ecounter_global_sum("matchcount")
     time_global_request = time.time() - t_get_global_start
+    print "end: %f" % time.time()
 
     # calculate pps
     timespan = abs(time.time() - last_log_timestamp)

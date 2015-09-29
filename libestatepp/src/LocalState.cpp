@@ -19,12 +19,12 @@ LocalState::~LocalState()
 void LocalState::set(std::string k, StateItem* v)
 {
 	this->data[k] = v;
-	debug("SET %s to %s\n", k.c_str(), v->toString().c_str());
+	//debug("SET %s to %s\n", k.c_str(), v->toString().c_str());
 }
 
 StateItem* LocalState::get(std::string k)
 {
-	debug("GET %s\n", k.c_str());
+	//debug("GET %s\n", k.c_str());
 	if (this->exists(k))
 		return this->data[k];
 	return NULL;
@@ -38,7 +38,7 @@ void LocalState::del(std::string k)
 		delete si;
 	}
 	this->data.erase(k);
-	debug("DEL %s\n", k.c_str());
+	//debug("DEL %s\n", k.c_str());
 }
 
 

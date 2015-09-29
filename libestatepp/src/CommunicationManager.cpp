@@ -17,6 +17,7 @@ CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int
 	this->sm = sm;
 	this->my_ip = ip;
 	this->my_port = port;
+	this->request_count = 0;
 
 	// create publisher
 	this->zpublisher = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pub);
@@ -55,7 +56,6 @@ void CommunicationManager::start()
 	this->request_subscriber_start();
 }
 
-
 /**
  * Request the global state by sending a state request to all peer nodes.
  * This is done by publishing a request to the zpublisher.
@@ -65,6 +65,20 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 	// prepare results structure
 	std::list<StateItem> results;
 
+	// store local request ID to identify response
+	unsigned long request_id = this->request_count;
+	this->request_count++;
+
+	// create and send request to all peers
+	zmqpp::message request;
+	request.push_back("global_state_request");
+	request.push_back(this->my_ip);
+	request.push_back(this->my_port);
+	request.push_back(request_id);
+	request.push_back(k);
+	this->zpublisher->send(request);
+	debug("(%s) published request k=%s; rid=%ld\n", this->get_local_identity().c_str(),  k.c_str(), request_id);
+
 	// try multiple times if something goes wrong
 	int request_try = 0;
 	bool result_complete = false;
@@ -72,15 +86,6 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 	{
 		// remove results from last try
 		results.clear();
-		// create and send request to all peers
-		zmqpp::message request;
-		request.push_back("global_state_request");
-		request.push_back(this->my_ip);
-		request.push_back(this->my_port);
-		request.push_back(k);
-		this->zpublisher->send(request);
-
-
 
 		// receive results (we always expect to get results from all peers)
 		uint num_peers = this->get_peer_nodes().size();
@@ -94,20 +99,22 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 				std::string sender_ip = response.get(1);
 				int sender_port;
 				response.get(sender_port, 2);
-				if (response.parts() > 3) // check if response contains a state item
+				unsigned long response_id;
+				response.get(response_id, 3);
+				if (response.parts() > 4) // check if response contains a state item
 				{
 					// actual state item data
-					std::string data = response.get(3);
-					std::string node_identifier = response.get(4);
+					std::string data = response.get(4);
+					std::string node_identifier = response.get(5);
 					long timestamp;
-					response.get(timestamp, 5);
+					response.get(timestamp, 6);
 					// add response to results
 					results.push_back(StateItem(data, node_identifier, timestamp));
-					debug("(%s) received response from %s:%d: k=%s; v=%s\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str());
+					debug("(%s) received response from %s:%d: k=%s; v=%s; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str(), response_id);
 				}
 				else
 				{   // empty response (key was not found on sender)
-					debug("(%s) received response from %s:%d: k=%s; v=NOT_PRESENT\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str());
+					debug("(%s) received response from %s:%d: k=%s; v=NOT_PRESENT; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), response_id);
 				}
 			}
 			// if we run in a timeout, we skip further tries to receive more responses
@@ -166,8 +173,10 @@ void CommunicationManager::request_subscriber_thread_func()
 			std::string sender_ip = request.get(1);
 			int sender_port;
 			request.get(sender_port, 2);
-			std::string key = request.get(3);
-			debug("(%s) received request from %s:%d\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
+			unsigned long request_id;
+			request.get(request_id, 3);
+			std::string key = request.get(4);
+			debug("(%s) received request from %s:%d; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, request_id);
 
 			// create ZMQ push socket for the response if it is not already present
 			std::string conn_string = sender_ip + ":" + to_string(sender_port + 1000);
@@ -192,6 +201,7 @@ void CommunicationManager::request_subscriber_thread_func()
 			response.push_back("global_state_response");
 			response.push_back(this->my_ip);
 			response.push_back(this->my_port);
+			response.push_back(request_id);
 			if(si != NULL)
 			{	// return state item if present on this node
 				response.push_back(si->getData()); // actual data for key

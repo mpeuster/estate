@@ -44,6 +44,6 @@ void StateItem::updateTimestamp()
 						std::chrono::system_clock::now().time_since_epoch()
 						).count()); // local system clock
 	}
-	debug("TIMESTAMP: StateItem@%s = %ld\n", this->node_identifier.c_str(), this->getTimestamp());
+	//debug("TIMESTAMP: StateItem@%s = %ld\n", this->node_identifier.c_str(), this->getTimestamp());
 }
 

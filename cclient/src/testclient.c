@@ -31,7 +31,11 @@ void client_a()
 	//const char* result = es_get("k1");
 	//printf("GET k1 result: %s\n", result);
 
-	usleep(1000 * 1000 * 10);
+	usleep(1000 * 1000 * 2);
+	es_get_global("k1", reduce_test);
+	usleep(1000 * 1000 * 2);
+	es_get_global("k1", reduce_test);
+	usleep(1000 * 1000 * 2);
 	es_get_global("k1", reduce_test);
 	usleep(1000 * 1000 * 1);
 

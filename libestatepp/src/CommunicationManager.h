@@ -29,6 +29,9 @@ private:
 	std::string my_ip;
 	int my_port;
 
+	/* global request identifier counter: 64bit long, however we'll see overflows here if the system runs long enough */
+	unsigned long request_count;
+
 	/* request publisher */
 	zmqpp::socket* zpublisher;
 
