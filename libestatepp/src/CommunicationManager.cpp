@@ -8,7 +8,7 @@
 #include "CommunicationManager.h"
 #include "StateManager.h"
 
-#define RESPONSE_TIMEOUT_MSEC 100
+#define RESPONSE_TIMEOUT_MSEC 1000
 #define MAX_REQUEST_RETRY 3
 
 CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int port)
@@ -101,6 +101,14 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 				response.get(sender_port, 2);
 				unsigned long response_id;
 				response.get(response_id, 3);
+
+				if(response_id < request_id) // filter old response messages
+				{
+					i--;
+					debug("(%s) dropping response from %s:%d: rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, response_id);
+					continue;
+				}
+
 				if (response.parts() > 4) // check if response contains a state item
 				{
 					// actual state item data
@@ -130,6 +138,7 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 		// next try
 		request_try++;
 	} // end while
+	debug("return results for rid=%ld\n", request_id);
 	return results;
 }
 
