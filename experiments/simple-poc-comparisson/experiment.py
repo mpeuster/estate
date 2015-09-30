@@ -78,33 +78,12 @@ def main():
     # global parameters
     DURATION = 120  # duration of one scenario
 
-    # scenarios: 0-50ms delay with libestate
-    for i in range(0, 201, 10):
-        # scenarios: lambda 1.0, 0.1, 0.01
-        for l in [1.0, 0.1, 0.01]:
-            run_scenario(
-                "sc_libestate_lambda%03d_delay%03d" % (l*100, i),
-                ["--backend", "libestate",
-                 "--duration", "%d" % DURATION,
-                 "--controldelay", "%d" % i,
-                 "--srclambda", "%f" % l])
-
-    # scenarios: 0-50ms delay with redis
-    for i in range(0, 51, 10):
-        # scenarios: lambda 1.0, 0.1, 0.01
-        for l in [1.0, 0.1, 0.01]:
-            run_scenario(
-                "sc_redis_lambda%03d_delay%03d" % (l*100, i),
-                ["--backend", "redis",
-                 "--duration", "%d" % DURATION,
-                 "--controldelay", "%d" % i,
-                 "--srclambda", "%f" % l])
     # different backends
     for be in ["redis", "libestate"]:
         # different delays
         for i in [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]:
             # different lambdas 1.0, 0.1, 0.01
-            for l in [1.0, 0.1, 0.01]:
+            for l in [0.1, 0.01]:
                 # different number of middleboxes
                 run_scenario(
                     "sc_%s_lambda%03d_delay%03d" % (be, l*100, i),
