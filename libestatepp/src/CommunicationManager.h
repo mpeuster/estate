@@ -63,6 +63,8 @@ public:
 	/* peer discovery */
 	virtual std::list<std::string> get_peer_nodes();
 	virtual void set_peer_nodes(std::list<std::string>);
+
+	virtual bool is_state_item_of_node_in_list(StateItem si, std::list<StateItem> l);
 };
 
 #endif /* COMMUNICATIONMANAGER_H_ */

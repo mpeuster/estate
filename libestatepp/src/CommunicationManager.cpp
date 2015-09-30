@@ -8,6 +8,7 @@
 #include "CommunicationManager.h"
 #include "StateManager.h"
 
+// Attention: MAX_REQUEST_RETRY * RESPONSE_TIMEOUT_MSEC > control link delay must hold, otherwise nothing will work
 #define RESPONSE_TIMEOUT_MSEC 1000
 #define MAX_REQUEST_RETRY 3
 
@@ -69,78 +70,99 @@ std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 	unsigned long request_id = this->request_count;
 	this->request_count++;
 
-	// create and send request to all peers
-	zmqpp::message request;
-	request.push_back("global_state_request");
-	request.push_back(this->my_ip);
-	request.push_back(this->my_port);
-	request.push_back(request_id);
-	request.push_back(k);
-	this->zpublisher->send(request);
-	debug("(%s) published request k=%s; rid=%ld\n", this->get_local_identity().c_str(),  k.c_str(), request_id);
-
-	// try multiple times if something goes wrong
+	// re-publish the request until result is complete or MAX_REQUEST_RETRY reached
 	int request_try = 0;
-	bool result_complete = false;
-	while(request_try < MAX_REQUEST_RETRY && !result_complete)
+	while(request_try < MAX_REQUEST_RETRY && results.size() < this->get_peer_nodes().size())
 	{
-		// remove results from last try
-		results.clear();
+		// create and request message to be published for all peers
+		// (we have to do this inside the loop because message objects are flushed on send)
+		zmqpp::message request;
+		request.push_back("global_state_request");
+		request.push_back(this->my_ip);
+		request.push_back(this->my_port);
+		request.push_back(request_id);
+		request.push_back(k);
+		// publish request message
+		this->zpublisher->send(request);
+		debug("(%s) published request k=%s; rid=%ld\n", this->get_local_identity().c_str(),  k.c_str(), request_id);
 
-		// receive results (we always expect to get results from all peers)
-		uint num_peers = this->get_peer_nodes().size();
-		for(uint i = 0; i < num_peers; i++)
+		// try to get all results of one request directly in this inner loop
+		while(results.size() < this->get_peer_nodes().size())
 		{
+			// fetch message from input queue
 			zmqpp::message response;
 			this->zresponsepull->receive(response);
-			if(response.parts() > 2)
+
+			// if we run into timeout, we stop this loop and re-publish the request
+			if(response.parts() < 1)
+				break;
+
+			if(response.parts() > 6)
 			{
-				// unpack response message
+				// unpack response message:
+				// 0: constant message type
+				// 1: sender IP
 				std::string sender_ip = response.get(1);
+				// 2: sender port
 				int sender_port;
 				response.get(sender_port, 2);
+				// 3: request ID:
 				unsigned long response_id;
 				response.get(response_id, 3);
+				// 4: state item: data
+				std::string data = response.get(4);
+				// 5: state item: node identifier
+				std::string node_identifier = response.get(5);
+				// 6: state item: timestamp
+				long timestamp;
+				response.get(timestamp, 6);
 
-				if(response_id < request_id) // filter old response messages
+				debug("(%s) received response from %s:%d: k=%s; v=%s; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str(), response_id);
+
+				// decide if we have a valid response for the current request
+				if(response_id != request_id)
 				{
-					i--;
-					debug("(%s) dropping response from %s:%d: rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, response_id);
+					debug("(%s) dropping response from %s:%d: rid=%ld != %ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, response_id, request_id);
 					continue;
 				}
 
-				if (response.parts() > 4) // check if response contains a state item
-				{
-					// actual state item data
-					std::string data = response.get(4);
-					std::string node_identifier = response.get(5);
-					long timestamp;
-					response.get(timestamp, 6);
-					// add response to results
-					results.push_back(StateItem(data, node_identifier, timestamp));
-					debug("(%s) received response from %s:%d: k=%s; v=%s; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), data.c_str(), response_id);
-				}
-				else
-				{   // empty response (key was not found on sender)
-					debug("(%s) received response from %s:%d: k=%s; v=NOT_PRESENT; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, k.c_str(), response_id);
-				}
-			}
-			// if we run in a timeout, we skip further tries to receive more responses
-			if(response.parts() < 1)
-				break;
-		}
+				// generate state item
+				StateItem si = StateItem(data, node_identifier, timestamp);
 
-		// if we have more than one peer, we will check if we have all results (remove this later, but helpful to keep track during development)
-		if(num_peers != results.size() && results.size() != 1)
-			debug("get_global response resulsts.size()=%lu != num_peers=%d\n", results.size(), num_peers);
-		else
-			result_complete = true; // stop while loop
+				// decide if we add the response to our global result
+				if(this->is_state_item_of_node_in_list(si, results))
+				{
+					debug("(%s) dropping response from %s:%d: StateItem exists.\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port);
+					continue;
+				}
+
+				// response can be used: add it to our result list
+				results.push_back(si);
+			}
+		} // end inner while
 		// next try
 		request_try++;
-	} // end while
+	} // end outer while
+
+	// display a message if we still have not all results
+	if(this->get_peer_nodes().size() != results.size() && this->get_peer_nodes().size() > 1)
+		debug("get_global response resulsts.size()=%lu != num_peers=%d\n", results.size(), this->get_peer_nodes().size());
+
+	// filter empty results, we don't want them in our reduce functions
+	std::list<StateItem> filtered_results;
+	for (std::list<StateItem>::const_iterator it = results.begin(), end = results.end(); it != end; ++it)
+	{
+		if(it->getData() != "ES_NOT_PRESENT")
+		{
+			filtered_results.push_back(*it);
+		}
+	}
+
+	// return results
 	debug("return results for rid=%ld\n", request_id);
-	return results;
+	return filtered_results;
 }
+
 
 /**
  * Starts a thread that subscribes to all peers and subscribes to get_global requests.
@@ -219,7 +241,9 @@ void CommunicationManager::request_subscriber_thread_func()
 			}
 			else
 			{	// return indicator that state item was not found
-				//response.push_back("ES_NOT_PRESENT");
+				response.push_back("ES_NOT_PRESENT");
+				response.push_back(this->get_local_identity());
+				response.push_back(0);
 			}
 			zresponsepush->send(response);
 		}
@@ -242,6 +266,16 @@ std::string CommunicationManager::get_local_identity()
 	// this is used to identify each estate node
 	return this->my_ip + std::string(":") + to_string(this->my_port);
 	//return to_string(this->my_port);
+}
+
+bool CommunicationManager::is_state_item_of_node_in_list(StateItem si, std::list<StateItem> l)
+{
+	for (std::list<StateItem>::const_iterator it = l.begin(), end = l.end(); it != end; ++it)
+	{
+		if(it->getNodeIdentifier() == si.getNodeIdentifier())
+			return true;
+	}
+	return false;
 }
 
 
