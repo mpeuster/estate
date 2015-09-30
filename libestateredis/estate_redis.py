@@ -58,7 +58,8 @@ class estate(object):
     def get(self, k):
         kl = self.to_instance_key(k)
         logging.debug("ES: GET k=%s" % (str(kl)))
-        return self.r.get(kl) if self.r.get(kl) is not None else "ES_NONE"
+        res = self.r.get(kl)
+        return res if res is not None else "ES_NONE"
 
     def delete(self, k):
         kl = self.to_instance_key(k)
@@ -79,13 +80,13 @@ class estate(object):
         keys = self.r.keys("%s.?" % k)
         states = []
         timestamps = []
+        pipe = self.r.pipeline()
         for kl in keys:
-            pipe = self.r.pipeline()
-            pipe.get("timestamp.%s" % kl)
-            pipe.get(kl)
-            res = pipe.execute()
-            timestamps.append(res[0])
-            states.append(res[1])
+            pipe.mget("timestamp.%s" % kl, kl)
+        res = pipe.execute()
+        for r in res:
+            timestamps.append(r[0])
+            states.append(r[1])
         return (states, timestamps)
 
     def _get_newest_replica(self, k):
