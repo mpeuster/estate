@@ -53,7 +53,7 @@ def single_scenario_plot(sc, output,
     pylab.close()
 
 
-def plot(output="figures/"):
+def plot(output="figures/single/"):
     # prepare output
     ensure_dir(output)
     # load data

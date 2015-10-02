@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import io
 import sys
+import json
 
 RESULT_PATH = "../results/"
 
@@ -11,14 +12,26 @@ class Scenario():
     One emulation run.
     - name
     - mblogs: dict of middlebox logs as pandas df
+    - TODO allow to get one combined dataframe with intergrated
+    scenario definition: lambda, #mbs etc
+    (each key of params dict becomes an additional column).
     """
 
     def __init__(self, path, name):
         self.path = os.path.join(path, name)
         self.name = name
         self.mblogs = {}  # dict containing pandas frames of middlebox logs
+        self.params = {}  # params of scenario from params.json
         print "Creating scenario '%s' location: '%s'" % (self.name, self.path)
+        self.load_scenario_parameters()
         self.load_middlebox_logs()
+
+    def load_scenario_parameters(self):
+        fpath = os.path.join(self.path, "params.json")
+        with open(fpath) as f:
+            data = json.load(f)
+        self.params = data
+        print str(self.params)
 
     def _get_monitoring_files(self):
         return [
@@ -50,10 +63,26 @@ class Scenario():
         num[num < 0] = 0
         return df
 
+    def _annotate_df(self, df, mbfile="-1"):
+        """
+        Add additional data to dataframes to add
+        mb number and params to our data.
+        """
+        # add column with filename (ATTENTION: May break!)
+        df["mb"] = int(filter(lambda x: x.isdigit(), mbfile))
+        # add params columns
+        for k, v in self.params.items():
+            try:
+                df[str(k)] = float(v)
+            except:
+                df[str(k)] = v
+        return df
+
     def load_middlebox_logs(self):
         files = self._get_monitoring_files()
         for f in files:
-            self.mblogs[f] = self._load_middlebox_log_to_pandas(f)
+            df = self._load_middlebox_log_to_pandas(f)
+            self.mblogs[f] = self._annotate_df(df, f)
             print ("Loaded log from: %s containing %d rows."
                    % (f, len(self.mblogs[f].index)))
             print "Columns: %s" % list(self.mblogs[f].columns.values)
@@ -78,6 +107,14 @@ class Scenario():
             raise Exception("mbname not found")
         return df[fieldname].tolist()
 
+    def get_combined_dfs(self):
+        """
+        Generates one dataframe with all log data.
+        """
+        return pd.concat(
+            [d for d in self.mblogs.itervalues()],
+            ignore_index=True)
+
 
 class ExperimentData():
     """
@@ -98,7 +135,8 @@ class ExperimentData():
         ns = self._get_scenario_names()
         print "Loading scenarios: %s" % str(ns)
         for n in ns:
-            self.scenarios[n] = Scenario(self.path, n)
+            if "DS_Store" not in n:
+                self.scenarios[n] = Scenario(self.path, n)
 
     def load(self):
         self.load_scenarios()
@@ -107,10 +145,23 @@ class ExperimentData():
         for s in self.scenarios.itervalues():
             s.normalize_times()
 
+    def get_combined_df(self, filter=None):
+        """
+        Return dataframe data of all scenarios.
+        Adds additional index columns based on
+        scenario params.
+        """
+        dfs = [s.get_combined_dfs() for s in self.scenarios.itervalues()]
+        return pd.concat(dfs, ignore_index=True)
+
 
 def main():
     ed = ExperimentData()
-
+    cdf = ed.get_combined_df()
+    print cdf
+    print "=" * 70
+    print "Columns: %s " % str(cdf.columns.values)
+    print "Rows: %d " % len(cdf)
 
 if __name__ == '__main__':
     main()
