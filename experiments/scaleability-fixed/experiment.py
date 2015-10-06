@@ -81,11 +81,11 @@ def main():
     # different backends
     for be in ["redis", "libestate"]:
         # different delays
-        for i in range(0, 201, 5):
+        for i in range(0, 121, 5):
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
                 # different number of middleboxes
-                for nmb in range(2, 33, 2):
+                for nmb in range(2, 17, 2):
                     run_scenario(
                         "sc_%s_lambda%03d_delay%03d_nmb%02d" % (be, l*100, i, nmb),
                         ["--backend", "%s" % be,

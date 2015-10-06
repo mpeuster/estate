@@ -81,7 +81,7 @@ def main():
     # different backends
     for be in ["redis", "libestate"]:
         # different delays
-        for i in [0, 40, 100, 200]:
+        for i in [0, 50, 100]:
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
                 # different number of middleboxes

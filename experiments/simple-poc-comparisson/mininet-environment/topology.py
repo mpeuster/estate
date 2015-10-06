@@ -124,6 +124,7 @@ class GenericMiddleBoxTopology(object):
         self.config_middlebox_hosts()
         self.run_middlebox_hosts()
         self.run_target_hosts()
+        time.sleep(5)  # give servers some time to come up
         self.run_source_hosts()
 
     def test_network(self):
@@ -220,7 +221,9 @@ class GenericMiddleBoxTopology(object):
             p = USER_BASE_PORT
             for sh in self.source_hosts:
                 # start target.py for each source host once on each target host
-                th.cmd("./target.py %d > log/target_%s_%s.log 2>&1 &"
+                #th.cmd("./target.py %d > log/target_%s_%s.log 2>&1 &"
+                #       % (p, th.name, sh.name))  # one port for each source
+                th.cmd("iperf -s -p %d > log/target_%s_%s.log 2>&1 &"
                        % (p, th.name, sh.name))  # one port for each source
                 p += 1
 
@@ -232,10 +235,12 @@ class GenericMiddleBoxTopology(object):
         p = USER_BASE_PORT
         for sh in self.source_hosts:
             # start source.py on source hosts and connect to first target host
-            sh.cmd("./source.py %s %d %s > log/source_%s.log 2>&1 &"
-                   % (th.IP(), p, PARAMS.srclambda, sh.name))
-            print("./source.py %s %d %s > log/source_%s.log 2>&1 &"
-                  % (th.IP(), p, PARAMS.srclambda, sh.name))
+            #sh.cmd("./source.py %s %d %s > log/source_%s.log 2>&1 &"
+            #       % (th.IP(), p, PARAMS.srclambda, sh.name))
+            sh.cmd("iperf -c %s -p %d -t 120 -i 10 > log/source_%s.log 2>&1 &"
+                   % (th.IP(), p, sh.name))
+            #print("./source.py %s %d %s > log/source_%s.log 2>&1 &"
+            #      % (th.IP(), p, PARAMS.srclambda, sh.name))
             p += 1
 
     def stop_topo(self):
