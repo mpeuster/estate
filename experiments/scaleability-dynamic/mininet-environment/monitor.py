@@ -7,6 +7,7 @@ from scapy.layers.inet import TCP, IP
 import sys
 import time
 import thread
+import random
 
 es = None
 
@@ -79,9 +80,12 @@ def pkt_callback(pkt):
     # do pattern matching on raw data
     PATTERN = "a"
     pattern_count = 0
-    data = str(pkt[TCP].payload)
-    if len(data) > 0:
-        pattern_count = data.count(PATTERN)
+    #data = str(pkt[TCP].payload)
+    #if len(data) > 0:
+    #    pattern_count = data.count(PATTERN)
+    # randomly match packets (emulate malformed packet detection)
+    if pkt[TCP].seq % random.randint(10, 20) == 0:
+        pattern_count += 1
 
     # update state values:
     # general packet count
@@ -96,7 +100,7 @@ def pkt_callback(pkt):
     # TODO: add state: flows seen, flows active on instance (local dict)
 
     # debugging:
-    #return "PKT: " + str(pkt.summary())
+    #return "PKT: " + str(pkt.show()) #pkt.summary()
 
 
 def init_state():
