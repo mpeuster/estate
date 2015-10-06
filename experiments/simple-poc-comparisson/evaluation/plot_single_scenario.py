@@ -2,12 +2,13 @@ import pylab
 import matplotlib
 import os
 import data
-from helper import ensure_dir
+from helper import ensure_dir, get_markers, get_upb_colors
 # ensure correct fonts for ACM/IEEE
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 # style template ('bmh', 'ggplot', 'fivethirtyeight')
-matplotlib.pyplot.style.use("ggplot")
+# matplotlib.pyplot.style.use("ggplot")
+matplotlib.pyplot.style.use("grayscale")
 
 
 def single_scenario_plot(sc, output,
@@ -22,14 +23,19 @@ def single_scenario_plot(sc, output,
     # figure
     fig = pylab.figure()
     g1 = fig.add_subplot(111)
+    # iterators
+    markers = get_markers()
+    colors = get_upb_colors()
     # do plots
     for n in sc.get_middlerbox_names():
         for yf in yfield:
             g1.plot(
                 sc.get_values(n, xfield),
                 sc.get_values(n, yf),
-                linewidth=1.5,
-                alpha=1.0, marker="x",
+                linewidth=1.25,
+                alpha=0.7,
+                marker=markers.next(),
+                color=colors.next(),
                 label="%s %s" % (n, yf))
     # label etc.
     g1.legend(
