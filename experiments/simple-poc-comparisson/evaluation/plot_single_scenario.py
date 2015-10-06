@@ -1,5 +1,7 @@
 import pylab
 import matplotlib
+import brewer2mpl
+import itertools
 import os
 import data
 from helper import ensure_dir, get_markers, get_upb_colors
@@ -25,7 +27,9 @@ def single_scenario_plot(sc, output,
     g1 = fig.add_subplot(111)
     # iterators
     markers = get_markers()
-    colors = get_upb_colors()
+    #colors = get_upb_colors()
+    # http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
+    colors = itertools.cycle(brewer2mpl.get_map('Set1', 'qualitative', 8).mpl_colors)
     # do plots
     for n in sc.get_middlerbox_names():
         for yf in yfield:
@@ -33,7 +37,7 @@ def single_scenario_plot(sc, output,
                 sc.get_values(n, xfield),
                 sc.get_values(n, yf),
                 linewidth=1.25,
-                alpha=0.7,
+                alpha=1.0,
                 marker=markers.next(),
                 color=colors.next(),
                 label="%s %s" % (n, yf))
