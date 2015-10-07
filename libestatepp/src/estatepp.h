@@ -41,6 +41,7 @@ extern "C"
 	 * return: string (selected, reduced result)
 	 */
 	extern const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int));
+	extern const char* es_get_global_predefined_reduce(const char* k, int reduce_id);
 
 #ifdef __cplusplus
 }

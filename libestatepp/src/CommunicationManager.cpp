@@ -22,11 +22,11 @@ CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int
 
 	// create publisher
 	this->zpublisher = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pub);
-	this->zpublisher->bind("tcp://*:" + to_string(this->my_port));
+	this->zpublisher->bind("tcp://*:" + int_to_string(this->my_port));
 
 	// pull socket to receive the request responses (on port = (orig_port + 1000)
 	this->zresponsepull = new zmqpp::socket(this->zmqctx, zmqpp::socket_type::pull);
-	this->zresponsepull->bind("tcp://*:" + to_string(this->my_port + 1000));
+	this->zresponsepull->bind("tcp://*:" + int_to_string(this->my_port + 1000));
 	this->zresponsepull->set(zmqpp::socket_option::receive_timeout, RESPONSE_TIMEOUT_MSEC);
 }
 
@@ -210,7 +210,7 @@ void CommunicationManager::request_subscriber_thread_func()
 			debug("(%s) received request from %s:%d; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, request_id);
 
 			// create ZMQ push socket for the response if it is not already present
-			std::string conn_string = sender_ip + ":" + to_string(sender_port + 1000);
+			std::string conn_string = sender_ip + ":" + int_to_string(sender_port + 1000);
 			zmqpp::socket* zresponsepush;
 
 			//TODO: Dyn: This map has to be updated dynamically if nodes can join/leave
@@ -264,7 +264,7 @@ void CommunicationManager::set_peer_nodes(std::list<std::string> peer_lst)
 std::string CommunicationManager::get_local_identity()
 {
 	// this is used to identify each estate node
-	return this->my_ip + std::string(":") + to_string(this->my_port);
+	return this->my_ip + std::string(":") + int_to_string(this->my_port);
 	//return to_string(this->my_port);
 }
 

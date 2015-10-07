@@ -10,7 +10,7 @@
 #include <sstream>
 
 
-std::string to_string(int i)
+std::string int_to_string(int i)
 {
 	std::stringstream s;
 	s << i;
@@ -18,4 +18,15 @@ std::string to_string(int i)
 }
 
 
+std::string double_to_string(double d)
+{
+	std::stringstream s;
+	s << d;
+	return s.str();
+}
+
+double string_to_double(std::string s)
+{
+	return atof(s.c_str());
+}
 

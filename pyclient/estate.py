@@ -4,6 +4,7 @@
 
 import ctypes
 
+
 class state_item_t(ctypes.Structure):
     """
     This custom structure corresponds to the state_item_t structure of
@@ -15,17 +16,24 @@ class state_item_t(ctypes.Structure):
                 ("data", ctypes.c_char_p)]
 
     def __str__(self):
-        return "StateItem: %s(time=%d,node=%s)" % (str(self.data), self.timestamp, str(self.node_identifier))
+        return "StateItem: %s(time=%d,node=%s)" % (
+            str(self.data), self.timestamp, str(self.node_identifier))
+
 
 class estate(object):
 
-    def __init__(self, instance_id, ip="127.0.0.1", base_port=9000):
-    	self.instance_id = int(instance_id)
-        self.lib = ctypes.cdll.LoadLibrary("libestatepp/Debug/libestatepp.so")
+    def __init__(self, instance_id):
+        self.instance_id = int(instance_id)
+
+    def init_libestate(self, ip, port, peerlist=["127.0.0.1", "9000"]):
+        self.lib = ctypes.cdll.LoadLibrary(
+            "../libestatepp/Debug/libestatepp.so")
         self.ip = str(ip)
-        self.port = int(self.instance_id + base_port)
-        self.lib.es_init(self.ip, self.port)
-        print "ES: Initialized estate for instance: %d" % self.instance_id
+        self.port = int(port)
+        self.lib.es_init_with_peers(
+            self.ip, self.port, self.to_peerlist_str(peerlist))
+        print "ES: Initialized estate for instance: %d with peers: %s" % (
+            self.instance_id, self.to_peerlist_str(peerlist))
 
     def close(self):
         self.lib.es_close()
@@ -49,40 +57,18 @@ class estate(object):
         self.lib.es_del(k)
         return True
 
-
-    def _get_all_replicas(self, k):
-        # return all map items, except of the latest field
-        return []
-
-    def _get_newest_replica(self, k):
-        return None
-
-    def get_global(self, k, red_func):
-
-        if red_func is None:
-            red_func = reduce_test
-
+    def get_global(self, k, red_func=0):
+        """
+        red_func: 0 = latest
+                  1 = sum
+                  2 = avg
+        """
         print "ES: GET_GLOBAL k=%s f=%s" % (str(k), str(red_func))
-        # define signature of reduce function (first argument is the return type)
-        CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.POINTER(state_item_t), ctypes.c_int)
-        # create a callback pointer for the given reduce function
-        reduce_func = CMPFUNC(red_func)
-        # call the C library with the callback pointer
-        rptr = self.lib.es_get_global(k, reduce_func)
+        rptr = self.lib.es_get_global_predefined_reduce(k, int(red_func))
         return ctypes.c_char_p(rptr).value
 
-
-def reduce_test(data_ptr, length):
-    """
-    Example reduce function.
-    Most important: Convertion from C char** to a python list 
-    of strings: data_lst = [data_ptr[i] for i in range(0, length)]
-    """
-    # TODO hide this when in a nice python module so that the outside does not
-    # notice that we are useing a C library
-    print "Python reduce: " + str(data_ptr)
-    print "Python length: " + str(length)
-    # convert to pyhton list of strings
-    data_lst = [str(data_ptr[i]) for i in range(0, length)]
-    print str(data_lst)
-    return "ES_NONE"
+    def to_peerlist_str(self, lst):
+        res = ""
+        for i in range(0, len(lst), 2):
+            res += lst[i] + ":" + lst[i + 1] + " "
+        return res
