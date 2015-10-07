@@ -3,7 +3,7 @@ import matplotlib
 import itertools
 import os
 import data
-from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors
+from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors, label_rename
 # ensure correct fonts for ACM/IEEE
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -14,7 +14,7 @@ matplotlib.pyplot.style.use("grayscale")
 
 def single_scenario_plot(sc, output,
                          xfield="t", yfield=["pps_local", "pps_global"],
-                         xname="Time [s]", yname="pps"):
+                         xname="time [s]", yname="pps"):
     # input processing
     if isinstance(yfield, basestring) or isinstance(yfield, str):
         yfield = [yfield]
@@ -29,24 +29,24 @@ def single_scenario_plot(sc, output,
     colors = get_preset_colors()
 
     # do plots
-    for n in sc.get_middlerbox_names():
-        for yf in yfield:
+    for n in sorted(sc.get_middlerbox_names()):
+        for yf in sorted(yfield):
             g1.plot(
                 sc.get_values(n, xfield),
                 sc.get_values(n, yf),
-                linewidth=1.25,
+                linewidth=1.5,
                 alpha=1.0,
                 marker=markers.next(),
                 color=colors.next(),
-                label="%s %s" % (n, yf))
+                label=label_rename("%s %s" % (n, yf)))
     # label etc.
     g1.legend(
-        bbox_to_anchor=(0., 1.02, 1., .102),
-        loc=3,
-        fancybox=True,
+        bbox_to_anchor=(1.02, 1),
+        loc=2,
+        borderaxespad=0.,
+        fancybox=False,
         shadow=False,
-        ncol=2,
-        mode="expand",
+        ncol=1,
         prop={'size': 10})
     g1.set_xlabel(xname)
     g1.set_ylabel(yname)
@@ -76,13 +76,13 @@ def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results
     # go over all scenarios and call plot methods
     for s in ed.scenarios.itervalues():
         single_scenario_plot(
-            s, output_dir, yfield=["pps_local", "pps_global"], yname="pps")
+            s, output_dir, yfield=["pps_local", "pps_global"], yname="packets per second")
         single_scenario_plot(
-            s, output_dir, yfield=["pcount_local", "pcount_global"], yname="pcount")
+            s, output_dir, yfield=["pcount_local", "pcount_global"], yname="number of processed packets")
         single_scenario_plot(
-            s, output_dir, yfield=["matchcount_local", "matchcount_global"], yname="mcount")
+            s, output_dir, yfield=["matchcount_local", "matchcount_global"], yname="number of matched packets")
         single_scenario_plot(
-            s, output_dir, yfield=["t_request_local", "t_request_global"], yname="t request")
+            s, output_dir, yfield=["t_request_local", "t_request_global"], yname="state request delay [s]")
 
 if __name__ == '__main__':
     plot()

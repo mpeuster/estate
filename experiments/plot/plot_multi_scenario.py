@@ -2,7 +2,7 @@ import pylab
 import matplotlib
 import os
 import data
-from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors
+from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors, label_rename
 # ensure correct fonts for ACM/IEEE
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -65,20 +65,20 @@ def multi_scenario_plot(
             g1.plot(
                 dfiltered.index.values,
                 dfiltered[yf].tolist(),
-                linewidth=1.25,
+                linewidth=1.5,
                 alpha=1.0,
                 marker=markers.next(),
                 color=colors.next(),
-                label="%s %s" % (dv, yf))
+                label=label_rename("%s %s" % (dv, yf)))
 
     # label etc.
     g1.legend(
-        bbox_to_anchor=(0., 1.02, 1., .102),
-        loc=3,
-        fancybox=True,
+        bbox_to_anchor=(1.02, 1),
+        loc=2,
+        borderaxespad=0.,
+        fancybox=False,
         shadow=False,
-        ncol=2,
-        mode="expand",
+        ncol=1,
         prop={'size': 10})
     g1.set_xlabel(xname)
     g1.set_ylabel(yname)
@@ -130,8 +130,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["pps_global", "pps_local"],
                 destinction_field="backend",
                 rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname=None,
-                yname="pps",
+                xname="number of NF replicas",
+                yname="packets per second",
                 name_pre="",
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
                 )
@@ -142,8 +142,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["t_request_global", "t_request_local"],
                 destinction_field="backend",
                 rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname=None,
-                yname="request delay [s]",
+                xname="number of NF replicas",
+                yname="state request delay [s]",
                 name_pre="",
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
                 )
@@ -154,8 +154,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["pcount_global"],
                 destinction_field="backend",
                 rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname=None,
-                yname="# packets logged",
+                xname="number of NF replicas",
+                yname="number of processed packets",
                 name_pre="",
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
                 )
@@ -175,8 +175,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["pps_global", "pps_local"],
                 destinction_field="backend",
                 rowfilter={"numbermb": nmb, "srclambda": lmb},
-                xname=None,
-                yname="pps",
+                xname="control plane latency [ms]",
+                yname="packets per second",
                 name_pre="",
                 name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
                 )
@@ -187,8 +187,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["t_request_global", "t_request_local"],
                 destinction_field="backend",
                 rowfilter={"numbermb": nmb, "srclambda": lmb},
-                xname=None,
-                yname="request delay [s]",
+                xname="control plane latency [ms]",
+                yname="state request delay [s]",
                 name_pre="",
                 name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
                 )
@@ -199,8 +199,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["pcount_global"],
                 destinction_field="backend",
                 rowfilter={"numbermb": nmb, "srclambda": lmb},
-                xname=None,
-                yname="# packets logged",
+                xname="control plane latency [ms]",
+                yname="number of processed packets",
                 name_pre="",
                 name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
                 )

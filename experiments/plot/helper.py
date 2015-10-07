@@ -28,3 +28,20 @@ def get_preset_colors():
 
 def get_markers():
     return itertools.cycle([u'o', u's', u'^', u'v', u'p', u'8', u'<', u'>', u'*', u'h', u'H', u'D', u'd'])
+
+
+def label_rename(lbl):
+    lbl = lbl.replace("monitor_mb2.log", "NF.2")
+    lbl = lbl.replace("monitor_mb1.log", "NF.1")
+    lbl = lbl.replace("pcount_local", "local")
+    lbl = lbl.replace("pcount_global", "global")
+    lbl = lbl.replace("matchcount_local", "local")
+    lbl = lbl.replace("matchcount_global", "global")
+    lbl = lbl.replace("pps_local", "local")
+    lbl = lbl.replace("pps_global", "global")
+    lbl = lbl.replace("t_request_local", "local")
+    lbl = lbl.replace("t_request_global", "global")
+
+    lbl = lbl.replace("libestate", "estate")
+    lbl = lbl.replace("redis", "central")
+    return lbl
