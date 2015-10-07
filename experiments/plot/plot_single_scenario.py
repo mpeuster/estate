@@ -14,7 +14,7 @@ matplotlib.pyplot.style.use("grayscale")
 
 def single_scenario_plot(sc, output,
                          xfield="t", yfield=["pps_local", "pps_global"],
-                         xname="time [s]", yname="pps"):
+                         xname="time [s]", yname="pps", xlim=-1):
     # input processing
     if isinstance(yfield, basestring) or isinstance(yfield, str):
         yfield = [yfield]
@@ -50,6 +50,8 @@ def single_scenario_plot(sc, output,
         prop={'size': 10})
     g1.set_xlabel(xname)
     g1.set_ylabel(yname)
+    if xlim > 0:
+        g1.set_xlim(0, xlim)
     # fig.suptitle(sc.name)
     # store to disc
     fig.set_size_inches(7, 4)
@@ -76,13 +78,17 @@ def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results
     # go over all scenarios and call plot methods
     for s in ed.scenarios.itervalues():
         single_scenario_plot(
-            s, output_dir, yfield=["pps_local", "pps_global"], yname="packets per second")
+            s, output_dir, yfield=["pps_local", "pps_global"],
+            yname="packets per second", xlim=120)
         single_scenario_plot(
-            s, output_dir, yfield=["pcount_local", "pcount_global"], yname="number of processed packets")
+            s, output_dir, yfield=["pcount_local", "pcount_global"],
+            yname="number of processed packets", xlim=120)
         single_scenario_plot(
-            s, output_dir, yfield=["matchcount_local", "matchcount_global"], yname="number of matched packets")
+            s, output_dir, yfield=["matchcount_local", "matchcount_global"],
+            yname="number of matched packets", xlim=120)
         single_scenario_plot(
-            s, output_dir, yfield=["t_request_local", "t_request_global"], yname="state request delay [s]")
+            s, output_dir, yfield=["t_request_local", "t_request_global"],
+            yname="state request delay [s]", xlim=120)
 
 if __name__ == '__main__':
     plot()
