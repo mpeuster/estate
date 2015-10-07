@@ -1,10 +1,9 @@
 import pylab
 import matplotlib
-import brewer2mpl
 import itertools
 import os
 import data
-from helper import ensure_dir, get_markers, get_upb_colors
+from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors
 # ensure correct fonts for ACM/IEEE
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -27,9 +26,8 @@ def single_scenario_plot(sc, output,
     g1 = fig.add_subplot(111)
     # iterators
     markers = get_markers()
-    #colors = get_upb_colors()
-    # http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
-    colors = itertools.cycle(brewer2mpl.get_map('Set1', 'qualitative', 8).mpl_colors)
+    colors = get_preset_colors()
+
     # do plots
     for n in sc.get_middlerbox_names():
         for yf in yfield:
@@ -63,23 +61,28 @@ def single_scenario_plot(sc, output,
     pylab.close()
 
 
-def plot(output="figures/"):
-    # prepare output
-    ensure_dir(output)
+def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results/"):
+    # setup directories for this plot
+    input_dir = os.path.join(experiment, input_dir)
+    output_dir = os.path.join(experiment, output_dir)
+    ensure_dir(output_dir, rm=True)
+    print input_dir
+    print output_dir
+
     # load data
-    ed = data.ExperimentData()
+    ed = data.ExperimentData(path=input_dir)
     ed.normalize_times()
 
     # go over all scenarios and call plot methods
     for s in ed.scenarios.itervalues():
         single_scenario_plot(
-            s, output, yfield=["pps_local", "pps_global"], yname="pps")
+            s, output_dir, yfield=["pps_local", "pps_global"], yname="pps")
         single_scenario_plot(
-            s, output, yfield=["pcount_local", "pcount_global"], yname="pcount")
+            s, output_dir, yfield=["pcount_local", "pcount_global"], yname="pcount")
         single_scenario_plot(
-            s, output, yfield=["matchcount_local", "matchcount_global"], yname="mcount")
+            s, output_dir, yfield=["matchcount_local", "matchcount_global"], yname="mcount")
         single_scenario_plot(
-            s, output, yfield=["t_request_local", "t_request_global"], yname="t request")
+            s, output_dir, yfield=["t_request_local", "t_request_global"], yname="t request")
 
 if __name__ == '__main__':
     plot()

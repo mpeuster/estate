@@ -2,12 +2,13 @@ import pylab
 import matplotlib
 import os
 import data
-from helper import ensure_dir
+from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors
 # ensure correct fonts for ACM/IEEE
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 # style template ('bmh', 'ggplot', 'fivethirtyeight')
-matplotlib.pyplot.style.use("ggplot")
+#matplotlib.pyplot.style.use("ggplot")
+matplotlib.pyplot.style.use("grayscale")
 
 
 def multi_scenario_plot(
@@ -35,6 +36,9 @@ def multi_scenario_plot(
     # figure
     fig = pylab.figure()
     g1 = fig.add_subplot(111)
+    # iterators
+    markers = get_markers()
+    colors = get_preset_colors()
 
     # get different values for lines to be plotted
     destinction_values = [""]
@@ -61,8 +65,10 @@ def multi_scenario_plot(
             g1.plot(
                 dfiltered.index.values,
                 dfiltered[yf].tolist(),
-                linewidth=1.5,
-                alpha=1.0, marker="x",
+                linewidth=1.25,
+                alpha=1.0,
+                marker=markers.next(),
+                color=colors.next(),
                 label="%s %s" % (dv, yf))
 
     # label etc.
@@ -87,11 +93,16 @@ def multi_scenario_plot(
     pylab.close()
 
 
-def plot(output="figures/multi/"):
-    # prepare output
-    ensure_dir(output)
+def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/"):
+    # setup directories for this plot
+    input_dir = os.path.join(experiment, input_dir)
+    output_dir = os.path.join(experiment, output_dir)
+    ensure_dir(output_dir, rm=True)
+    print input_dir
+    print output_dir
+
     # load data
-    ed = data.ExperimentData()
+    ed = data.ExperimentData(path=input_dir)
     ed.normalize_times()
     df = ed.get_combined_df()
 
@@ -113,7 +124,7 @@ def plot(output="figures/multi/"):
     for delay in cdelays:
         for lmb in lambdas:
             multi_scenario_plot(
-                output,
+                output_dir,
                 ed,
                 xfield="numbermb",
                 yfield=["pps_global", "pps_local"],
@@ -125,7 +136,7 @@ def plot(output="figures/multi/"):
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
                 )
             multi_scenario_plot(
-                output,
+                output_dir,
                 ed,
                 xfield="numbermb",
                 yfield=["t_request_global", "t_request_local"],
@@ -137,7 +148,7 @@ def plot(output="figures/multi/"):
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
                 )
             multi_scenario_plot(
-                output,
+                output_dir,
                 ed,
                 xfield="numbermb",
                 yfield=["pcount_global"],
@@ -158,7 +169,7 @@ def plot(output="figures/multi/"):
     for nmb in middleboxes:
         for lmb in lambdas:
             multi_scenario_plot(
-                output,
+                output_dir,
                 ed,
                 xfield="controldelay",
                 yfield=["pps_global", "pps_local"],
@@ -170,7 +181,7 @@ def plot(output="figures/multi/"):
                 name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
                 )
             multi_scenario_plot(
-                output,
+                output_dir,
                 ed,
                 xfield="controldelay",
                 yfield=["t_request_global", "t_request_local"],
@@ -182,7 +193,7 @@ def plot(output="figures/multi/"):
                 name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
                 )
             multi_scenario_plot(
-                output,
+                output_dir,
                 ed,
                 xfield="controldelay",
                 yfield=["pcount_global"],
