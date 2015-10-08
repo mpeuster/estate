@@ -284,8 +284,8 @@ class LibestateTopology(GenericMiddleBoxTopology):
                     peers.append("9000")
             print "%s run cppesnode with peers: %s " % (mb.name, str(peers))
             # run monitor.py on each MB node
-            mb.cmd("./monitor.py estatepp %d %s > log/monitor_%s.log 2>&1 &"
-                   % (c, " ".join(peers), mb.name))
+            mb.cmd("./monitor.py %s %d %s > log/monitor_%s.log 2>&1 &"
+                   % (PARAMS.backend, c, " ".join(peers), mb.name))
             c += 1
 
 
@@ -403,7 +403,11 @@ if __name__ == '__main__':
     # start custom controller
     p = start_custom_pox()
 
-    if PARAMS.backend == "libestate":
+    print "BACKEND: %s" % PARAMS.backend
+
+    if PARAMS.backend == "libestatezmq":
+        mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
+    elif PARAMS.backend == "libestatepython":
         mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
     elif PARAMS.backend == "redis":
         mt = RedisTopology(mbox_instances=int(PARAMS.numbermb))
@@ -419,5 +423,5 @@ if __name__ == '__main__':
         else:
             wait(int(PARAMS.duration))
         mt.stop_topo()
-    # stop custom controller
-    stop_custom_pox(p)
+        # stop custom controller
+        stop_custom_pox(p)
