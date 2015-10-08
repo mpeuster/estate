@@ -79,7 +79,7 @@ def main():
     DURATION = 120  # duration of one scenario
 
     # different backends
-    for be in ["redis", "libestate"]:
+    for be in ["redis", "libestatezmq", "libestatepython"]:
         # different delays
         for i in [0, 50, 100]:
             # different lambdas 1.0, 0.1, 0.01
