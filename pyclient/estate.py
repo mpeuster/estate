@@ -88,7 +88,7 @@ class estate(object):
         try:
             # attention: setting the restype is important!
             self.lib.es_get_global_predefined_reduce.restype = ctypes.c_char_p
-            rptr = self.lib.es_get_global_predefined_reduce(str(k))
+            rptr = self.lib.es_get_global_predefined_reduce(str(k), rf_id)
             val = ctypes.c_char_p(rptr).value
             return val
         except:
