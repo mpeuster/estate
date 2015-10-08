@@ -24,7 +24,7 @@ extern "C"
 	extern void es_init(const char* ip, int port);
 	extern void es_init_with_peers(const char* ip, int port, const char* peers);
 	extern void es_close(void);
-	extern void testpp(void);
+	extern const char* testpp(void);
 
 	/* our main state management API */
 	extern void es_set(const char*,const char*);

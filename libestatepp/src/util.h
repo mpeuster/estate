@@ -11,10 +11,10 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#define PRINT_CALLS 1
+#define PRINT_CALLS 0
 #define print_call(...) do { if (PRINT_CALLS) fprintf(stdout, "CALL: %s:%d:%s()\n", __FILE__, __LINE__, __func__); } while (0)
 
-#define PRINT_DEBUG 1
+#define PRINT_DEBUG 0
 #define debug(fmt, args...) do { if (PRINT_DEBUG) fprintf(stdout, "\e[34mDEBUG: %s:%d:%s():\e[0m" fmt, __FILE__, __LINE__, __func__, ##args); } while (0)
 
 #define PRINT_INFO 1

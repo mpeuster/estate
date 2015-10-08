@@ -31,6 +31,7 @@ void es_init(const char* ip, int port)
 
 void es_init_with_peers(const char* ip, int port, const char* peers)
 {
+	print_call();
 	std::string str_ip(ip);
 	sm = new StateManager(str_ip, port);
 	// set peers
@@ -43,19 +44,24 @@ void es_init_with_peers(const char* ip, int port, const char* peers)
 
 void es_close()
 {
+	print_call();
 	delete sm;
 }
 
-void testpp()
+char* test;
+const char* testpp()
 {
 	print_call();
+	test = (char*)malloc(sizeof(char) * 5);
+	strcpy(test, "abcd\0");
+	printf("%s\n", test);
+	return test;
 	//sm->test();
 }
 
 void es_set(const char* k, const char* v)
 {
 	print_call();
-	debug("%s\n", k);
 	assert(sm != NULL);
 	assert(k != NULL);
 	assert(v != NULL);
@@ -68,7 +74,6 @@ void es_set(const char* k, const char* v)
 const char* es_get(const char* k)
 {
 	print_call();
-	debug("%s\n", k);
 	assert(sm != NULL);
 	assert(k != NULL);
 
@@ -79,7 +84,6 @@ const char* es_get(const char* k)
 const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 {
 	print_call();
-	debug("%s\n", k);
 	assert(sm != NULL);
 	assert(k != NULL);
 
@@ -94,10 +98,9 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 
 	// run custom reduce function on returned data
 	debug("calling reduce function\n");
-	char* res = reduce(data_buffer, size);
-	debug("reduce result: %s\n", res);
+	const char* res = reduce(data_buffer, size);
 	free(data_buffer);
-
+	debug("reduce result: %s\n", res);
 	// return reduced
 	return res;
 }
@@ -112,7 +115,6 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 const char* es_get_global_predefined_reduce(const char* k, int reduce_id)
 {
 	print_call();
-	debug("%s\n", k);
 	if(reduce_id == 1)
 		return es_get_global(k, reduce_sum);
 	if(reduce_id == 2)

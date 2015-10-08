@@ -14,6 +14,7 @@
 
 CommunicationManager::CommunicationManager(StateManager* sm, std::string ip, int port)
 {
+	print_call();
 	// initialization
 	this->sm = sm;
 	this->my_ip = ip;
@@ -63,6 +64,7 @@ void CommunicationManager::start()
  */
 std::list<StateItem> CommunicationManager::request_global_state(std::string k)
 {
+	print_call();
 	// prepare results structure
 	std::list<StateItem> results;
 
@@ -180,6 +182,7 @@ void CommunicationManager::request_subscriber_start()
  */
 void CommunicationManager::request_subscriber_thread_func()
 {
+	print_call();
 	// create one single ZMQ subscriber
 	zmqpp::socket zsubscriber (this->zmqctx, zmqpp::socket_type::sub);
 	zsubscriber.set(zmqpp::socket_option::subscribe, "global_state_request");
