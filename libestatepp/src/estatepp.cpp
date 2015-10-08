@@ -54,7 +54,8 @@ void testpp()
 
 void es_set(const char* k, const char* v)
 {
-	//print_call();
+	print_call();
+	debug("%s\n", k);
 	assert(sm != NULL);
 	assert(k != NULL);
 	assert(v != NULL);
@@ -66,7 +67,8 @@ void es_set(const char* k, const char* v)
 
 const char* es_get(const char* k)
 {
-	//print_call();
+	print_call();
+	debug("%s\n", k);
 	assert(sm != NULL);
 	assert(k != NULL);
 
@@ -77,6 +79,7 @@ const char* es_get(const char* k)
 const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 {
 	print_call();
+	debug("%s\n", k);
 	assert(sm != NULL);
 	assert(k != NULL);
 
@@ -109,6 +112,7 @@ const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int))
 const char* es_get_global_predefined_reduce(const char* k, int reduce_id)
 {
 	print_call();
+	debug("%s\n", k);
 	if(reduce_id == 1)
 		return es_get_global(k, reduce_sum);
 	if(reduce_id == 2)

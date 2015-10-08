@@ -3,6 +3,7 @@
 """
 
 import ctypes
+import os
 
 
 class state_item_t(ctypes.Structure):
@@ -27,7 +28,8 @@ class estate(object):
 
     def init_libestate(self, ip, port, peerlist=["127.0.0.1", "9000"]):
         self.lib = ctypes.cdll.LoadLibrary(
-            "../libestatepp/Debug/libestatepp.so")
+            os.path.join(os.path.dirname(__file__),
+                         "../libestatepp/Debug/libestatepp.so"))
         self.ip = str(ip)
         self.port = int(port)
         self.lib.es_init_with_peers(
@@ -38,15 +40,16 @@ class estate(object):
     def close(self):
         self.lib.es_close()
 
-    def set(self, k, s):
-        print "ES: SET k=%s s=%s" % (str(k), str(s))
-        self.lib.es_set(k, s)
+    def set(self, k, v):
+        print "ES: SET k=%s v=%s" % (str(k), str(v))
+        self.lib.es_set(str(k), str(v))
+        print "done"
         return True
 
     def get(self, k):
         print "ES: GET k=%s" % (str(k))
         try:
-            rptr = self.lib.es_get(k)
+            rptr = self.lib.es_get(str(k))
             val = ctypes.c_char_p(rptr).value
             return val if val != "ES_NONE" else None
         except Exception:
@@ -63,8 +66,24 @@ class estate(object):
                   1 = sum
                   2 = avg
         """
-        print "ES: GET_GLOBAL k=%s f=%s" % (str(k), str(red_func))
-        rptr = self.lib.es_get_global_predefined_reduce(k, int(red_func))
+        # we handle all kinds of formats to be compatible
+        red_func = str(red_func)
+        rf_id = 0
+        if "latest" in red_func:
+            rf_id = 0
+        elif "sum" in red_func:
+            rf_id = 1
+        elif "avg" in red_func:
+            rf_id = 2
+        else:
+            try:
+                rf_id = int(red_func)
+            except:
+                rf_id = 0
+                print "WARNING: estate.py unknown red_func value"
+
+        print "ES: GET_GLOBAL k=%s f=%s" % (str(k), str(rf_id))
+        rptr = self.lib.es_get_global_predefined_reduce(k, rf_id)
         return ctypes.c_char_p(rptr).value
 
     def to_peerlist_str(self, lst):

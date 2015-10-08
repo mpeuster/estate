@@ -1,4 +1,4 @@
-#!/bin/baash
+#!/bin/bash
 
 # This file contains environment variables which are set on each 
 # Mininet host.

@@ -11,7 +11,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#define PRINT_CALLS 0
+#define PRINT_CALLS 1
 #define print_call(...) do { if (PRINT_CALLS) fprintf(stdout, "CALL: %s:%d:%s()\n", __FILE__, __LINE__, __func__); } while (0)
 
 #define PRINT_DEBUG 1
