@@ -3,6 +3,7 @@
 from libestateredis.estate_redis import estate as estater
 from cppesnode.estate_zmqclient import estate as estatez
 from pyclient.estate import estate as estatep
+from libestatelocal.estate import estate as estatelocal
 from scapy.all import sniff
 from scapy.layers.inet import TCP, IP
 import sys
@@ -216,6 +217,8 @@ def main():
     elif backend == "libestatepython":
         es = estatep(0)
         es.init_libestate(options[0], options[1], options)
+    elif backend == "libestatelocal":
+        es = estatelocal(0)
     else:
         print "specified backend not known"
 

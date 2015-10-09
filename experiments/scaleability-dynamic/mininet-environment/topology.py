@@ -409,6 +409,8 @@ if __name__ == '__main__':
         mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
     elif PARAMS.backend == "libestatepython":
         mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
+    elif PARAMS.backend == "libestatelocal":
+        mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
     elif PARAMS.backend == "redis":
         mt = RedisTopology(mbox_instances=int(PARAMS.numbermb))
     else:
