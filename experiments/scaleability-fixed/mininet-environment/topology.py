@@ -19,7 +19,6 @@ import time
 # defines start of portrange for generated user connections
 USER_BASE_PORT = 1200
 PARAMS = None
-MAX_MB_INSTANCES = 16
 
 
 def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
@@ -178,21 +177,23 @@ class GenericMiddleBoxTopology(object):
         for i in range(0, self.source_instances):
             sh = self.net.addHost(
                 "source%d" % (i + 1),
-                ip="20.0.0.%d" % (i + 1), cpu=.2)
+                ip="20.0.0.%d" % (i + 1), cpu=float(PARAMS.cpusource))
             self.source_hosts.append(sh)
             self.net.addLink(sh, self.source_switch)
         # target hosts
         for i in range(0, self.target_instances):
             th = self.net.addHost(
                 "target%d" % (i + 1),
-                ip="20.0.1.%d" % (i + 1), cpu=.2)
+                ip="20.0.1.%d" % (i + 1), cpu=float(PARAMS.cputarget))
             self.target_hosts.append(th)
             self.net.addLink(th, self.target_switch)
         # middlebox hosts
         for i in range(0, self.mbox_instances):
             # we assume a max of 16 MBs in all experiments
             # all these MBs together use max 50% of CPU
-            mb = self.net.addHost("mb%d" % (i + 1), cpu=.5/MAX_MB_INSTANCES)
+            mb = self.net.addHost(
+                "mb%d" % (i + 1),
+                cpu=float(PARAMS.cpumb)/float(PARAMS.maxnumbermb))
             self.middlebox_hosts.append(mb)
             # management plane links
             cdl = int(PARAMS.controldelay)
@@ -398,6 +399,14 @@ def setup_cli_parser():
     parser.add_argument("--srclambda", default="1.0")
     # number of middleboxes in experiment
     parser.add_argument("--numbermb", default="2")
+    # max number of middleboxes in experiment (used for CPU limiting)
+    parser.add_argument("--maxnumbermb", default="16")
+    # fraction of cpu assigned to MBs
+    parser.add_argument("--cpumb", default="0.5")
+    # fraction of cpu assigned to source host
+    parser.add_argument("--cpusource", default="0.2")
+    # fraction of cpu assigned to source host
+    parser.add_argument("--cputarget", default="0.2")
     return parser
 
 
