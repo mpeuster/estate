@@ -4,7 +4,7 @@ from mininet.net import Mininet
 from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel
 from mininet.cli import CLI
-from mininet.node import OVSSwitch
+from mininet.node import OVSSwitch, CPULimitedHost
 from mininet.node import Controller, RemoteController
 from mininet.link import TCLink
 
@@ -19,6 +19,7 @@ import time
 # defines start of portrange for generated user connections
 USER_BASE_PORT = 1200
 PARAMS = None
+MAX_MB_INSTANCES = 16
 
 
 def config_bridge(node, br="br0", if0="eth1", if1="eth2"):
@@ -86,7 +87,8 @@ class GenericMiddleBoxTopology(object):
         self.mbox_instances = mbox_instances
 
         # bring up Mininet
-        self.net = Mininet(link=TCLink, autoSetMacs=True)
+        self.net = Mininet(
+            host=CPULimitedHost, link=TCLink, autoSetMacs=True)
 
         # topology elements
         self.controllers = []
@@ -173,19 +175,21 @@ class GenericMiddleBoxTopology(object):
         for i in range(0, self.source_instances):
             sh = self.net.addHost(
                 "source%d" % (i + 1),
-                ip="20.0.0.%d" % (i + 1))
+                ip="20.0.0.%d" % (i + 1), cpu=.2)
             self.source_hosts.append(sh)
             self.net.addLink(sh, self.source_switch)
         # target hosts
         for i in range(0, self.target_instances):
             th = self.net.addHost(
                 "target%d" % (i + 1),
-                ip="20.0.1.%d" % (i + 1))
+                ip="20.0.1.%d" % (i + 1), cpu=.2)
             self.target_hosts.append(th)
             self.net.addLink(th, self.target_switch)
         # middlebox hosts
         for i in range(0, self.mbox_instances):
-            mb = self.net.addHost("mb%d" % (i + 1))
+            # we assume a max of 16 MBs in all experiments
+            # all these MBs together use max 50% of CPU
+            mb = self.net.addHost("mb%d" % (i + 1), cpu=.5/MAX_MB_INSTANCES)
             self.middlebox_hosts.append(mb)
             # management plane links
             cdl = int(PARAMS.controldelay)
