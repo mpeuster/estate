@@ -159,7 +159,11 @@ class CassandraEstateTestCase(GenericEstateTestCase):
 
 class CppesnodeEstateTestCase(GenericEstateTestCase):
     """
-        libestate (UPB) using direct Python-to-C wrapper
+        libestate (UPB) using local ZMQ between python and C
+
+        This test case is a bit different.
+        We need to start some other nodes as real external processes which
+        built our peer network.
     """
 
     def setUp(self):
@@ -182,51 +186,6 @@ class CppesnodeEstateTestCase(GenericEstateTestCase):
             e.stop_cppesnode_process()
         # just to be sure ;-)
         subprocess.call(["pkill", "cppesnode"])
-
-
-class LibestateTestCase(GenericEstateTestCase):
-    """
-        libestate (UPB) using direct Python-to-C wrapper
-
-        This test case is a bit different.
-        We need to start some other nodes as real external processes which
-        built our peer network.
-
-        These nodes might need some time to stabalize their entwork so we need some delays.
-        Also, the nodes have to be killed after each test to ensure that the network
-        ports are free for the next test.
-    """
-
-    def setUp(self):
-        START_DELAY = 0.5
-
-        # run 4 environment instaces (node.py)
-        self.enodes = []
-        for i in range(1, 6):
-            self.enodes.append(subprocess.Popen(["./pyclient/node.py", str(i)]))
-            print "Started node.py %d" % i
-            time.sleep(START_DELAY)
-
-        # create local test instance
-        self.es = []
-        self.es.append(estatep(0))
-        time.sleep(START_DELAY)
-
-    def tearDown(self):
-        STOP_DELAY = 0.1
-
-        for e in self.enodes:
-            e.terminate()
-            time.sleep(STOP_DELAY)
-
-        # not nice, but helps if e.terminate does not work
-        subprocess.call(["pkill", "node.py"])
-        time.sleep(STOP_DELAY)
-
-        for e in self.es:
-            e.close()
-            time.sleep(STOP_DELAY)
-
 
 
 def red_sum(l):
@@ -259,10 +218,5 @@ if __name__ == '__main__':
     ts3 = unittest.TestLoader().loadTestsFromTestCase(CppesnodeEstateTestCase)
     if len(sys.argv) < 2 or sys.argv[1] == "3":
         suite.addTest(ts3)
-    # libestate version (UPB) direct Python-to-C wrapper
-    #ts4 = unittest.TestLoader().loadTestsFromTestCase(LibestateTestCase)
-    #if len(sys.argv) < 2 or sys.argv[1] == "4":
-    #    suite.addTest(ts4)
-
     #execute
     unittest.TextTestRunner(verbosity=0).run(suite)
