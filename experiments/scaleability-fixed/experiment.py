@@ -76,7 +76,7 @@ def main():
     helper_cleanup_folder("results")
 
     # global parameters
-    DURATION = 120  # duration of one scenario
+    DURATION = 60  # duration of one scenario
 
     # different backends
     for be in ["redis", "libestatezmq", "libestatepython"]:
