@@ -133,9 +133,11 @@ class GenericMiddleBoxTopology(object):
         # debugging
         print "### Dumping host connections"
         dumpNodeConnections(self.net.hosts)
-        print "### Testing middlebox replica connectivity"
-        if self.net.ping(hosts=self.middlebox_hosts) < 0.1:
-            print "### OK"
+        if PARAMS.duration < 0:
+            # only test if we are in CLI mode (save time)
+            print "### Testing middlebox replica connectivity"
+            if self.net.ping(hosts=self.middlebox_hosts) < 0.1:
+                print "### OK"
 
     def enter_cli(self):
         # enter user interface
@@ -363,12 +365,15 @@ def start_custom_pox():
 
 def stop_custom_pox(p):
     print "Stopping external POX..."
+    wait(2)
     print subprocess.call("ps", shell=True)
     os.killpg(p.pid, signal.SIGTERM)
     wait(2)
+    print subprocess.call("ps", shell=True)
     os.killpg(p.pid, signal.SIGKILL)
     wait(2)
     subprocess.call("pkill pox", shell=True)
+    subprocess.call("mn -c", shell=True)
     print subprocess.call("ps", shell=True)
 
 
