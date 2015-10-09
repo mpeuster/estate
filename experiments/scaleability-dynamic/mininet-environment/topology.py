@@ -291,8 +291,11 @@ class LibestateTopology(GenericMiddleBoxTopology):
                     peers.append("9000")
             print "%s run cppesnode with peers: %s " % (mb.name, str(peers))
             # run monitor.py on each MB node
-            mb.cmd("./monitor.py %s %d %s > log/monitor_%s.log 2>&1 &"
-                   % (PARAMS.backend, c, " ".join(peers), mb.name))
+            mb.cmd("./monitor.py %s %d %s %s > log/monitor_%s.log 2>&1 &"
+                   % (PARAMS.backend,
+                      c,
+                      PARAMS.dummystatesize,
+                      " ".join(peers), mb.name))
             c += 1
 
 
@@ -346,9 +349,12 @@ class RedisTopology(GenericMiddleBoxTopology):
         # run monitor.py on each MB node
         c = 0
         for mb in self.middlebox_hosts:
-
-            mb.cmd("./monitor.py redis %d %s > log/monitor_%s.log 2>&1 &"
-                   % (c, self.redis_host.IP(), mb.name))
+            mb.cmd("./monitor.py %s %d %s %s > log/monitor_%s.log 2>&1 &"
+                   % (PARAMS.backend,
+                      c,
+                      PARAMS.dummystatesize,
+                      self.redis_host.IP(),
+                      mb.name))
             c += 1
 
     def stop_topo(self):
@@ -406,6 +412,8 @@ def setup_cli_parser():
     parser.add_argument("--cpusource", default="0.2")
     # fraction of cpu assigned to source host
     parser.add_argument("--cputarget", default="0.2")
+    # size of dummy state used by monitor.py in byte
+    parser.add_argument("--dummystatesize", default="0")
     return parser
 
 

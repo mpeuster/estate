@@ -84,13 +84,16 @@ def main():
         for i in [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]:
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
-                run_scenario(
-                    "sc_%s_lambda%03d_delay%03d" % (be, l*100, i),
-                    ["--backend", "%s" % be,
-                     "--duration", "%d" % DURATION,
-                     "--controldelay", "%d" % i,
-                     "--numbermb", "%d" % 16,
-                     "--srclambda", "%f" % l])
+                # different dummy state sizes
+                for dss in [0, 128, 1024, 10*1024]:
+                    run_scenario(
+                        "sc_%s_lambda%03d_delay%03d_dss%04d" % (be, l*100, i, dss),
+                        ["--backend", "%s" % be,
+                         "--duration", "%d" % DURATION,
+                         "--controldelay", "%d" % i,
+                         "--numbermb", "%d" % 16,
+                         "--srclambda", "%f" % l,
+                         "--dummystatesize", "%d" % dss])
 
     print "*" * 40
     print "Finish!"

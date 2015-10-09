@@ -10,6 +10,7 @@ import sys
 import time
 import thread
 import random
+import string
 
 es = None
 
@@ -17,6 +18,8 @@ es = None
 last_log_timestamp = 0
 last_local_pcount = 0
 last_global_pcount = 0
+
+dummy_state_size = 0
 
 
 def get_ecounter(k):
@@ -105,12 +108,23 @@ def pkt_callback(pkt):
     #return "PKT: " + str(pkt.show()) #pkt.summary()
 
 
+def random_bytes(size):
+    return ''.join(
+        random.choice(
+            string.letters + string.digits) for _ in range(int(size)))
+
+
 def init_state():
     """
     Initializes estate values, and lcoal values.
     """
     global last_log_timestamp
     last_log_timestamp = time.time()
+    # if we should use a big chouck of dummy data for state transferes,
+    # initialize it:
+    if dummy_state_size > 0:
+        dummydata = random_bytes(dummy_state_size)
+        es.set("dummystate", dummydata)
 
 
 def log_global_state():
@@ -132,6 +146,10 @@ def log_global_state():
     t_get_global_start = time.time()
     pcount_global = get_ecounter_global_sum("pcount")
     matchcount_global = get_ecounter_global_sum("matchcount")
+    # if we should use dummy state with given size, ensure to fetch it always!
+    if dummy_state_size > 0:
+        dummydata = es.get_global("dummystate", red_latest)
+        #print dummydata
     time_global_request = time.time() - t_get_global_start
 
     # calculate pps
@@ -192,20 +210,29 @@ def red_avg(l):
     #print "red_avg: %s = %f" % (str(l), res)
     return res
 
-#TODO add red_latest implementation
+
+def red_latest(l):
+    if len(l) < 1:
+        return "ES_NONE"
+    return l[0]
+#TODO add real red_latest implementation
 
 
 def main():
     global es
+    global dummy_state_size
     if len(sys.argv) < 3:
         print "Arguments missing:"
-        print "monitor.py BACKEND INST_ID [BACKEND_OPTIONS1...N]"
+        print "monitor.py BACKEND INST_ID DUMMY_STATE_SIZE [BACKEND_OPTIONS1...N]"
         print "e.g.: monitor.py redis 1 10.0.0.1"
         exit(1)
 
     backend = str(sys.argv[1])
     instance_id = int(sys.argv[2])
-    options = sys.argv[3:]
+    dummy_state_size = float(sys.argv[3])  # in byte!
+    options = sys.argv[4:]
+
+    print "DUMMY_STATE_SIZE=%d" % dummy_state_size
 
     if backend == "redis":
         es = estater(instance_id, redis_host=options[0])
