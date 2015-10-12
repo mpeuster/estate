@@ -56,12 +56,16 @@ class Scenario():
         return data
 
     def _load_middlebox_log_to_pandas(self, fname):
-        data = self._load_logfile_as_csv(fname)
-        df = pd.read_csv(io.StringIO(data), sep=";", dtype=float)
-        # for now we will have only positive values
-        num = df._get_numeric_data()
-        num[num < 0] = 0
-        return df
+        try:
+            data = self._load_logfile_as_csv(fname)
+            df = pd.read_csv(io.StringIO(data), sep=";", dtype=float)
+            # for now we will have only positive values
+            num = df._get_numeric_data()
+            num[num < 0] = 0
+            return df
+        except:
+            print "WARNING: EMPTY monitor.log"
+        return None
 
     def _annotate_df(self, df, mbfile="-1"):
         """
@@ -82,10 +86,11 @@ class Scenario():
         files = self._get_monitoring_files()
         for f in files:
             df = self._load_middlebox_log_to_pandas(f)
-            self.mblogs[f] = self._annotate_df(df, f)
-            print ("Loaded log from: %s containing %d rows."
-                   % (f, len(self.mblogs[f].index)))
-            print "Columns: %s" % list(self.mblogs[f].columns.values)
+            if df is not None:
+                self.mblogs[f] = self._annotate_df(df, f)
+                print ("Loaded log from: %s containing %d rows."
+                       % (f, len(self.mblogs[f].index)))
+                print "Columns: %s" % list(self.mblogs[f].columns.values)
 
     def normalize_times(self, timefield="t"):
         """
