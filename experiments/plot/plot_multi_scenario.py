@@ -106,14 +106,17 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     ed.normalize_times()
     df = ed.get_combined_df()
 
-    cdelays = df["controldelay"].drop_duplicates().tolist()
+    cdelays = sorted(df["controldelay"].drop_duplicates().tolist())
     print cdelays
 
-    lambdas = df["srclambda"].drop_duplicates().tolist()
+    lambdas = sorted(df["srclambda"].drop_duplicates().tolist())
     print lambdas
 
-    middleboxes = df["numbermb"].drop_duplicates().tolist()
+    middleboxes = sorted(df["numbermb"].drop_duplicates().tolist())
     print middleboxes
+
+    dummystatesizes = sorted(df["dummystatesize"].drop_duplicates().tolist())
+    print dummystatesizes
 
     """
     Plots:
@@ -121,44 +124,54 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     yaxis = pps, request times, global pcount
     layout: one plot line per backend
     """
-    for delay in cdelays:
+    for delay in cdelays[:2]:
         for lmb in lambdas:
-            multi_scenario_plot(
-                output_dir,
-                ed,
-                xfield="numbermb",
-                yfield=["pps_global", "pps_local"],
-                destinction_field="backend",
-                rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname="number of NF instances",
-                yname="packets per second",
-                name_pre="",
-                name_post="_d%03d_l%03d" % (delay, lmb*100)
-                )
-            multi_scenario_plot(
-                output_dir,
-                ed,
-                xfield="numbermb",
-                yfield=["t_request_global", "t_request_local"],
-                destinction_field="backend",
-                rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname="number of NF instances",
-                yname="state request delay [s]",
-                name_pre="",
-                name_post="_d%03d_l%03d" % (delay, lmb*100)
-                )
-            multi_scenario_plot(
-                output_dir,
-                ed,
-                xfield="numbermb",
-                yfield=["pcount_global"],
-                destinction_field="backend",
-                rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname="number of NF instances",
-                yname="number of processed packets",
-                name_pre="",
-                name_post="_d%03d_l%03d" % (delay, lmb*100)
-                )
+            for dss in dummystatesizes[:1]:
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="numbermb",
+                    yfield=["pps_global", "pps_local"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "controldelay": delay,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="number of NF instances",
+                    yname="packets per second",
+                    name_pre="",
+                    name_post="_d%03d_l%03d_dss%05d" % (delay, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="numbermb",
+                    yfield=["t_request_global", "t_request_local"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "controldelay": delay,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="number of NF instances",
+                    yname="state request delay [s]",
+                    name_pre="",
+                    name_post="_d%03d_l%03d_dss%05d" % (delay, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="numbermb",
+                    yfield=["pcount_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "controldelay": delay,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="number of NF instances",
+                    yname="number of processed packets",
+                    name_pre="",
+                    name_post="_d%03d_l%03d_dss%05d" % (delay, lmb*100, dss)
+                    )
 
     """
     Plots:
@@ -168,41 +181,107 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     """
     for nmb in middleboxes:
         for lmb in lambdas:
-            multi_scenario_plot(
-                output_dir,
-                ed,
-                xfield="controldelay",
-                yfield=["pps_global", "pps_local"],
-                destinction_field="backend",
-                rowfilter={"numbermb": nmb, "srclambda": lmb},
-                xname="control plane latency [ms]",
-                yname="packets per second",
-                name_pre="",
-                name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
-                )
-            multi_scenario_plot(
-                output_dir,
-                ed,
-                xfield="controldelay",
-                yfield=["t_request_global", "t_request_local"],
-                destinction_field="backend",
-                rowfilter={"numbermb": nmb, "srclambda": lmb},
-                xname="control plane latency [ms]",
-                yname="state request delay [s]",
-                name_pre="",
-                name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
-                )
-            multi_scenario_plot(
-                output_dir,
-                ed,
-                xfield="controldelay",
-                yfield=["pcount_global"],
-                destinction_field="backend",
-                rowfilter={"numbermb": nmb, "srclambda": lmb},
-                xname="control plane latency [ms]",
-                yname="number of processed packets",
-                name_pre="",
-                name_post="_nmb%03d_l%03d" % (nmb, lmb*100)
-                )
+            for dss in dummystatesizes[:1]:
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="controldelay",
+                    yfield=["pps_global", "pps_local"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="control plane latency [ms]",
+                    yname="packets per second",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_dss%05d" % (nmb, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="controldelay",
+                    yfield=["t_request_global", "t_request_local"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="control plane latency [ms]",
+                    yname="state request delay [s]",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_dss%05d" % (nmb, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="controldelay",
+                    yfield=["pcount_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="control plane latency [ms]",
+                    yname="number of processed packets",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_dss%05d" % (nmb, lmb*100, dss)
+                    )
+
+    """
+    Plots:
+    xaxis = dummystatesize
+    yaxis = pps, request times, global pcount
+    layout: one plot line per backend
+    """
+    for nmb in middleboxes[-1:]:
+        for lmb in lambdas:
+            for delay in cdelays[:2]:
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="dummystatesize",
+                    yfield=["pps_global", "pps_local"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "controldelay": delay},
+                    xname="state size [byte]",
+                    yname="packets per second",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="dummystatesize",
+                    yfield=["t_request_global", "t_request_local"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "controldelay": delay},
+                    xname="state size [byte]",
+                    yname="state request delay [s]",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="dummystatesize",
+                    yfield=["pcount_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "controldelay": delay},
+                    xname="state size [byte]",
+                    yname="number of processed packets",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
+                    )
+
 if __name__ == '__main__':
-    plot()
+    plot("scaleability-fixed")
