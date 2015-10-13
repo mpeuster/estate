@@ -197,9 +197,9 @@ class GenericMiddleBoxTopology(object):
             # management plane links
             cdl = int(PARAMS.controldelay)
             if cdl > 0:
-                self.net.addLink(mb, self.control_switch, delay="%dms" % cdl)
+                self.net.addLink(mb, self.control_switch, delay="%dms" % cdl, bw=1000)
             else:
-                self.net.addLink(mb, self.control_switch)
+                self.net.addLink(mb, self.control_switch, bw=1000)
             # data plane links
             self.net.addLink(mb, self.source_switch)
             self.net.addLink(mb, self.target_switch)
