@@ -140,7 +140,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="number of NF instances",
                     yname="packets per second",
                     name_pre="",
-                    name_post="_d%03d_l%03d_dss%05d" % (delay, lmb*100, dss)
+                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
                 multi_scenario_plot(
                     output_dir,
@@ -155,7 +155,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="number of NF instances",
                     yname="state request delay [s]",
                     name_pre="",
-                    name_post="_d%03d_l%03d_dss%05d" % (delay, lmb*100, dss)
+                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
                 multi_scenario_plot(
                     output_dir,
@@ -170,7 +170,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="number of NF instances",
                     yname="number of processed packets",
                     name_pre="",
-                    name_post="_d%03d_l%03d_dss%05d" % (delay, lmb*100, dss)
+                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
 
     """
@@ -195,7 +195,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="control plane latency [ms]",
                     yname="packets per second",
                     name_pre="",
-                    name_post="_nmb%03d_l%03d_dss%05d" % (nmb, lmb*100, dss)
+                    name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
                 multi_scenario_plot(
                     output_dir,
@@ -210,7 +210,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="control plane latency [ms]",
                     yname="state request delay [s]",
                     name_pre="",
-                    name_post="_nmb%03d_l%03d_dss%05d" % (nmb, lmb*100, dss)
+                    name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
                 multi_scenario_plot(
                     output_dir,
@@ -225,7 +225,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="control plane latency [ms]",
                     yname="number of processed packets",
                     name_pre="",
-                    name_post="_nmb%03d_l%03d_dss%05d" % (nmb, lmb*100, dss)
+                    name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
 
     """

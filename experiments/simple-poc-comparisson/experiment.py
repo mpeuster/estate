@@ -81,13 +81,13 @@ def main():
     # different backends
     for be in ["redis", "libestatelocal", "libestatepython"]:
         # different delays
-        for i in [0, 50, 100]:
+        for i in [0, 10]:
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
                 # different dummy state sizes
-                for dss in [0, 128, 1024, 10*1024]:
+                for dss in [0, 1024, 10*1024, 100*1024, 1000*1024]:
                     run_scenario(
-                        "sc_%s_lambda%03d_delay%03d_dss%04d" % (be, l*100, i, dss),
+                        "sc_%s_lambda%03d_delay%03d_dss%08d" % (be, l*100, i, dss),
                         ["--backend", "%s" % be,
                          "--duration", "%d" % DURATION,
                          "--controldelay", "%d" % i,
