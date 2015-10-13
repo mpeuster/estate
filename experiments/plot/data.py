@@ -82,6 +82,23 @@ class Scenario():
                 df[str(k)] = v
         return df
 
+    def _calc_global_values(self):
+        """
+        If we use our local only implementation as a baseline,
+        we do not have any results for global values because the
+        system operates without global state.
+        Thus we calculate these global values for the plot only
+        by summing up results from the MB logs.
+        """
+        for k1, v1 in self.mblogs.iteritems():
+            v1["pps_global"] = 0
+            v1["pcount_global"] = 0
+            v1["matchcount_global"] = 0
+            for k2, v2 in self.mblogs.iteritems():
+                v1["pps_global"] += v2["pps_local"]
+                v1["pcount_global"] += v2["pcount_local"]
+                v1["matchcount_global"] += v2["matchcount_local"]
+
     def load_middlebox_logs(self):
         files = self._get_monitoring_files()
         for f in files:
@@ -91,6 +108,10 @@ class Scenario():
                 print ("Loaded log from: %s containing %d rows."
                        % (f, len(self.mblogs[f].index)))
                 print "Columns: %s" % list(self.mblogs[f].columns.values)
+        if self.params["backend"] == "libestatelocal":
+            # if we have local only results, we compute the global values
+            # to make results comparable
+            self._calc_global_values()
 
     def normalize_times(self, timefield="t"):
         """

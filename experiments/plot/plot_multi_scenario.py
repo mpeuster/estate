@@ -130,7 +130,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["pps_global", "pps_local"],
                 destinction_field="backend",
                 rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname="number of NF replicas",
+                xname="number of NF instances",
                 yname="packets per second",
                 name_pre="",
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
@@ -142,7 +142,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["t_request_global", "t_request_local"],
                 destinction_field="backend",
                 rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname="number of NF replicas",
+                xname="number of NF instances",
                 yname="state request delay [s]",
                 name_pre="",
                 name_post="_d%03d_l%03d" % (delay, lmb*100)
@@ -154,7 +154,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                 yfield=["pcount_global"],
                 destinction_field="backend",
                 rowfilter={"controldelay": delay, "srclambda": lmb},
-                xname="number of NF replicas",
+                xname="number of NF instances",
                 yname="number of processed packets",
                 name_pre="",
                 name_post="_d%03d_l%03d" % (delay, lmb*100)

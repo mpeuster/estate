@@ -42,6 +42,7 @@ def label_rename(lbl):
     lbl = lbl.replace("t_request_local", "local")
     lbl = lbl.replace("t_request_global", "global")
 
-    lbl = lbl.replace("libestate", "estate")
-    lbl = lbl.replace("redis", "central")
+    lbl = lbl.replace("libestatepython", "libestate")
+    lbl = lbl.replace("libestatelocal", "baseline")
+    lbl = lbl.replace("redis", "centraldb")
     return lbl
