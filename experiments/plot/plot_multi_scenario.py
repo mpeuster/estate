@@ -1,5 +1,9 @@
 import pylab
 import matplotlib
+from scipy import stats as st
+import scipy
+import scikits.bootstrap as bootstrap
+import numpy as np
 import os
 import data
 from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors, label_rename
@@ -10,6 +14,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 #matplotlib.pyplot.style.use("ggplot")
 matplotlib.pyplot.style.use("grayscale")
 
+ENABLE_CONFIDENCE_INTERVAL = True
 
 def multi_scenario_plot(
         output,
@@ -59,17 +64,35 @@ def multi_scenario_plot(
                     dfiltered = dfiltered[dfiltered[k] == v]
 
             # reduce data to have xfield -> yflied 1:1 relationship
-            dfiltered = dfiltered.groupby(xfield).mean()
-            print dfiltered
+            dfmean = dfiltered.groupby(xfield).mean()
+            print dfmean["pps_global"]
+            # calc confidence intervals:
+            # http://stackoverflow.com/questions/18039923/standard-error-ignoring-nan-in-pandas-groupby-groups
+            # http://www.randalolson.com/2012/08/06/statistical-analysis-made-easy-in-python/
+            # http://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
+            dfci = dfiltered.groupby(xfield).aggregate(lambda x: scipy.stats.sem(x) * scipy.stats.t.ppf((1+0.95)/2., len(x)-1))
+            print dfci["pps_global"]
+
             # do plots
-            g1.plot(
-                dfiltered.index.values,
-                dfiltered[yf].tolist(),
-                linewidth=1.5,
-                alpha=1.0,
-                marker=markers.next(),
-                color=colors.next(),
-                label=label_rename("%s %s" % (dv, yf)))
+            if ENABLE_CONFIDENCE_INTERVAL:
+                g1.errorbar(
+                    dfmean.index.values,
+                    dfmean[yf].tolist(),
+                    linewidth=1.5,
+                    alpha=1.0,
+                    marker=markers.next(),
+                    color=colors.next(),
+                    label=label_rename("%s %s" % (dv, yf)),
+                    yerr=dfci[yf].tolist())
+            else:
+                g1.plot(
+                    dfmean.index.values,
+                    dfmean[yf].tolist(),
+                    linewidth=1.5,
+                    alpha=1.0,
+                    marker=markers.next(),
+                    color=colors.next(),
+                    label=label_rename("%s %s" % (dv, yf)))
 
     # label etc.
     g1.legend(
