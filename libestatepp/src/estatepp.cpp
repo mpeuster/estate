@@ -135,6 +135,15 @@ void es_del(const char* k)
 }
 
 
+void es_register_get_global_callback(void (*cb_func)(const char* key))
+{
+	print_call();
+	assert(sm != NULL);
+	assert(cb_func != NULL);
+	sm->get_communication_manager()->register_get_global_callback(cb_func);
+}
+
+
 //-----------------------------------------------------------------------------------------------------
 // locally implemented defaul reduce functions (for easier interfacing to the lib from e.g. Python
 //------------------------------------------------------------------------------------------------------

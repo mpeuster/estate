@@ -43,6 +43,10 @@ extern "C"
 	extern const char* es_get_global(const char* k, char* (*reduce)(state_item_t*, int));
 	extern const char* es_get_global_predefined_reduce(const char* k, int reduce_id);
 
+	/* extended API */
+	/* register callback function which is called on get_global */
+	extern void es_register_get_global_callback(void (*cb_func)(const char* key));
+
 #ifdef __cplusplus
 }
 #endif

@@ -30,6 +30,8 @@ public:
 	virtual void del(std::string);
 	virtual void set_peers(std::string);
 	virtual void start();
+
+	virtual CommunicationManager* get_communication_manager() {return this->comm; }
 };
 
 #endif /* STATEMANAGER_H_ */

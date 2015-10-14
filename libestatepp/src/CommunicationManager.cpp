@@ -212,6 +212,10 @@ void CommunicationManager::request_subscriber_thread_func()
 			std::string key = request.get(4);
 			debug("(%s) received request from %s:%d; rid=%ld\n", this->get_local_identity().c_str(), sender_ip.c_str(), sender_port, request_id);
 
+			// if global callback is set, call it
+			if(this->get_global_callback_func != NULL)
+				this->get_global_callback_func(key.c_str());
+
 			// create ZMQ push socket for the response if it is not already present
 			std::string conn_string = sender_ip + ":" + int_to_string(sender_port + 1000);
 			zmqpp::socket* zresponsepush;
