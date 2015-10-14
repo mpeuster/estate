@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <assert.h>
+#include <algorithm>
 #include "estatepp.h"
 #include "StateManager.h"
 #include "util.h"
@@ -36,6 +37,7 @@ void es_init_with_peers(const char* ip, int port, const char* peers)
 	sm = new StateManager(str_ip, port);
 	// set peers
 	std::string str_peers(peers);
+	std::replace( str_peers.begin(), str_peers.end(), ';', ' '); // allow also ';' as separator
 	sm->set_peers(str_peers);
 
 	// start node
