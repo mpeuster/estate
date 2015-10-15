@@ -188,22 +188,22 @@ class GenericMiddleBoxTopology(object):
             else:
                 self.net.addLink(mb, self.control_switch, bw=1000)
             # data plane links
-            self.net.addLink(mb, self.source_switch)
-            self.net.addLink(mb, self.target_switch)
+            self.net.addLink(mb, self.source_switch, bw=1000)
+            self.net.addLink(mb, self.target_switch, bw=1000)
         # source hosts
         for i in range(0, self.source_instances):
             sh = self.net.addHost(
                 "source%d" % (i + 1),
                 ip="20.0.0.%d" % (i + 1), cpu=float(PARAMS.cpusource))
             self.source_hosts.append(sh)
-            self.net.addLink(sh, self.source_switch)
+            self.net.addLink(sh, self.source_switch, bw=1000)
         # target hosts
         for i in range(0, self.target_instances):
             th = self.net.addHost(
                 "target%d" % (i + 1),
                 ip="20.0.1.%d" % (i + 1), cpu=float(PARAMS.cputarget))
             self.target_hosts.append(th)
-            self.net.addLink(th, self.target_switch)
+            self.net.addLink(th, self.target_switch, bw=1000)
 
     def config_middlebox_hosts(self):
         """
@@ -402,7 +402,7 @@ def setup_cli_parser():
     # max number of middleboxes in experiment (used for CPU limiting)
     parser.add_argument("--maxnumbermb", default="2")
     # fraction of cpu assigned to MBs
-    parser.add_argument("--cpumb", default="0.5")
+    parser.add_argument("--cpumb", default="0.4")
     # fraction of cpu assigned to source host
     parser.add_argument("--cpusource", default="0.2")
     # fraction of cpu assigned to source host
