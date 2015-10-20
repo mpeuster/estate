@@ -39,6 +39,10 @@ def single_scenario_plot(sc, output,
                 marker=markers.next(),
                 color=colors.next(),
                 label=label_rename("%s %s" % (n, yf)))
+
+    # handover line
+    g1.axvline(55, color='gray', linestyle='--')
+
     # label etc.
     g1.legend(
         bbox_to_anchor=(1.02, 1),
@@ -54,7 +58,7 @@ def single_scenario_plot(sc, output,
         g1.set_xlim(0, xlim)
     # fig.suptitle(sc.name)
     # store to disc
-    fig.set_size_inches(7, 4)
+    fig.set_size_inches(7, 3)
     pylab.savefig(
         os.path.join(output, pname + ".pdf"),
         bbox_inches='tight')
@@ -91,4 +95,4 @@ def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results
             yname="state request delay [s]", xlim=120)
 
 if __name__ == '__main__':
-    plot()
+    plot("../simple-poc-comparisson")

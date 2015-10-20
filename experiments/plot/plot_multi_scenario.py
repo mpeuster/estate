@@ -14,7 +14,8 @@ matplotlib.rcParams['ps.fonttype'] = 42
 #matplotlib.pyplot.style.use("ggplot")
 matplotlib.pyplot.style.use("grayscale")
 
-ENABLE_CONFIDENCE_INTERVAL = True
+ENABLE_CONFIDENCE_INTERVAL = False
+
 
 def multi_scenario_plot(
         output,
@@ -50,8 +51,8 @@ def multi_scenario_plot(
     if destinction_field is not None:
         destinction_values = list(set(df[destinction_field].tolist()))
 
-    print df
-    print destinction_values
+    # print df
+    # print destinction_values
 
     # filter data for single plot
     for yf in yfield:
@@ -65,13 +66,19 @@ def multi_scenario_plot(
 
             # reduce data to have xfield -> yflied 1:1 relationship
             dfmean = dfiltered.groupby(xfield).mean()
-            print dfmean["pps_global"]
+            # print dfmean["pps_global"]
             # calc confidence intervals:
             # http://stackoverflow.com/questions/18039923/standard-error-ignoring-nan-in-pandas-groupby-groups
             # http://www.randalolson.com/2012/08/06/statistical-analysis-made-easy-in-python/
             # http://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
             dfci = dfiltered.groupby(xfield).aggregate(lambda x: scipy.stats.sem(x) * scipy.stats.t.ppf((1+0.95)/2., len(x)-1))
-            print dfci["pps_global"]
+            # print dfci["pps_global"]
+
+            # create labels
+            if len(yfield) < 2:
+                labelstr = label_rename("%s" % (dv))
+            else:
+                labelstr = label_rename("%s %s" % (dv, yf))
 
             # do plots
             if ENABLE_CONFIDENCE_INTERVAL:
@@ -82,7 +89,7 @@ def multi_scenario_plot(
                     alpha=1.0,
                     marker=markers.next(),
                     color=colors.next(),
-                    label=label_rename("%s %s" % (dv, yf)),
+                    label=labelstr,
                     yerr=dfci[yf].tolist())
             else:
                 g1.plot(
@@ -92,7 +99,7 @@ def multi_scenario_plot(
                     alpha=1.0,
                     marker=markers.next(),
                     color=colors.next(),
-                    label=label_rename("%s %s" % (dv, yf)))
+                    label=labelstr)
 
     # label etc.
     g1.legend(
@@ -107,7 +114,7 @@ def multi_scenario_plot(
     g1.set_ylabel(yname)
     # fig.suptitle(sc.name)
     # store to disc
-    fig.set_size_inches(7, 4)
+    fig.set_size_inches(7, 5)
     pylab.savefig(
         os.path.join(output, pname + ".pdf"),
         bbox_inches='tight')
@@ -136,6 +143,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     print lambdas
 
     middleboxes = sorted(df["numbermb"].drop_duplicates().tolist())
+    # middleboxes.remove(16)
     print middleboxes
 
     dummystatesizes = sorted(df["dummystatesize"].drop_duplicates().tolist())
@@ -149,7 +157,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     """
     for delay in cdelays[:2]:
         for lmb in lambdas:
-            for dss in dummystatesizes[:1]:
+            for dss in dummystatesizes:
                 multi_scenario_plot(
                     output_dir,
                     ed,
@@ -161,7 +169,22 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="number of NF instances",
-                    yname="packets per second",
+                    yname="avg. packets/second",
+                    name_pre="",
+                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="numbermb",
+                    yfield=["pps_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "controldelay": delay,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="number of NF instances",
+                    yname="avg. packets/second",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
@@ -176,7 +199,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="number of NF instances",
-                    yname="state request delay [s]",
+                    yname="avg. request delay [s]",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
@@ -184,7 +207,22 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     output_dir,
                     ed,
                     xfield="numbermb",
-                    yfield=["pcount_global"],
+                    yfield=["t_request_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "controldelay": delay,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="number of NF instances",
+                    yname="avg. request delay [s]",
+                    name_pre="",
+                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="numbermb",
+                    yfield=["pcount_global", "pcount_local"],
                     destinction_field="backend",
                     rowfilter={
                         "controldelay": delay,
@@ -204,7 +242,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     """
     for nmb in middleboxes:
         for lmb in lambdas:
-            for dss in dummystatesizes[:1]:
+            for dss in dummystatesizes[:2]:
                 multi_scenario_plot(
                     output_dir,
                     ed,
@@ -216,7 +254,22 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="control plane latency [ms]",
-                    yname="packets per second",
+                    yname="avg. packets/second",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="controldelay",
+                    yfield=["pps_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="control plane latency [ms]",
+                    yname="avg. packets/second",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
@@ -232,6 +285,21 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "dummystatesize": dss},
                     xname="control plane latency [ms]",
                     yname="state request delay [s]",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="controldelay",
+                    yfield=["t_request_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "dummystatesize": dss},
+                    xname="control plane latency [ms]",
+                    yname="avg. request delay [s]",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
@@ -257,21 +325,21 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     yaxis = pps, request times, global pcount
     layout: one plot line per backend
     """
-    for nmb in middleboxes[-1:]:
+    for nmb in middleboxes[-1:2]:
         for lmb in lambdas:
             for delay in cdelays[:2]:
                 multi_scenario_plot(
                     output_dir,
                     ed,
                     xfield="dummystatesize",
-                    yfield=["pps_global", "pps_local"],
+                    yfield=["pps_global"],
                     destinction_field="backend",
                     rowfilter={
                         "numbermb": nmb,
                         "srclambda": lmb,
                         "controldelay": delay},
                     xname="state size [byte]",
-                    yname="packets per second",
+                    yname="avg. packets/second",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
                     )
@@ -286,7 +354,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "controldelay": delay},
                     xname="state size [byte]",
-                    yname="state request delay [s]",
+                    yname="avg. request delay [s]",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
                     )
@@ -307,4 +375,4 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     )
 
 if __name__ == '__main__':
-    plot("scaleability-fixed")
+    plot("../scaleability-fixed")
