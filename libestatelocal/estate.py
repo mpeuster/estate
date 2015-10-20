@@ -25,7 +25,10 @@ class estate(object):
 
     def get(self, k):
         logging.debug("ES: GET k=%s" % (str(k)))
-        return self.state.get(str(k), "ES_NONE")
+        try:
+            return self.state[str(k)]
+        except:
+            return "ES_NONE"
 
     def delete(self, k):
         logging.debug("ES: DEL k=%s" % (str(k)))
