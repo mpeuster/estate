@@ -27,7 +27,8 @@ def multi_scenario_plot(
         xname=None,
         yname="pps",
         name_pre="",
-        name_post=""
+        name_post="",
+        xlogscale=False
         ):
     # get dataframe
     df = ed.get_combined_df()
@@ -112,6 +113,10 @@ def multi_scenario_plot(
         prop={'size': 10})
     g1.set_xlabel(xname)
     g1.set_ylabel(yname)
+
+    if xlogscale:
+        g1.set_xscale('log', basex=2)
+
     # fig.suptitle(sc.name)
     # store to disc
     fig.set_size_inches(7, 5)
@@ -341,7 +346,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="state size [byte]",
                     yname="avg. packets/second",
                     name_pre="",
-                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
+                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay),
+                    xlogscale=True
                     )
                 multi_scenario_plot(
                     output_dir,
@@ -356,7 +362,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="state size [byte]",
                     yname="avg. request delay [s]",
                     name_pre="",
-                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
+                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay),
+                    xlogscale=True
                     )
 
 if __name__ == '__main__':
