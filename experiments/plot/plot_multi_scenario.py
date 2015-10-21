@@ -325,7 +325,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
     yaxis = pps, request times, global pcount
     layout: one plot line per backend
     """
-    for nmb in middleboxes[-1:2]:
+    for nmb in middleboxes:
         for lmb in lambdas:
             for delay in cdelays[:2]:
                 multi_scenario_plot(
@@ -355,21 +355,6 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "controldelay": delay},
                     xname="state size [byte]",
                     yname="avg. request delay [s]",
-                    name_pre="",
-                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
-                    )
-                multi_scenario_plot(
-                    output_dir,
-                    ed,
-                    xfield="dummystatesize",
-                    yfield=["pcount_global"],
-                    destinction_field="backend",
-                    rowfilter={
-                        "numbermb": nmb,
-                        "srclambda": lmb,
-                        "controldelay": delay},
-                    xname="state size [byte]",
-                    yname="number of processed packets",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay)
                     )
