@@ -34,7 +34,7 @@ def single_scenario_plot(sc, output,
             g1.plot(
                 sc.get_values(n, xfield),
                 sc.get_values(n, yf),
-                linewidth=1.5,
+                linewidth=1.0,
                 alpha=1.0,
                 marker=markers.next(),
                 color=colors.next(),
@@ -45,9 +45,9 @@ def single_scenario_plot(sc, output,
 
     # label etc.
     g1.legend(
-        bbox_to_anchor=(1.02, 1),
+        #bbox_to_anchor=(1.02, 1),
         loc=2,
-        borderaxespad=0.,
+        #borderaxespad=0.,
         fancybox=False,
         shadow=False,
         ncol=1,
@@ -58,7 +58,7 @@ def single_scenario_plot(sc, output,
         g1.set_xlim(0, xlim)
     # fig.suptitle(sc.name)
     # store to disc
-    fig.set_size_inches(7, 3)
+    fig.set_size_inches(4, 4)
     pylab.savefig(
         os.path.join(output, pname + ".pdf"),
         bbox_inches='tight')
@@ -86,10 +86,10 @@ def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results
             yname="packets per second", xlim=120)
         single_scenario_plot(
             s, output_dir, yfield=["pcount_local", "pcount_global"],
-            yname="number of processed packets", xlim=120)
+            yname="# matches", xlim=120)
         single_scenario_plot(
             s, output_dir, yfield=["matchcount_local", "matchcount_global"],
-            yname="number of matched packets", xlim=120)
+            yname="# matches", xlim=120)
         single_scenario_plot(
             s, output_dir, yfield=["t_request_local", "t_request_global"],
             yname="state request delay [s]", xlim=120)

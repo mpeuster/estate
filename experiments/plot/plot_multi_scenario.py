@@ -104,9 +104,9 @@ def multi_scenario_plot(
 
     # label etc.
     g1.legend(
-        bbox_to_anchor=(1.02, 1),
+        #bbox_to_anchor=(1.02, 1),
         loc=2,
-        borderaxespad=0.,
+        #borderaxespad=0.,
         fancybox=False,
         shadow=False,
         ncol=1,
@@ -119,7 +119,7 @@ def multi_scenario_plot(
 
     # fig.suptitle(sc.name)
     # store to disc
-    fig.set_size_inches(7, 5)
+    fig.set_size_inches(4, 4)
     pylab.savefig(
         os.path.join(output, pname + ".pdf"),
         bbox_inches='tight')
