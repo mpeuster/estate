@@ -15,6 +15,7 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 * `sudo apt-get install libzmq3`
 * `sudo apt-get install libzmq3-dev`
 * `sudo apt-get install bridge-utils`
+* `sudo apt-get install iperf`
 
 ### Python:
 * `sudo pip install zmq`
@@ -33,9 +34,10 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 
 
 #### Setup `.bashrc`
-* `export PATH="$PATH:$HOME/estate/cppesnode/Debug/:$HOME/redis-3.0.4/src/"`
-* `export PYTHONPATH="$HOME/estate:$PYTHONPATH"`
-* `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/estate/libestatepp/Debug/:/usr/local/lib`
+* export PATH="$PATH:$HOME/estate/cppesnode/Debug/:$HOME/redis-3.0.4/src/"
+* export PYTHONPATH="$HOME/estate:$PYTHONPATH"
+* export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/estate/libestatepp/Debug:/usr/local/lib
+* export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:$HOME/estate/libestatepp/src/
 
 If ld error occurs: Hardlink the lib: `sudo ln libestatepp.so /lib/libestatepp.so`
 
