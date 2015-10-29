@@ -3,7 +3,7 @@ import matplotlib
 import itertools
 import os
 import data
-from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors, label_rename
+from helper import ensure_dir, get_markers, get_upb_colors, get_preset_colors, label_rename, label_rename_matchexample, label_rename_generic_performance
 # ensure correct fonts for ACM/IEEE
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -14,7 +14,7 @@ matplotlib.pyplot.style.use("grayscale")
 
 def single_scenario_plot(sc, output,
                          xfield="t", yfield=["pps_local", "pps_global"],
-                         xname="time [s]", yname="pps", xlim=-1):
+                         xname="time [s]", yname="pps", xlim=-1, label_rename_func=None):
     # input processing
     if isinstance(yfield, basestring) or isinstance(yfield, str):
         yfield = [yfield]
@@ -28,6 +28,12 @@ def single_scenario_plot(sc, output,
     markers = get_markers()
     colors = get_preset_colors()
 
+    def do_label_rename(l):
+        label = label_rename(l)
+        if label_rename_func is not None:
+            label = label_rename_func(label)
+        return label
+
     # do plots
     for n in sorted(sc.get_middlerbox_names()):
         for yf in sorted(yfield):
@@ -38,7 +44,7 @@ def single_scenario_plot(sc, output,
                 alpha=1.0,
                 marker=markers.next(),
                 color=colors.next(),
-                label=label_rename("%s %s" % (n, yf)))
+                label=do_label_rename("%s %s" % (n, yf)))
 
     # handover line
     g1.axvline(55, color='gray', linestyle='--')
@@ -83,13 +89,13 @@ def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results
     for s in ed.scenarios.itervalues():
         single_scenario_plot(
             s, output_dir, yfield=["pps_local", "pps_global"],
-            yname="packets per second", xlim=120)
+            yname="packets per second", xlim=120, label_rename_func=label_rename_generic_performance)
         single_scenario_plot(
             s, output_dir, yfield=["pcount_local", "pcount_global"],
-            yname="# matches", xlim=120)
+            yname="# matches", xlim=120, label_rename_func=label_rename_matchexample)
         single_scenario_plot(
             s, output_dir, yfield=["matchcount_local", "matchcount_global"],
-            yname="# matches", xlim=120)
+            yname="# matches", xlim=120, label_rename_func=label_rename_matchexample)
         single_scenario_plot(
             s, output_dir, yfield=["t_request_local", "t_request_global"],
             yname="state request delay [s]", xlim=120)

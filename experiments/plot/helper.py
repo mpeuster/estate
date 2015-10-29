@@ -46,3 +46,15 @@ def label_rename(lbl):
     lbl = lbl.replace("libestatelocal", "baseline")
     lbl = lbl.replace("redis", "centraldb")
     return lbl
+
+
+def label_rename_matchexample(lbl):
+    lbl = lbl.replace("global", "libestate")
+    lbl = lbl.replace("local", "legacy")
+    return lbl
+
+
+def label_rename_generic_performance(lbl):
+    lbl = lbl.replace("global", "total")
+    lbl = lbl.replace("local", "local")
+    return lbl
