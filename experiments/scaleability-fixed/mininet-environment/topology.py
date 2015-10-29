@@ -406,7 +406,7 @@ def setup_cli_parser():
     # number of middleboxes in experiment
     parser.add_argument("--numbermb", default="2")
     # max number of middleboxes in experiment (used for CPU limiting)
-    parser.add_argument("--maxnumbermb", default="16")
+    parser.add_argument("--maxnumbermb", default="32")
     # fraction of cpu assigned to MBs
     parser.add_argument("--cpumb", default="0.4")
     # fraction of cpu assigned to source host
