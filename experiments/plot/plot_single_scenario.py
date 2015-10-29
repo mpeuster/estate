@@ -35,8 +35,13 @@ def single_scenario_plot(sc, output,
         return label
 
     # do plots
-    for n in sorted(sc.get_middlerbox_names()):
-        for yf in sorted(yfield):
+    for yf in sorted(yfield):
+        # throw away second pps global
+        if yf == "pps_global":
+            nfis = ["monitor_mb1.log"]
+        else:
+            nfis = sc.get_middlerbox_names()
+        for n in sorted(nfis):
             g1.plot(
                 sc.get_values(n, xfield),
                 sc.get_values(n, yf),

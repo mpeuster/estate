@@ -27,7 +27,7 @@ def get_preset_colors():
 
 
 def get_markers():
-    return itertools.cycle([u'o', u's', u'^', u'v', u'p', u'8', u'<', u'>', u'*', u'h', u'H', u'D', u'd'])
+    return itertools.cycle([u's', u'o', u'^', u'v', u'p', u'8', u'<', u'>', u'*', u'h', u'H', u'D', u'd'])
 
 
 def label_rename(lbl):
@@ -55,6 +55,6 @@ def label_rename_matchexample(lbl):
 
 
 def label_rename_generic_performance(lbl):
-    lbl = lbl.replace("global", "total")
-    lbl = lbl.replace("local", "local")
+    lbl = lbl.replace("NF.1 global", "total")
+    lbl = lbl.replace("local", "")
     return lbl
