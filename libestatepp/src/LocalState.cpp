@@ -19,12 +19,12 @@ LocalState::~LocalState()
 void LocalState::set(std::string k, StateItem* v)
 {
 	this->data[k] = v;
-	//debug("SET %s to %s\n", k.c_str(), v->toString().c_str());
+	verbose("SET %s to %s\n", k.c_str(), v->toString().c_str());
 }
 
 StateItem* LocalState::get(std::string k)
 {
-	//debug("GET %s\n", k.c_str());
+	verbose("GET %s\n", k.c_str());
 	if (this->exists(k))
 		return this->data[k];
 	return NULL;

@@ -54,7 +54,7 @@ private:
 	std::list<std::string> peer_lst;
 
 	/* callback pointer, called when global requests are received */
-	void (*get_global_callback_func)(const char* key) = NULL;
+	void (*get_global_callback_func)(unsigned long id, const char* key) = NULL;
 
 public:
 	CommunicationManager(StateManager*, std::string, int);
@@ -70,7 +70,7 @@ public:
 	virtual bool is_state_item_of_node_in_list(StateItem si, std::list<StateItem> l);
 
 	/* setter for get_global_callback */
-	virtual void register_get_global_callback(void (*cb_func)(const char* key)) {this->get_global_callback_func = cb_func; }
+	virtual void register_get_global_callback(void (*cb_func)(unsigned long id, const char* key)) {this->get_global_callback_func = cb_func; }
 };
 
 #endif /* COMMUNICATIONMANAGER_H_ */

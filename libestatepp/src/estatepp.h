@@ -45,7 +45,7 @@ extern "C"
 
 	/* extended API */
 	/* register callback function which is called on get_global */
-	extern void es_register_get_global_callback(void (*cb_func)(const char* key));
+	extern void es_register_get_global_callback(void (*cb_func)(unsigned long id, const char* key));
 
 #ifdef __cplusplus
 }
