@@ -79,10 +79,9 @@ def main():
     DURATION = 60 * 3  # duration of one scenario
 
     # different backends
-    #for be in ["redis", "rediscluster", "libestatelocal", "libestatepython"]:
-    for be in ["rediscluster"]:
+    for be in ["redis", "rediscluster", "libestatelocal", "libestatepython"]:
         # different delays
-        for i in [0, 5, 10, 20]:
+        for i in [0, 5, 10]:
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
                 # different number of middleboxes
