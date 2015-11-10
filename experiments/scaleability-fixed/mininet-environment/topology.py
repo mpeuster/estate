@@ -379,7 +379,7 @@ class RedisClusterTopology(GenericMiddleBoxTopology):
         super(RedisClusterTopology, self).config_middlebox_hosts()
         for mb in self.middlebox_hosts:
             # cleanups
-            print mb.cmd("rm -f nodes*.conf")
+            print mb.cmd("rm -f node*.conf")
             print mb.cmd("rm -f dump.rdb")
             # set all environment variables for each middlebox host
             print mb.cmd("source environment_vars.sh")
@@ -399,8 +399,8 @@ class RedisClusterTopology(GenericMiddleBoxTopology):
         self.middlebox_hosts[0].cmd(
             "./redis-trib.rb create %s > log/redis-trib.log 2>&1 &" % (
                 redis_addresses))
-        print "Wait 10s to let cluster start up ..."
-        time.sleep(10)
+        print "Wait %ds to let cluster start up ..." % (len(self.middlebox_hosts) * 3)
+        time.sleep(len(self.middlebox_hosts) * 3)
         print "proceed."
 
         # run monitor.py on each MB node
@@ -418,7 +418,7 @@ class RedisClusterTopology(GenericMiddleBoxTopology):
         for mb in self.middlebox_hosts:
             mb.cmd("pkill redis-server")
             # cleanups
-            print mb.cmd("rm -f nodes*.conf")
+            print mb.cmd("rm -f node*.conf")
             print mb.cmd("rm -f dump.rdb")
         super(RedisClusterTopology, self).stop_topo()
 
@@ -448,7 +448,7 @@ def stop_custom_redis():
     print "Leftover redis servers..."
     wait(2)
     print subprocess.call("pkill redis-server", shell=True)
-    print subprocess.call("rm -f nodes*.conf", shell=True)
+    print subprocess.call("rm -f node*.conf", shell=True)
     wait(2)
 
 
