@@ -17,6 +17,9 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 * `sudo apt-get install bridge-utils`
 * `sudo apt-get install iperf`
 
+### Ruby:
+* `sudo gem install redis`
+
 ### Python:
 * `sudo pip install zmq`
 * `sudo pip install redis`
