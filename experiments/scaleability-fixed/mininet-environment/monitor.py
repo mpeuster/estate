@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from libestateredis.estate_redis import estate as estater
+from libestateredis.estate_redis_cluster import estate as estaterc
 from cppesnode.estate_zmqclient import estate as estatez
 from pyclient.estate import estate as estatep
 from libestatelocal.estate import estate as estatelocal
@@ -236,6 +237,8 @@ def main():
 
     if backend == "redis":
         es = estater(instance_id, redis_host=options[0])
+    elif backend == "rediscluster":
+        es = estaterc(instance_id)
     elif backend == "libestatezmq":
         es = estatez(instance_id)
         es.set_connection_properties(port=(8800 + instance_id))

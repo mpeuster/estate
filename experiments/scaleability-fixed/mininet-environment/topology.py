@@ -404,17 +404,15 @@ class RedisClusterTopology(GenericMiddleBoxTopology):
         print "proceed."
 
         # run monitor.py on each MB node
-        """
         c = 0
         for mb in self.middlebox_hosts:
             mb.cmd("./monitor.py %s %d %s %s > log/monitor_%s.log 2>&1 &"
                    % (PARAMS.backend,
                       c,
                       PARAMS.dummystatesize,
-                      self.redis_host.IP(),
+                      "127.0.0.1",
                       mb.name))
             c += 1
-        """
 
     def stop_topo(self):
         for mb in self.middlebox_hosts:
@@ -511,6 +509,9 @@ if __name__ == '__main__':
     elif PARAMS.backend == "redis":
         mt = RedisTopology(mbox_instances=int(PARAMS.numbermb))
     elif PARAMS.backend == "rediscluster":
+        if int(PARAMS.numbermb) < 3:
+            print "Redis cluster needs at least 4 nodes."
+            exit(0)
         mt = RedisClusterTopology(mbox_instances=int(PARAMS.numbermb))
     else:
         mt = None

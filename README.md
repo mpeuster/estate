@@ -20,6 +20,7 @@ Basic documentation: [https://github.com/mpeuster/estate/wiki]
 ### Python:
 * `sudo pip install zmq`
 * `sudo pip install redis`
+* `sudo pip install redis-py-cluster`
 * `sudo pip install cassandra-driver`
 
 ### C++:
