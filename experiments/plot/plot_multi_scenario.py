@@ -119,7 +119,7 @@ def multi_scenario_plot(
 
     # fig.suptitle(sc.name)
     # store to disc
-    fig.set_size_inches(4, 4)
+    fig.set_size_inches(4, 3)
     pylab.savefig(
         os.path.join(output, pname + ".pdf"),
         bbox_inches='tight')
