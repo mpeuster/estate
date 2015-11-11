@@ -162,7 +162,11 @@ class ExperimentData():
         print "Loading scenarios: %s" % str(ns)
         for n in ns:
             if "DS_Store" not in n:
-                self.scenarios[n] = Scenario(self.path, n)
+                # only use folders with monitor data
+                spath = os.path.join(self.path, n)
+                if len([f for f in os.listdir(spath)
+                        if "monitor_" in f]) > 0:
+                    self.scenarios[n] = Scenario(self.path, n)
 
     def load(self):
         self.load_scenarios()
