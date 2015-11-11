@@ -173,7 +173,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "controldelay": delay,
                         "srclambda": lmb,
                         "dummystatesize": dss},
-                    xname="number of NF instances",
+                    xname="number of replicated NF instances",
                     yname="avg. packets/second",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
@@ -188,7 +188,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "controldelay": delay,
                         "srclambda": lmb,
                         "dummystatesize": dss},
-                    xname="number of NF instances",
+                    xname="number of replicated NF instances",
                     yname="avg. packets/second",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
@@ -203,7 +203,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "controldelay": delay,
                         "srclambda": lmb,
                         "dummystatesize": dss},
-                    xname="number of NF instances",
+                    xname="number of replicated NF instances",
                     yname="avg. request delay [s]",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
@@ -218,7 +218,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "controldelay": delay,
                         "srclambda": lmb,
                         "dummystatesize": dss},
-                    xname="number of NF instances",
+                    xname="number of replicated NF instances",
                     yname="avg. request delay [s]",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
@@ -233,7 +233,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "controldelay": delay,
                         "srclambda": lmb,
                         "dummystatesize": dss},
-                    xname="number of NF instances",
+                    xname="number of replicated NF instances",
                     yname="number of processed packets",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
