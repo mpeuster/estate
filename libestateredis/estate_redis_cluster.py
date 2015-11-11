@@ -42,10 +42,10 @@ class estate(object):
         lock mechanism is needed. However, we keep it for easy debugging of
         locking times.
         """
-        self._acquire_lock("lock.%s" % k)
+        #self._acquire_lock("lock.%s" % k)
         val = self.r.incr("globaltime.%s" % k)
         logging.debug("ES: Update time: %s is %d" % (k, val))
-        self._release_lock("lock.%s" % k)
+        #self._release_lock("lock.%s" % k)
         return int(val)
 
     def to_instance_key(self, k):
