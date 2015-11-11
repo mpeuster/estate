@@ -79,13 +79,13 @@ def main():
     DURATION = 60 * 3  # duration of one scenario
 
     # different backends
-    for be in ["redis", "libestatelocal", "libestatepython"]:
+    for be in ["redis", "rediscluster", "libestatelocal", "libestatepython"]:
         # different delays
-        for i in [0, 5, 10, 20]:
+        for i in [0, 5, 10]:
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
                 # different number of middleboxes
-                for nmb in range(2, 32, 1):
+                for nmb in range(2, 17, 2):
                     # different dummy state sizes
                     for dss in [0, 1024, 10*1024, 100*1024, 1000*1024]:
                         run_scenario(

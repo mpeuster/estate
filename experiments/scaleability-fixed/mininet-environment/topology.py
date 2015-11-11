@@ -363,6 +363,66 @@ class RedisTopology(GenericMiddleBoxTopology):
         super(RedisTopology, self).stop_topo()
 
 
+class RedisClusterTopology(GenericMiddleBoxTopology):
+
+    def __init__(self, **kwargs):
+        super(RedisClusterTopology, self).__init__(**kwargs)
+
+    def setup_hosts(self):
+        """
+        overwrite and extend host setup: we need an additional redis host
+        """
+        super(RedisClusterTopology, self).setup_hosts()
+        #self.net.addLink(self.redis_host, self.control_switch, delay="100ms")
+
+    def config_middlebox_hosts(self):
+        super(RedisClusterTopology, self).config_middlebox_hosts()
+        for mb in self.middlebox_hosts:
+            # cleanups
+            print mb.cmd("rm -f node*.conf")
+            print mb.cmd("rm -f dump.rdb")
+            # set all environment variables for each middlebox host
+            print mb.cmd("source environment_vars.sh")
+
+    def run_middlebox_hosts(self):
+        super(RedisClusterTopology, self).run_middlebox_hosts()
+        # run redis server on each middlebox
+        for mb in self.middlebox_hosts:
+            mbid = str(mb.name).replace("mb", "")
+            print mb.cmd(
+                "redis-server ./redis%s.conf > log/redis%s.log 2>&1 &" % (
+                    mbid, mbid))
+        # connect all redis instances to a cluster
+        redis_addresses = " ".join(
+            [mb.IP() + ":6379" for mb in self.middlebox_hosts])
+        print "Creating redis cluster with: " + redis_addresses
+        self.middlebox_hosts[0].cmd(
+            "./redis-trib.rb create %s > log/redis-trib.log 2>&1 &" % (
+                redis_addresses))
+        print "Wait %ds to let cluster start up ..." % (len(self.middlebox_hosts) * 3)
+        time.sleep(len(self.middlebox_hosts) * 3)
+        print "proceed."
+
+        # run monitor.py on each MB node
+        c = 0
+        for mb in self.middlebox_hosts:
+            mb.cmd("./monitor.py %s %d %s %s > log/monitor_%s.log 2>&1 &"
+                   % (PARAMS.backend,
+                      c,
+                      PARAMS.dummystatesize,
+                      "127.0.0.1",
+                      mb.name))
+            c += 1
+
+    def stop_topo(self):
+        for mb in self.middlebox_hosts:
+            mb.cmd("pkill redis-server")
+            # cleanups
+            print mb.cmd("rm -f node*.conf")
+            print mb.cmd("rm -f dump.rdb")
+        super(RedisClusterTopology, self).stop_topo()
+
+
 def start_custom_pox():
     print "Starting esternal POX..."
     return subprocess.Popen(
@@ -382,6 +442,14 @@ def stop_custom_pox(p):
     subprocess.call("pkill pox", shell=True)
     subprocess.call("mn -c", shell=True)
     print subprocess.call("ps", shell=True)
+
+
+def stop_custom_redis():
+    print "Leftover redis servers..."
+    wait(2)
+    print subprocess.call("pkill redis-server", shell=True)
+    print subprocess.call("rm -f node*.conf", shell=True)
+    wait(2)
 
 
 def wait(sec):
@@ -406,7 +474,7 @@ def setup_cli_parser():
     # number of middleboxes in experiment
     parser.add_argument("--numbermb", default="2")
     # max number of middleboxes in experiment (used for CPU limiting)
-    parser.add_argument("--maxnumbermb", default="32")
+    parser.add_argument("--maxnumbermb", default="16")
     # fraction of cpu assigned to MBs
     parser.add_argument("--cpumb", default="0.4")
     # fraction of cpu assigned to source host
@@ -440,6 +508,11 @@ if __name__ == '__main__':
         mt = LibestateTopology(mbox_instances=int(PARAMS.numbermb))
     elif PARAMS.backend == "redis":
         mt = RedisTopology(mbox_instances=int(PARAMS.numbermb))
+    elif PARAMS.backend == "rediscluster":
+        if int(PARAMS.numbermb) < 3:
+            print "Redis cluster needs at least 4 nodes."
+            exit(0)
+        mt = RedisClusterTopology(mbox_instances=int(PARAMS.numbermb))
     else:
         mt = None
         print "No backend selected"
@@ -452,5 +525,6 @@ if __name__ == '__main__':
         else:
             wait(int(PARAMS.duration))
         mt.stop_topo()
+        stop_custom_redis()
         # stop custom controller
         stop_custom_pox(p)

@@ -64,9 +64,7 @@ std::string StateManager::get(std::string k)
 
 StateItem* StateManager::getItem(std::string k)
 {
-	if(this->local_state->exists(k) && this->local_state->get(k) != NULL)
-		return this->local_state->get(k);
-	return NULL;
+	return this->local_state->get(k);
 }
 
 

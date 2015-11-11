@@ -135,7 +135,7 @@ void es_del(const char* k)
 }
 
 
-void es_register_get_global_callback(void (*cb_func)(const char* key))
+void es_register_get_global_callback(void (*cb_func)(unsigned long id, const char* key))
 {
 	print_call();
 	assert(sm != NULL);

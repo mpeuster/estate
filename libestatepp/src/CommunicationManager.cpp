@@ -214,7 +214,7 @@ void CommunicationManager::request_subscriber_thread_func()
 
 			// if global callback is set, call it
 			if(this->get_global_callback_func != NULL)
-				this->get_global_callback_func(key.c_str());
+				this->get_global_callback_func(request_id, key.c_str());
 
 			// create ZMQ push socket for the response if it is not already present
 			std::string conn_string = sender_ip + ":" + int_to_string(sender_port + 1000);
@@ -231,7 +231,6 @@ void CommunicationManager::request_subscriber_thread_func()
 			}
 			zresponsepush = this->zresponsepush_map[conn_string];
 
-			// get local state item
 			StateItem* si = this->sm->getItem(key);
 
 			// send response message to requester
@@ -245,12 +244,14 @@ void CommunicationManager::request_subscriber_thread_func()
 				response.push_back(si->getData()); // actual data for key
 				response.push_back(si->getNodeIdentifier());
 				response.push_back(si->getTimestamp());
+				debug("Sending state for rid=%ld\n", request_id);
 			}
 			else
 			{	// return indicator that state item was not found
 				response.push_back("ES_NOT_PRESENT");
 				response.push_back(this->get_local_identity());
 				response.push_back(0);
+				debug("State item for request not found. Sending ES_NOT_PRESENT for rid=%ld\n", request_id);
 			}
 			zresponsepush->send(response);
 		}
