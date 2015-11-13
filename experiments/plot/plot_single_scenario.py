@@ -97,10 +97,10 @@ def plot(experiment, output_dir="evaluation/single_scenario", input_dir="results
             yname="packets per second", xlim=120, label_rename_func=label_rename_generic_performance)
         single_scenario_plot(
             s, output_dir, yfield=["pcount_local", "pcount_global"],
-            yname="# matches", xlim=120, label_rename_func=label_rename_matchexample)
+            yname="# pattern matches", xlim=120, label_rename_func=label_rename_matchexample)
         single_scenario_plot(
             s, output_dir, yfield=["matchcount_local", "matchcount_global"],
-            yname="# matches", xlim=120, label_rename_func=label_rename_matchexample)
+            yname="# pattern matches", xlim=120, label_rename_func=label_rename_matchexample)
         single_scenario_plot(
             s, output_dir, yfield=["t_request_local", "t_request_global"],
             yname="state request delay [s]", xlim=120)

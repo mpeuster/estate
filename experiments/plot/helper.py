@@ -44,13 +44,14 @@ def label_rename(lbl):
 
     lbl = lbl.replace("libestatepython", "libestate")
     lbl = lbl.replace("libestatelocal", "baseline")
+    lbl = lbl.replace("rediscluster", "clusterdb")
     lbl = lbl.replace("redis", "centraldb")
     return lbl
 
 
 def label_rename_matchexample(lbl):
     lbl = lbl.replace("global", "libestate")
-    lbl = lbl.replace("local", "legacy")
+    lbl = lbl.replace("local", "baseline")
     return lbl
 
 

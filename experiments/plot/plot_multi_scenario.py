@@ -359,7 +359,23 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "numbermb": nmb,
                         "srclambda": lmb,
                         "controldelay": delay},
-                    xname="state size [byte]",
+                    xname="state item size [byte]",
+                    yname="avg. request delay [s]",
+                    name_pre="",
+                    name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay),
+                    xlogscale=True
+                    )
+                multi_scenario_plot(
+                    output_dir,
+                    ed,
+                    xfield="dummystatesize",
+                    yfield=["t_request_global"],
+                    destinction_field="backend",
+                    rowfilter={
+                        "numbermb": nmb,
+                        "srclambda": lmb,
+                        "controldelay": delay},
+                    xname="state item size [byte]",
                     yname="avg. request delay [s]",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay),
