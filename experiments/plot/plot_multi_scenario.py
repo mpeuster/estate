@@ -28,7 +28,8 @@ def multi_scenario_plot(
         yname="pps",
         name_pre="",
         name_post="",
-        xlogscale=False
+        xlogscale=False,
+        ymax=None
         ):
     # get dataframe
     df = ed.get_combined_df()
@@ -64,6 +65,8 @@ def multi_scenario_plot(
             if len(rowfilter) > 0:
                 for k, v in rowfilter.items():
                     dfiltered = dfiltered[dfiltered[k] == v]
+            if ymax is not None:
+                dfiltered = dfiltered[dfiltered[yf] < ymax]
 
             # reduce data to have xfield -> yflied 1:1 relationship
             dfmean = dfiltered.groupby(xfield).mean()
@@ -221,7 +224,8 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                     xname="number of replicated NF instances",
                     yname="avg. request delay [s]",
                     name_pre="",
-                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
+                    name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss),
+                    ymax=0.9
                     )
                 multi_scenario_plot(
                     output_dir,

@@ -85,7 +85,7 @@ def main():
             # different lambdas 1.0, 0.1, 0.01
             for l in [0.01]:
                 # different number of middleboxes
-                for nmb in range(2, 16, 1):
+                for nmb in range(2, 17, 1):
                     # different dummy state sizes
                     for dss in [0, 1024, 10*1024, 100*1024, 1000*1024, 10000*1024]:
                         run_scenario(
