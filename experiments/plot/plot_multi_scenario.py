@@ -177,7 +177,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="number of replicated VNF instances",
-                    yname="avg. processed packets/second",
+                    yname="avg. processed pkt/s",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
@@ -192,7 +192,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="number of replicated VNF instances",
-                    yname="avg. processed packets/second",
+                    yname="avg. processed pkt/s",
                     name_pre="",
                     name_post="_d%03d_l%03d_dss%08d" % (delay, lmb*100, dss)
                     )
@@ -263,7 +263,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="control plane latency [ms]",
-                    yname="avg. processed packets/second",
+                    yname="avg. processed pkt/s",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
@@ -278,7 +278,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "dummystatesize": dss},
                     xname="control plane latency [ms]",
-                    yname="avg. processed packets/second",
+                    yname="avg. processed pkt/s",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_dss%08d" % (nmb, lmb*100, dss)
                     )
@@ -348,7 +348,7 @@ def plot(experiment, output_dir="evaluation/multi_scenario", input_dir="results/
                         "srclambda": lmb,
                         "controldelay": delay},
                     xname="state size [byte]",
-                    yname="avg. processed packets/second",
+                    yname="avg. processed pkt/s",
                     name_pre="",
                     name_post="_nmb%03d_l%03d_d%03d" % (nmb, lmb*100, delay),
                     xlogscale=True
