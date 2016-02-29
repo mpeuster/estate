@@ -44,8 +44,8 @@ def label_rename(lbl):
 
     lbl = lbl.replace("libestatepython", "libestate")
     lbl = lbl.replace("libestatelocal", "baseline")
-    lbl = lbl.replace("rediscluster", "clusterdb")
-    lbl = lbl.replace("redis", "centraldb")
+    lbl = lbl.replace("rediscluster", "clustermem")
+    lbl = lbl.replace("redis", "centralmem")
     return lbl
 
 
