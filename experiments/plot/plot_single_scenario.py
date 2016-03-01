@@ -59,17 +59,17 @@ def single_scenario_plot(sc, output,
         #bbox_to_anchor=(1.02, 1),
         loc=2,
         #borderaxespad=0.,
-        fancybox=False,
-        shadow=False,
-        ncol=1,
-        prop={'size': 10})
+        #fancybox=False,
+        #shadow=False,
+        #ncol=1,
+        prop={'size': 8})
     g1.set_xlabel(xname)
     g1.set_ylabel(yname)
     if xlim > 0:
         g1.set_xlim(0, xlim)
     # fig.suptitle(sc.name)
     # store to disc
-    fig.set_size_inches(4, 2.5)
+    fig.set_size_inches(4, 2.0)
     pylab.savefig(
         os.path.join(output, pname + ".pdf"),
         bbox_inches='tight')
