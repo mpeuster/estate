@@ -148,7 +148,7 @@ class SwitchController(object):
             of_action = of.ofp_action_output(port=(out_port))
             msg.actions.append(of_action)
         self.connection.send(msg)
-        log.debug("SET RULE: %s" % str(msg))
+        #log.debug("SET RULE: %s" % str(msg))
 
     def del_static_rule(self, in_port, out_port, prio, **match_args):
         msg = of.ofp_flow_mod()
@@ -166,7 +166,7 @@ class SwitchController(object):
             of_action = of.ofp_action_output(port=(out_port))
             msg.actions.append(of_action)
         self.connection.send(msg)
-        log.debug("DELETE RULE: %s" % str(msg))
+        #log.debug("DELETE RULE: %s" % str(msg))
 
     def flow_move_1(self):
         log.info("Flow move c2 on s%d" % self.switch)
